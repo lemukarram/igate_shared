@@ -65,7 +65,7 @@ Route::middleware(['auth', 'App\Http\Middleware\EnsureProviderIsOnboarded'])->gr
 
     // Client Portfolio
     Route::get('/portfolio', [MarketplaceController::class, 'portfolio'])->name('client.portfolio');
-    });
+
     // Checkout
     Route::get('/checkout/{providerServiceId}', [CheckoutController::class, 'review'])->name('checkout.review');
     Route::post('/checkout/process', [CheckoutController::class, 'process'])->name('checkout.process');

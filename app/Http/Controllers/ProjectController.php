@@ -10,12 +10,16 @@ class ProjectController extends Controller
 {
     public function show($id)
     {
-        $project = Project::with(['service', 'client', 'provider', 'tasks', 'milestones', 'documents.user'])
-            ->where(function($query) {
-                $query->where('client_id', Auth::id())
-                      ->orWhere('provider_id', Auth::id());
-            })
-            ->findOrFail($id);
+        $query = Project::with(['service', 'client', 'provider', 'tasks', 'milestones', 'documents.user']);
+
+        if (Auth::user()->role !== 'admin') {
+            $query->where(function($q) {
+                $q->where('client_id', Auth::id())
+                  ->orWhere('provider_id', Auth::id());
+            });
+        }
+
+        $project = $query->findOrFail($id);
 
         return view('projects.show', compact('project'));
     }

@@ -194,22 +194,76 @@
                         <button @click="settingsOpen = false" class="text-gray-400 hover:text-gray-900"><i data-lucide="x" class="w-5 h-5"></i></button>
                     </div>
                     <div class="space-y-6 flex-1 overflow-y-auto pr-4 custom-scrollbar">
-                        <div x-show="settingsTab === 'account'" class="space-y-4">
+                        <!-- Account Tab -->
+                        <div x-show="settingsTab === 'account'" class="space-y-4 animate-in fade-in duration-300">
                             <div class="grid grid-cols-2 gap-4">
-                                <div class="space-y-1"><label class="text-xs font-medium text-gray-400">First Name</label><input type="text" value="{{ explode(' ', Auth::user()->name)[0] }}" class="w-full px-4 py-2 border border-gray-200 rounded-md outline-none focus:ring-2 focus:ring-primary/20 text-sm"></div>
-                                <div class="space-y-1"><label class="text-xs font-medium text-gray-400">Last Name</label><input type="text" value="{{ explode(' ', Auth::user()->name)[1] ?? '' }}" class="w-full px-4 py-2 border border-gray-200 rounded-md outline-none focus:ring-2 focus:ring-primary/20 text-sm"></div>
+                                <div class="space-y-1"><label class="text-[10px] font-black uppercase tracking-widest text-gray-400">First Name</label><input type="text" value="{{ explode(' ', Auth::user()->name)[0] }}" class="w-full px-4 py-2.5 border border-gray-100 bg-gray-50 rounded-lg outline-none focus:ring-4 focus:ring-primary/10 text-sm font-medium"></div>
+                                <div class="space-y-1"><label class="text-[10px] font-black uppercase tracking-widest text-gray-400">Last Name</label><input type="text" value="{{ explode(' ', Auth::user()->name)[1] ?? '' }}" class="w-full px-4 py-2.5 border border-gray-100 bg-gray-50 rounded-lg outline-none focus:ring-4 focus:ring-primary/10 text-sm font-medium"></div>
                             </div>
-                            <div class="space-y-1"><label class="text-xs font-medium text-gray-400">Email Address</label><input type="email" value="{{ Auth::user()->email }}" class="w-full px-4 py-2 border border-gray-200 rounded-md outline-none focus:ring-2 focus:ring-primary/20 text-sm"></div>
+                            <div class="space-y-1"><label class="text-[10px] font-black uppercase tracking-widest text-gray-400">Email Address</label><input type="email" value="{{ Auth::user()->email }}" class="w-full px-4 py-2.5 border border-gray-100 bg-gray-50 rounded-lg outline-none focus:ring-4 focus:ring-primary/10 text-sm font-medium"></div>
+                            <div class="space-y-1"><label class="text-[10px] font-black uppercase tracking-widest text-gray-400">Phone Number</label><input type="text" value="+966 50 000 0000" class="w-full px-4 py-2.5 border border-gray-100 bg-gray-50 rounded-lg outline-none focus:ring-4 focus:ring-primary/10 text-sm font-medium"></div>
                         </div>
-                        <div x-show="settingsTab === 'plans'" class="space-y-4">
-                            <div class="p-6 border border-primary/20 bg-primary-light rounded-lg">
-                                <p class="text-xs font-black text-primary uppercase mb-2">Current Plan</p>
-                                <h3 class="text-xl font-bold mb-4">Enterprise Pro</h3>
-                                <button class="px-6 py-2 bg-primary text-white text-xs font-bold rounded-md">Upgrade Plan</button>
+
+                        <!-- Settings Tab -->
+                        <div x-show="settingsTab === 'settings'" class="space-y-6 animate-in fade-in duration-300">
+                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                <div><p class="text-sm font-bold text-gray-900">Dark Mode</p><p class="text-xs text-gray-400">Adjust the visual appearance</p></div>
+                                <div class="w-12 h-6 bg-gray-200 rounded-full relative"><div class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full shadow-sm"></div></div>
+                            </div>
+                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                <div><p class="text-sm font-bold text-gray-900">Language</p><p class="text-xs text-gray-400">System display language</p></div>
+                                <select class="bg-transparent text-sm font-bold text-primary outline-none"><option>English</option><option>Arabic</option></select>
                             </div>
                         </div>
-                        <div x-show="!['account', 'plans'].includes(settingsTab)" class="py-20 text-center opacity-50">
-                            <i data-lucide="construction" class="w-10 h-10 mx-auto mb-4"></i><p class="text-sm font-medium">Options coming soon.</p>
+
+                        <!-- Permissions Tab -->
+                        <div x-show="settingsTab === 'permissions'" class="space-y-4 animate-in fade-in duration-300">
+                            <div class="p-4 border border-gray-100 rounded-lg flex items-center space-x-4">
+                                <div class="w-10 h-10 bg-primary-light text-primary rounded-lg flex items-center justify-center"><i data-lucide="shield" class="w-5 h-5"></i></div>
+                                <div><p class="text-sm font-bold">Role: {{ ucfirst(Auth::user()->role) }}</p><p class="text-xs text-gray-400">Full access to dashboard and services</p></div>
+                            </div>
+                            <div class="space-y-2">
+                                <p class="text-[10px] font-black uppercase tracking-widest text-gray-400">Enabled Features</p>
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="px-3 py-1 bg-green-50 text-green-600 rounded-full text-[10px] font-black uppercase">Payments</span>
+                                    <span class="px-3 py-1 bg-green-50 text-green-600 rounded-full text-[10px] font-black uppercase">Service Request</span>
+                                    <span class="px-3 py-1 bg-green-50 text-green-600 rounded-full text-[10px] font-black uppercase">Chat</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Plans Tab -->
+                        <div x-show="settingsTab === 'plans'" class="space-y-4 animate-in fade-in duration-300">
+                            <div class="p-6 border border-primary/20 bg-primary-light rounded-xl">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div><p class="text-[10px] font-black text-primary uppercase tracking-widest mb-1">Current Plan</p><h3 class="text-2xl font-black text-gray-900">Basic Free</h3></div>
+                                    <span class="px-3 py-1 bg-primary text-white rounded-full text-[10px] font-black uppercase">Active</span>
+                                </div>
+                                <div class="flex items-center justify-between text-sm">
+                                    <span class="text-gray-500 font-medium">Next billing date: <span class="text-gray-900 font-bold">Never</span></span>
+                                    <button class="text-primary font-black uppercase tracking-widest text-xs">View Invoices</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Notifications Tab -->
+                        <div x-show="settingsTab === 'notifications'" class="space-y-4 animate-in fade-in duration-300">
+                            @foreach(['Email Notifications', 'Browser Push', 'SMS Alerts', 'Marketing Inquiries'] as $n)
+                            <div class="flex items-center justify-between p-4 border-b border-gray-50">
+                                <span class="text-sm font-bold text-gray-700">{{ $n }}</span>
+                                <div class="w-10 h-5 bg-primary rounded-full relative"><div class="absolute right-1 top-1 w-3 h-3 bg-white rounded-full"></div></div>
+                            </div>
+                            @endforeach
+                        </div>
+
+                        <!-- Security Tab -->
+                        <div x-show="settingsTab === 'security'" class="space-y-4 animate-in fade-in duration-300">
+                            <div class="space-y-1"><label class="text-[10px] font-black uppercase tracking-widest text-gray-400">Current Password</label><input type="password" class="w-full px-4 py-2.5 border border-gray-100 bg-gray-50 rounded-lg outline-none text-sm font-medium"></div>
+                            <div class="space-y-1"><label class="text-[10px] font-black uppercase tracking-widest text-gray-400">New Password</label><input type="password" class="w-full px-4 py-2.5 border border-gray-100 bg-gray-50 rounded-lg outline-none text-sm font-medium"></div>
+                            <div class="flex items-center space-x-3 p-4 bg-amber-50 rounded-lg text-amber-700 border border-amber-100">
+                                <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+                                <p class="text-xs font-bold">Two-factor authentication is currently disabled.</p>
+                            </div>
                         </div>
                     </div>
                     <div class="pt-6 border-t border-gray-50 flex justify-end">
