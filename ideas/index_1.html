@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>iGate OS 1.0</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sidebar-w: 260px;
+    --accent: #3B82F6;
+  }
+  * { box-sizing: border-box; }
+  body { font-family: 'DM Sans', sans-serif; }
+  h1,h2,h3,.logo { font-family: 'Syne', sans-serif; }
+
+  /* Gradient border animation on chat input */
+  @keyframes gradientShift {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  .gradient-border {
+    background: linear-gradient(135deg, #3B82F6, #8B5CF6, #EC4899, #F59E0B, #10B981);
+    background-size: 300% 300%;
+    animation: gradientShift 4s ease infinite;
+    border-radius: 18px;
+    padding: 2px;
+  }
+  .gradient-border-inner {
+    background: #fff;
+    border-radius: 16px;
+  }
+
+  /* Fade in */
+  @keyframes fadeUp {
+    from { opacity:0; transform: translateY(16px); }
+    to   { opacity:1; transform: translateY(0); }
+  }
+  .fade-up { animation: fadeUp .45s ease both; }
+  .fade-up-delay-1 { animation-delay: .08s; }
+  .fade-up-delay-2 { animation-delay: .16s; }
+  .fade-up-delay-3 { animation-delay: .24s; }
+  .fade-up-delay-4 { animation-delay: .32s; }
+
+  /* Shimmer on login modal */
+  @keyframes shimmer {
+    0%   { opacity:.5; }
+    50%  { opacity:1; }
+    100% { opacity:.5; }
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 99px; }
+
+  /* Card hover */
+  .service-card { transition: transform .2s ease, box-shadow .2s ease; }
+  .service-card:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0,0,0,.1); }
+
+  /* Mobile sidebar overlay */
+  #sidebar-overlay { transition: opacity .3s ease; }
+
+  /* Nav active */
+  .nav-item { transition: background .15s, color .15s; }
+  .nav-item.active { background: #EFF6FF; color: #2563EB; }
+  .nav-item.active svg { stroke: #2563EB; }
+
+  /* Progress bar animation */
+  @keyframes fillBar { from { width: 0; } to { width: var(--fill); } }
+  .progress-bar { animation: fillBar 1.2s ease .3s both; }
+
+  /* Timeline dot pulse */
+  @keyframes pulseDot {
+    0%,100% { box-shadow: 0 0 0 0 rgba(59,130,246,.4); }
+    50%      { box-shadow: 0 0 0 5px rgba(59,130,246,0); }
+  }
+  .timeline-dot { animation: pulseDot 2s infinite; }
+
+  /* Explore filter pill */
+  .filter-pill { transition: background .15s, color .15s, box-shadow .15s; }
+  .filter-pill.active { background: #2563EB; color: #fff; box-shadow: 0 4px 14px rgba(37,99,235,.3); }
+
+  /* Badge */
+  .role-badge-client  { background:#DBEAFE; color:#1D4ED8; }
+  .role-badge-provider{ background:#EDE9FE; color:#6D28D9; }
+  .role-badge-admin   { background:#FEE2E2; color:#B91C1C; }
+
+  .primary-btn-client  { background:#2563EB; }
+  .primary-btn-provider{ background:#7C3AED; }
+  .primary-btn-admin   { background:#DC2626; }
+
+  /* Sidebar */
+  #sidebar { transition: transform .3s ease; }
+  @media (max-width: 767px) {
+    #sidebar { position: fixed; z-index: 40; height: 100vh; transform: translateX(-100%); }
+    #sidebar.open { transform: translateX(0); }
+  }
+
+  /* Profile popup */
+  #profile-popup { transition: opacity .2s, transform .2s; transform-origin: bottom left; }
+  #profile-popup.hidden { opacity:0; pointer-events:none; transform: scale(.95) translateY(4px); }
+  #profile-popup:not(.hidden) { opacity:1; transform: scale(1) translateY(0); }
+</style>
+</head>
+<body class="bg-gray-50 antialiased">
+
+<!-- ============================================================ AUTH VIEW ============================================================ -->
+<div id="auth-view" class="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-slate-100 via-blue-50 to-indigo-100">
+  <!-- Background blobs -->
+  <div class="absolute inset-0 overflow-hidden pointer-events-none">
+    <div class="absolute -top-32 -left-32 w-96 h-96 bg-blue-200 rounded-full opacity-30 blur-3xl"></div>
+    <div class="absolute -bottom-32 -right-32 w-96 h-96 bg-indigo-300 rounded-full opacity-20 blur-3xl"></div>
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-violet-100 rounded-full opacity-20 blur-3xl"></div>
+  </div>
+
+  <div class="relative w-full max-w-md mx-4 bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl shadow-blue-100 border border-white/60 p-8 fade-up">
+    <!-- Logo -->
+    <div class="flex items-center gap-2 mb-8">
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-md">
+        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+      </div>
+      <span class="logo text-xl font-bold text-gray-900">iGate <span class="text-blue-500">OS</span></span>
+    </div>
+
+    <h2 class="text-2xl font-bold text-gray-900 mb-1">Welcome back</h2>
+    <p class="text-gray-500 text-sm mb-7">Sign in to your workspace</p>
+
+    <div class="space-y-4 mb-6">
+      <div>
+        <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-1.5">Email</label>
+        <input type="email" placeholder="you@company.com" class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent placeholder-gray-400 transition">
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-1.5">Password</label>
+        <input type="password" placeholder="••••••••" class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent placeholder-gray-400 transition">
+      </div>
+    </div>
+
+    <p class="text-xs text-center text-gray-400 mb-3 font-medium">— Or continue as demo user —</p>
+
+    <div class="grid grid-cols-3 gap-2.5">
+      <button onclick="login('client')" class="py-2.5 rounded-xl text-sm font-semibold bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 transition hover:shadow-md">
+        <span class="block text-base mb-0.5">🧑‍💼</span>Client
+      </button>
+      <button onclick="login('provider')" class="py-2.5 rounded-xl text-sm font-semibold bg-violet-50 text-violet-700 hover:bg-violet-100 border border-violet-200 transition hover:shadow-md">
+        <span class="block text-base mb-0.5">🛠️</span>Provider
+      </button>
+      <button onclick="login('admin')" class="py-2.5 rounded-xl text-sm font-semibold bg-red-50 text-red-700 hover:bg-red-100 border border-red-200 transition hover:shadow-md">
+        <span class="block text-base mb-0.5">⚙️</span>Admin
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ MAIN APP (hidden until login) ============================================================ -->
+<div id="app-view" class="hidden h-screen w-full flex overflow-hidden bg-gray-50">
+
+  <!-- Sidebar overlay (mobile) -->
+  <div id="sidebar-overlay" class="fixed inset-0 z-30 bg-black/30 hidden md:hidden" onclick="closeSidebar()"></div>
+
+  <!-- ====== SIDEBAR ====== -->
+  <aside id="sidebar" class="w-[260px] min-w-[260px] bg-white border-r border-gray-100 flex flex-col h-screen z-40">
+    <!-- Logo -->
+    <div class="flex items-center gap-2 px-5 pt-5 pb-4 border-b border-gray-100">
+      <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow">
+        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+      </div>
+      <span class="logo text-lg font-bold text-gray-900">iGate <span class="text-blue-500">OS</span> <span class="text-xs font-normal text-gray-400">1.0</span></span>
+    </div>
+
+    <!-- Primary Action Button -->
+    <div class="px-4 pt-4 pb-2">
+      <button id="primary-action-btn" onclick="handlePrimaryAction()" class="w-full py-2.5 rounded-2xl text-sm font-semibold text-white flex items-center justify-center gap-2 shadow-md transition hover:opacity-90 active:scale-95">
+        <svg id="primary-action-icon" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
+        <span id="primary-action-text">New Request</span>
+      </button>
+    </div>
+
+    <!-- Nav -->
+    <nav class="px-3 py-2 space-y-0.5">
+      <button onclick="showView('chat')" data-nav="chat" class="nav-item active w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50">
+        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <span>Explore</span>
+      </button>
+      <button onclick="showView('dashboard')" data-nav="dashboard" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50">
+        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <span>Dashboard</span>
+      </button>
+      <button onclick="showView('explore')" data-nav="explore" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50">
+        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+        <span>Portfolio</span>
+      </button>
+    </nav>
+
+    <!-- History -->
+    <div class="flex-1 overflow-hidden flex flex-col px-3 mt-3">
+      <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider px-2 mb-2">All Tasks</p>
+      <div class="relative mb-2">
+        <svg class="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" placeholder="Search projects…" class="w-full pl-8 pr-3 py-2 text-xs rounded-lg border border-gray-200 bg-gray-50 text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-300 placeholder-gray-400">
+      </div>
+      <div class="flex-1 overflow-y-auto">
+        <!-- Empty state -->
+        <div class="flex flex-col items-center justify-center py-8 text-center">
+          <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center mb-2">
+            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>
+          </div>
+          <p class="text-xs text-gray-400 font-medium">No projects yet</p>
+          <p class="text-xs text-gray-300 mt-0.5">Your tasks will appear here</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile -->
+    <div class="relative">
+      <div id="profile-popup" class="hidden absolute bottom-[68px] left-3 right-3 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-50">
+        <button class="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition">
+          <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Switch Account
+        </button>
+        <button class="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition">
+          <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93A10 10 0 0 0 4.93 19.07M4.93 4.93a10 10 0 0 0 14.14 14.14"/></svg>
+          Settings
+        </button>
+        <div class="h-px bg-gray-100 mx-3"></div>
+        <button onclick="logout()" class="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-500 hover:bg-red-50 transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Logout
+        </button>
+      </div>
+
+      <button id="profile-btn" onclick="toggleProfileMenu(event)" class="w-full flex items-center gap-3 p-4 border-t border-gray-100 hover:bg-gray-50 transition">
+        <div id="avatar" class="w-9 h-9 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">M</div>
+        <div class="flex-1 min-w-0 text-left">
+          <p id="profile-name" class="text-sm font-semibold text-gray-800 truncate">Mukarram Al-Rashid</p>
+          <span id="role-badge" class="inline-block text-xs font-semibold px-2 py-0.5 rounded-full role-badge-client">Client</span>
+        </div>
+        <div class="flex items-center gap-1 flex-shrink-0">
+          <svg class="w-3.5 h-3.5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 0 0 .95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 0 0-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 0 0-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 0 0-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 0 0 .951-.69l1.07-3.292z"/></svg>
+          <span id="credit-count" class="text-xs font-bold text-gray-700">2,400</span>
+        </div>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ====== MAIN CONTENT ====== -->
+  <div class="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+
+    <!-- Mobile top nav -->
+    <div class="flex md:hidden items-center justify-between px-4 py-3 bg-white border-b border-gray-100">
+      <button onclick="openSidebar()" class="p-2 rounded-xl hover:bg-gray-100 transition">
+        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div class="flex items-center gap-2">
+        <div class="w-6 h-6 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+          <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        </div>
+        <span class="logo font-bold text-gray-900 text-sm">iGate OS</span>
+      </div>
+      <div id="mobile-badge" class="text-xs font-semibold px-2 py-1 rounded-full role-badge-client">Client</div>
+    </div>
+
+    <!-- Scrollable area -->
+    <div class="flex-1 overflow-y-auto">
+
+      <!-- ===== VIEW: CHAT ===== -->
+      <div id="view-chat" class="min-h-full flex flex-col items-center justify-between p-6">
+        <div class="flex-1 flex flex-col items-center justify-center w-full max-w-2xl mx-auto pt-16 pb-4">
+          <!-- Greeting -->
+          <div class="text-center mb-10 fade-up">
+            <div class="inline-flex items-center gap-2 bg-blue-50 text-blue-600 text-xs font-semibold px-3 py-1.5 rounded-full mb-5 border border-blue-100">
+              <span class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
+              AI-Powered Business OS
+            </div>
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-3">Hi Mukarram,<br>How can I help you?</h1>
+            <p id="chat-subtitle" class="text-gray-500 text-base">Discover services, manage projects, and scale your business.</p>
+          </div>
+
+          <!-- Suggestion chips -->
+          <div class="flex flex-wrap gap-2.5 justify-center mb-8 fade-up fade-up-delay-1">
+            <button class="suggestion-chip px-4 py-2 rounded-full text-sm font-medium bg-white border border-gray-200 text-gray-700 hover:border-blue-300 hover:text-blue-600 hover:bg-blue-50 transition shadow-sm">💼 I need an HR team</button>
+            <button class="suggestion-chip px-4 py-2 rounded-full text-sm font-medium bg-white border border-gray-200 text-gray-700 hover:border-blue-300 hover:text-blue-600 hover:bg-blue-50 transition shadow-sm">📊 Help me with bookkeeping</button>
+            <button class="suggestion-chip px-4 py-2 rounded-full text-sm font-medium bg-white border border-gray-200 text-gray-700 hover:border-blue-300 hover:text-blue-600 hover:bg-blue-50 transition shadow-sm">🚀 Launch a digital marketing campaign</button>
+          </div>
+
+          <!-- Input -->
+          <div class="w-full fade-up fade-up-delay-2">
+            <div class="gradient-border shadow-xl">
+              <div class="gradient-border-inner flex items-end gap-3 px-4 py-3.5">
+                <textarea id="chat-input" rows="1" placeholder="Ask anything — find services, get quotes, manage projects…" class="flex-1 resize-none text-sm text-gray-800 placeholder-gray-400 bg-transparent border-none outline-none leading-relaxed max-h-40 overflow-y-auto" oninput="autoGrow(this)"></textarea>
+                <button class="flex-shrink-0 w-9 h-9 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow hover:scale-105 transition">
+                  <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                </button>
+              </div>
+            </div>
+            <p class="text-center text-xs text-gray-400 mt-3">iGate AI may produce inaccurate information. Review important outputs.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== VIEW: DASHBOARD ===== -->
+      <div id="view-dashboard" class="hidden p-6 max-w-6xl mx-auto w-full">
+        <div class="mb-6 fade-up">
+          <h2 class="text-2xl font-bold text-gray-900">Dashboard</h2>
+          <p id="dashboard-subtitle" class="text-gray-500 text-sm mt-1">Manage your outsourcing operations in one place.</p>
+        </div>
+
+        <!-- Stats Row -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6 fade-up fade-up-delay-1">
+          <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-5 text-white shadow-lg shadow-blue-200">
+            <p class="text-blue-100 text-xs font-medium mb-1">Total Projects</p>
+            <p class="text-3xl font-bold">0</p>
+            <p class="text-blue-200 text-xs mt-2">↑ 0% this month</p>
+          </div>
+          <div class="bg-gradient-to-br from-violet-500 to-violet-600 rounded-2xl p-5 text-white shadow-lg shadow-violet-200">
+            <p class="text-violet-100 text-xs font-medium mb-1">Completed</p>
+            <p class="text-3xl font-bold">0</p>
+            <p class="text-violet-200 text-xs mt-2">↑ 0% this month</p>
+          </div>
+          <div class="bg-gradient-to-br from-orange-400 to-orange-500 rounded-2xl p-5 text-white shadow-lg shadow-orange-200">
+            <p class="text-orange-100 text-xs font-medium mb-1">In Progress</p>
+            <p class="text-3xl font-bold">0</p>
+            <p class="text-orange-200 text-xs mt-2">— No change</p>
+          </div>
+          <div id="stat-platform" class="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl p-5 text-white shadow-lg shadow-emerald-200">
+            <p class="text-emerald-100 text-xs font-medium mb-1">Platform Health</p>
+            <p class="text-3xl font-bold">99%</p>
+            <p class="text-emerald-200 text-xs mt-2">✓ All systems normal</p>
+          </div>
+        </div>
+
+        <!-- Middle Row -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 fade-up fade-up-delay-2">
+          <!-- Recent Projects -->
+          <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+            <h3 class="font-semibold text-gray-800 mb-4">Recent Projects</h3>
+            <div class="flex flex-col items-center py-8 text-center">
+              <div class="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center mb-3">
+                <svg class="w-7 h-7 text-gray-300" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+              </div>
+              <p class="text-sm font-medium text-gray-600 mb-1">No projects yet</p>
+              <p class="text-xs text-gray-400 mb-4">Create your first project to get started</p>
+              <button onclick="showView('chat')" class="px-5 py-2 rounded-xl text-sm font-semibold text-white bg-blue-500 hover:bg-blue-600 transition shadow">Create a new project</button>
+            </div>
+          </div>
+
+          <!-- Right column -->
+          <div class="flex flex-col gap-4">
+            <!-- Recent Activity -->
+            <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+              <h3 class="font-semibold text-gray-800 mb-4">Recent Activity</h3>
+              <div class="space-y-3">
+                <div class="flex gap-3">
+                  <div class="flex flex-col items-center">
+                    <div class="w-2.5 h-2.5 rounded-full bg-blue-500 flex-shrink-0 mt-0.5 timeline-dot"></div>
+                    <div class="w-px flex-1 bg-gray-100 mt-1"></div>
+                  </div>
+                  <div class="pb-3">
+                    <p class="text-sm text-gray-700 font-medium">Account created</p>
+                    <p class="text-xs text-gray-400">Just now</p>
+                  </div>
+                </div>
+                <div class="flex gap-3">
+                  <div class="flex flex-col items-center">
+                    <div class="w-2.5 h-2.5 rounded-full bg-emerald-400 flex-shrink-0 mt-0.5"></div>
+                    <div class="w-px flex-1 bg-gray-100 mt-1"></div>
+                  </div>
+                  <div class="pb-3">
+                    <p class="text-sm text-gray-700 font-medium">Profile verified</p>
+                    <p class="text-xs text-gray-400">1 min ago</p>
+                  </div>
+                </div>
+                <div class="flex gap-3">
+                  <div>
+                    <div class="w-2.5 h-2.5 rounded-full bg-gray-200 flex-shrink-0 mt-0.5"></div>
+                  </div>
+                  <div>
+                    <p class="text-sm text-gray-400">Awaiting first project…</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Resource Usage -->
+            <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="font-semibold text-gray-800">Resource Usage</h3>
+                <span class="text-xs font-bold text-blue-500 bg-blue-50 px-2.5 py-1 rounded-full">240 / 2,400 credits</span>
+              </div>
+              <div class="space-y-3">
+                <div>
+                  <div class="flex justify-between text-xs text-gray-500 mb-1"><span>AI Credits</span><span>10%</span></div>
+                  <div class="h-2.5 bg-gray-100 rounded-full overflow-hidden"><div class="progress-bar h-full bg-gradient-to-r from-blue-400 to-indigo-500 rounded-full" style="--fill:10%; width:10%;"></div></div>
+                </div>
+                <div>
+                  <div class="flex justify-between text-xs text-gray-500 mb-1"><span>Storage</span><span>3%</span></div>
+                  <div class="h-2.5 bg-gray-100 rounded-full overflow-hidden"><div class="progress-bar h-full bg-gradient-to-r from-emerald-400 to-teal-500 rounded-full" style="--fill:3%; width:3%;"></div></div>
+                </div>
+                <div>
+                  <div class="flex justify-between text-xs text-gray-500 mb-1"><span>API Calls</span><span>1%</span></div>
+                  <div class="h-2.5 bg-gray-100 rounded-full overflow-hidden"><div class="progress-bar h-full bg-gradient-to-r from-orange-400 to-amber-500 rounded-full" style="--fill:1%; width:1%;"></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== VIEW: EXPLORE ===== -->
+      <div id="view-explore" class="hidden p-6 max-w-6xl mx-auto w-full">
+        <div class="mb-6 fade-up">
+          <h2 class="text-2xl font-bold text-gray-900">Marketplace</h2>
+          <p class="text-gray-500 text-sm mt-1">Browse and connect with Saudi Arabia's top B2B service providers.</p>
+        </div>
+
+        <!-- Search -->
+        <div class="relative mb-4 fade-up">
+          <svg class="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" placeholder="Search services, providers, or categories…" class="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 bg-white text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-300 shadow-sm placeholder-gray-400">
+        </div>
+
+        <!-- Filter pills -->
+        <div id="filter-pills" class="flex flex-wrap gap-2 mb-6 fade-up fade-up-delay-1">
+          <button onclick="setFilter(this,'all')" class="filter-pill active px-4 py-1.5 rounded-full text-sm font-medium border border-transparent">All Services</button>
+          <button onclick="setFilter(this,'newest')" class="filter-pill px-4 py-1.5 rounded-full text-sm font-medium border border-gray-200 text-gray-600 hover:border-blue-300 hover:text-blue-600">Newest</button>
+          <button onclick="setFilter(this,'top')" class="filter-pill px-4 py-1.5 rounded-full text-sm font-medium border border-gray-200 text-gray-600 hover:border-blue-300 hover:text-blue-600">Top Rated</button>
+          <button onclick="setFilter(this,'hr')" class="filter-pill px-4 py-1.5 rounded-full text-sm font-medium border border-gray-200 text-gray-600 hover:border-blue-300 hover:text-blue-600">HR & Admin</button>
+          <button onclick="setFilter(this,'tech')" class="filter-pill px-4 py-1.5 rounded-full text-sm font-medium border border-gray-200 text-gray-600 hover:border-blue-300 hover:text-blue-600">Technology</button>
+          <button onclick="setFilter(this,'finance')" class="filter-pill px-4 py-1.5 rounded-full text-sm font-medium border border-gray-200 text-gray-600 hover:border-blue-300 hover:text-blue-600">Finance</button>
+        </div>
+
+        <!-- Cards Grid -->
+        <div id="services-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 fade-up fade-up-delay-2"></div>
+      </div>
+
+    </div><!-- end scrollable -->
+  </div><!-- end main content -->
+</div><!-- end app-view -->
+
+<script>
+// =========================================================
+// DATA
+// =========================================================
+const services = [
+  { id:1, title:'HR Management',          tag:'HR & Admin',  desc:'End-to-end human resources services including recruitment, payroll, and compliance.',     icon:'👥', color:'from-blue-400 to-blue-600',     bg:'bg-blue-50',  stars:4.8, cat:'hr' },
+  { id:2, title:'Government Relations',    tag:'Legal & GRO', desc:'Navigate Saudi government bodies, MISA licenses, and regulatory approvals seamlessly.',   icon:'🏛️', color:'from-slate-500 to-slate-700',   bg:'bg-slate-50', stars:4.7, cat:'hr' },
+  { id:3, title:'Bookkeeping & Accounting',tag:'Finance',     desc:'Accurate bookkeeping, financial reporting, and monthly closings for SMEs.',               icon:'📒', color:'from-green-400 to-emerald-600', bg:'bg-green-50', stars:4.9, cat:'finance' },
+  { id:4, title:'Tax & ZATCA Compliance',  tag:'Tax',         desc:'VAT filing, e-invoicing (ZATCA Phase 2), and full Saudi tax compliance management.',      icon:'🧾', color:'from-yellow-400 to-amber-500',  bg:'bg-yellow-50',stars:4.8, cat:'finance' },
+  { id:5, title:'Digital Marketing',       tag:'Marketing',   desc:'SEO, paid media, social strategy, and content creation tailored to MENA markets.',       icon:'📣', color:'from-pink-400 to-rose-500',    bg:'bg-pink-50',  stars:4.6, cat:'all' },
+  { id:6, title:'IT Infrastructure',       tag:'IT',          desc:'Cloud setup, cybersecurity, network management, and 24/7 technical support.',             icon:'🖥️', color:'from-indigo-400 to-indigo-600', bg:'bg-indigo-50',stars:4.7, cat:'tech' },
+  { id:7, title:'Custom Web & App Dev',    tag:'Software',    desc:'Full-stack web, mobile apps, and API integrations built to your specifications.',         icon:'💻', color:'from-cyan-400 to-cyan-600',    bg:'bg-cyan-50',  stars:4.9, cat:'tech' },
+  { id:8, title:'E-Commerce Strategy',     tag:'Commerce',    desc:'Store setup, marketplace integration (Noon, Amazon KSA), and growth strategy.',          icon:'🛒', color:'from-orange-400 to-orange-600', bg:'bg-orange-50',stars:4.5, cat:'all' },
+  { id:9, title:'Automation & AI Tools',   tag:'AI',          desc:'RPA, chatbot integration, workflow automation, and custom AI model deployment.',          icon:'🤖', color:'from-violet-400 to-violet-600', bg:'bg-violet-50',stars:4.9, cat:'tech' },
+  { id:10,title:'Contract Review',         tag:'Legal',       desc:'Commercial contract drafting, review, and legal risk analysis by KSA-qualified lawyers.', icon:'⚖️', color:'from-red-400 to-red-600',      bg:'bg-red-50',   stars:4.7, cat:'all' },
+  { id:11,title:'Procurement Sourcing',    tag:'Operations',  desc:'Supplier identification, RFQ management, and cost-optimized procurement solutions.',     icon:'📦', color:'from-teal-400 to-teal-600',    bg:'bg-teal-50',  stars:4.6, cat:'all' },
+  { id:12,title:'Customer Call Center',    tag:'Support',     desc:'Inbound/outbound bilingual (AR/EN) call center staffing and CRM integration.',           icon:'📞', color:'from-fuchsia-400 to-fuchsia-600',bg:'bg-fuchsia-50',stars:4.5,cat:'hr' },
+];
+
+// =========================================================
+// STATE
+// =========================================================
+let currentRole = 'client';
+
+const roles = {
+  client: {
+    name:'Mukarram Al-Rashid', badge:'Client', badgeClass:'role-badge-client',
+    btnText:'New Request', btnClass:'primary-btn-client',
+    avatarClass:'from-blue-400 to-indigo-500',
+    chatSubtitle:'Discover services, manage outsourcing, and scale your business.',
+    dashSubtitle:'Manage your outsourcing operations in one place.',
+    serviceBtn:(s) => `<button class="w-full mt-auto py-2 rounded-xl text-sm font-semibold bg-blue-50 text-blue-600 hover:bg-blue-100 transition">View Providers</button>`,
+    credits:'2,400'
+  },
+  provider: {
+    name:'Noura Al-Qahtani', badge:'Provider', badgeClass:'role-badge-provider',
+    btnText:'Add Service', btnClass:'primary-btn-provider',
+    avatarClass:'from-violet-400 to-purple-600',
+    chatSubtitle:'Manage your revenue streams, active clients, and service offerings.',
+    dashSubtitle:'Track your revenue, active clients, and service performance.',
+    serviceBtn:(s) => `<button class="w-full mt-auto py-2 rounded-xl text-sm font-semibold bg-violet-50 text-violet-600 hover:bg-violet-100 transition">Opt-in to Provide</button>`,
+    credits:'5,800'
+  },
+  admin: {
+    name:'Omar Al-Harbi', badge:'Admin', badgeClass:'role-badge-admin',
+    btnText:'Global Broadcast', btnClass:'primary-btn-admin',
+    avatarClass:'from-red-400 to-rose-600',
+    chatSubtitle:'Monitor platform health, manage users, and broadcast announcements.',
+    dashSubtitle:'Platform-wide health, compliance, and growth analytics.',
+    serviceBtn:(s) => `<button class="w-full mt-auto py-2 rounded-xl text-sm font-semibold bg-red-50 text-red-600 hover:bg-red-100 transition">Manage Listings</button>`,
+    credits:'∞'
+  }
+};
+
+// =========================================================
+// LOGIN / LOGOUT
+// =========================================================
+function login(role) {
+  currentRole = role;
+  applyRole(role);
+  document.getElementById('auth-view').classList.add('hidden');
+  document.getElementById('app-view').classList.remove('hidden');
+  showView('chat');
+  renderServices();
+}
+
+function logout() {
+  document.getElementById('app-view').classList.add('hidden');
+  document.getElementById('auth-view').classList.remove('hidden');
+  document.getElementById('profile-popup').classList.add('hidden');
+}
+
+function applyRole(role) {
+  const r = roles[role];
+  // Profile
+  document.getElementById('profile-name').textContent = r.name;
+  document.getElementById('credit-count').textContent = r.credits;
+  document.getElementById('avatar').textContent = r.name[0];
+  document.getElementById('avatar').className = `w-9 h-9 rounded-full bg-gradient-to-br ${r.avatarClass} flex items-center justify-center text-white text-sm font-bold flex-shrink-0`;
+
+  // Badge
+  ['role-badge', 'mobile-badge'].forEach(id => {
+    const el = document.getElementById(id);
+    el.textContent = r.badge;
+    el.className = el.className.replace(/role-badge-\w+/, r.badgeClass);
+  });
+
+  // Primary button
+  const btn = document.getElementById('primary-action-btn');
+  btn.className = btn.className.replace(/primary-btn-\w+/, r.btnClass);
+  document.getElementById('primary-action-text').textContent = r.btnText;
+
+  // Text
+  document.getElementById('chat-subtitle').textContent = r.chatSubtitle;
+  document.getElementById('dashboard-subtitle').textContent = r.dashSubtitle;
+}
+
+// =========================================================
+// VIEWS
+// =========================================================
+function showView(view) {
+  ['chat','dashboard','explore'].forEach(v => {
+    document.getElementById(`view-${v}`).classList.toggle('hidden', v !== view);
+  });
+  // Nav active state  (chat = explore nav, dashboard = dashboard, explore = portfolio)
+  const navMap = { chat:'chat', dashboard:'dashboard', explore:'explore' };
+  document.querySelectorAll('[data-nav]').forEach(el => {
+    el.classList.toggle('active', el.dataset.nav === view);
+  });
+  closeSidebar();
+}
+
+// =========================================================
+// SIDEBAR (MOBILE)
+// =========================================================
+function openSidebar() {
+  document.getElementById('sidebar').classList.add('open');
+  document.getElementById('sidebar-overlay').classList.remove('hidden');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.add('hidden');
+}
+
+// =========================================================
+// PROFILE POPUP
+// =========================================================
+function toggleProfileMenu(e) {
+  e.stopPropagation();
+  document.getElementById('profile-popup').classList.toggle('hidden');
+}
+document.addEventListener('click', () => {
+  document.getElementById('profile-popup').classList.add('hidden');
+});
+
+// =========================================================
+// PRIMARY ACTION
+// =========================================================
+function handlePrimaryAction() {
+  if(currentRole === 'client') showView('chat');
+  else if(currentRole === 'provider') showView('explore');
+  else if(currentRole === 'admin') {
+    alert('Global Broadcast: Feature coming soon.');
+  }
+}
+
+// =========================================================
+// EXPLORE — RENDER CARDS
+// =========================================================
+function renderServices() {
+  const grid = document.getElementById('services-grid');
+  const r = roles[currentRole];
+  grid.innerHTML = services.map((s,i) => `
+    <div class="service-card bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm flex flex-col" style="animation: fadeUp .4s ease ${i*0.04}s both;">
+      <div class="h-24 bg-gradient-to-br ${s.color} flex items-center justify-between px-5 relative overflow-hidden">
+        <div>
+          <span class="text-xs font-bold text-white/80 uppercase tracking-wider">${s.tag}</span>
+          <div class="text-3xl mt-1">${s.icon}</div>
+        </div>
+        <div class="absolute -right-4 -top-4 w-20 h-20 bg-white/10 rounded-full"></div>
+        <div class="absolute -right-2 -bottom-6 w-16 h-16 bg-white/10 rounded-full"></div>
+      </div>
+      <div class="p-4 flex flex-col flex-1">
+        <h4 class="font-semibold text-gray-800 text-sm mb-1 leading-snug">${s.title}</h4>
+        <p class="text-xs text-gray-500 leading-relaxed mb-3 flex-1">${s.desc}</p>
+        <div class="flex items-center gap-1 mb-3">
+          ${[1,2,3,4,5].map(n => `<svg class="w-3.5 h-3.5 ${n <= Math.round(s.stars) ? 'text-yellow-400' : 'text-gray-200'}" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 0 0 .95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 0 0-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 0 0-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 0 0-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 0 0 .951-.69l1.07-3.292z"/></svg>`).join('')}
+          <span class="text-xs font-semibold text-gray-500 ml-1">${s.stars}</span>
+        </div>
+        ${r.serviceBtn(s)}
+      </div>
+    </div>
+  `).join('');
+}
+
+// =========================================================
+// FILTER PILLS
+// =========================================================
+function setFilter(el, filter) {
+  document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// =========================================================
+// AUTO GROW TEXTAREA
+// =========================================================
+function autoGrow(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 160) + 'px';
+}
+
+// =========================================================
+// SUGGESTION CHIPS → fill input
+// =========================================================
+document.querySelectorAll('.suggestion-chip').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const input = document.getElementById('chat-input');
+    input.value = btn.textContent.trim().replace(/^[^\w\s]+\s/, '');
+    autoGrow(input);
+    input.focus();
+  });
+});
+</script>
+</body>
+</html>

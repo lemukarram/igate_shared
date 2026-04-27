@@ -1,0 +1,54 @@
+services:
+
+  # PHP Service
+  app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    image: igate-app
+    container_name: igate-app
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+    networks:
+      - igate-network
+
+  # Nginx Service
+  web:
+    image: nginx:alpine
+    container_name: igate-web
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+    networks:
+      - igate-network
+
+  # MySQL Service
+  db:
+    image: mysql:8.0
+    container_name: igate-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-igate}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-root}
+      MYSQL_USER: ${DB_USERNAME:-igate}
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+    volumes:
+      - dbdata:/var/lib/mysql
+    networks:
+      - igate-network
+
+networks:
+  igate-network:
+    driver: bridge
+
+volumes:
+  dbdata:
+    driver: local
