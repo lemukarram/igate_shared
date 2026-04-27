@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio | iGate</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3da9e4',
+                        'primary-dark': '#2a8cc2',
+                        'primary-light': '#ebf6fd',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * { border-radius: 0.25rem !important; }
+        .rounded-full, .rounded-full * { border-radius: 9999px !important; }
+        body { font-family: 'Poppins', sans-serif; font-weight: 300; }
+        h1, h2, h3, h4, .font-bold { font-weight: 600 !important; }
+    </style>
+</head>
+<body class="bg-white text-gray-900 overflow-hidden">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="w-64 border-r border-gray-100 flex flex-col h-full bg-white">
+            <div class="p-6">
+                <h1 class="text-2xl font-black text-gray-900 tracking-tighter">iGate.</h1>
+            </div>
+            <nav class="flex-1 px-3 space-y-1">
+                <a href="client-dashboard.html" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-600 hover:bg-gray-50 transition-all">
+                    <i data-lucide="layout-dashboard" class="w-4 h-4"></i><span class="text-sm font-bold">Dashboard</span>
+                </a>
+                <a href="portfolio.html" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg bg-primary-light text-primary font-bold transition-all">
+                    <i data-lucide="briefcase" class="w-4 h-4"></i><span class="text-sm font-bold">Portfolio</span>
+                </a>
+                <a href="explore.html" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-600 hover:bg-gray-50 transition-all">
+                    <i data-lucide="compass" class="w-4 h-4"></i><span class="text-sm font-bold">Explore</span>
+                </a>
+            </nav>
+        </div>
+
+        <!-- Main -->
+        <main class="flex-1 overflow-y-auto p-10 bg-white">
+            <div class="max-w-7xl mx-auto space-y-10">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-4xl font-black text-gray-900 tracking-tight">Company Portfolio</h1>
+                        <p class="text-gray-500 font-medium mt-1">Manage your registered business entities.</p>
+                    </div>
+                    <button class="px-6 py-3 bg-primary text-white rounded-lg font-bold text-sm shadow-lg shadow-primary/20 flex items-center space-x-2">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                        <span>Add Entity</span>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-3 gap-8">
+                    <div class="bg-white border border-gray-100 p-8 rounded-lg shadow-sm hover:shadow-md transition-all">
+                        <div class="w-16 h-16 bg-gray-900 text-white rounded-lg flex items-center justify-center font-black text-xl mb-6">RC</div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-1">Retail Corp</h3>
+                        <p class="text-xs text-gray-400 font-bold uppercase tracking-widest mb-6">CR: 1010XXXXXXX</p>
+                        <div class="pt-6 border-t border-gray-50 flex items-center justify-between">
+                            <span class="px-3 py-1 bg-green-50 text-green-600 rounded-full text-[10px] font-black uppercase">Primary</span>
+                            <button class="text-primary text-xs font-bold uppercase hover:underline">Settings</button>
+                        </div>
+                    </div>
+
+                    <div class="bg-white border border-gray-100 p-8 rounded-lg shadow-sm hover:shadow-md transition-all">
+                        <div class="w-16 h-16 bg-blue-100 text-primary rounded-lg flex items-center justify-center font-black text-xl mb-6">TV</div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-1">Tech Ventures</h3>
+                        <p class="text-xs text-gray-400 font-bold uppercase tracking-widest mb-6">CR: 2020XXXXXXX</p>
+                        <div class="pt-6 border-t border-gray-50 flex items-center justify-between">
+                            <span class="px-3 py-1 bg-gray-50 text-gray-400 rounded-full text-[10px] font-black uppercase">Subsidiary</span>
+                            <button class="text-primary text-xs font-bold uppercase hover:underline">Settings</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script>lucide.createIcons();</script>
+</body>
+</html>

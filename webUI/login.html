@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | iGate</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3da9e4',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * { border-radius: 0.25rem !important; }
+        body { font-family: 'Poppins', sans-serif; font-weight: 300; }
+        h1, h2, h3, h4, .font-bold { font-weight: 600 !important; }
+    </style>
+</head>
+<body class="bg-gray-50 flex items-center justify-center h-screen">
+    <div class="w-full max-w-md bg-white p-10 rounded-lg shadow-xl border border-gray-100">
+        <div class="text-center mb-10">
+            <h1 class="text-3xl font-black text-gray-900 tracking-tighter mb-2">iGate.</h1>
+            <p class="text-sm font-medium text-gray-400">Welcome back to the ecosystem.</p>
+        </div>
+        <form action="client-dashboard.html" class="space-y-6">
+            <div class="space-y-1">
+                <label class="text-[10px] font-black uppercase tracking-widest text-gray-400">Email Address</label>
+                <input type="email" value="client@igate.com" class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-lg outline-none focus:ring-4 focus:ring-primary/10 transition-all font-bold text-sm">
+            </div>
+            <div class="space-y-1">
+                <label class="text-[10px] font-black uppercase tracking-widest text-gray-400">Password</label>
+                <input type="password" value="password" class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-lg outline-none focus:ring-4 focus:ring-primary/10 transition-all font-bold text-sm">
+            </div>
+            <button type="submit" class="w-full py-4 bg-primary text-white rounded-lg font-black text-sm shadow-lg shadow-primary/20 hover:bg-primary-dark transition-all">
+                Login to Dashboard
+            </button>
+            <div class="flex items-center justify-between pt-4">
+                <a href="provider-dashboard.html" class="text-[10px] font-black text-primary uppercase tracking-widest hover:underline">Provider Login</a>
+                <a href="#" class="text-[10px] font-black text-gray-400 uppercase tracking-widest hover:underline">Forgot Password?</a>
+            </div>
+        </form>
+    </div>
+    <script>lucide.createIcons();</script>
+</body>
+</html>

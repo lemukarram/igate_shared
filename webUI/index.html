@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iGate | B2B Service Marketplace</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3da9e4',
+                        'primary-dark': '#2a8cc2',
+                        'primary-light': '#ebf6fd',
+                    },
+                    borderRadius: {
+                        'lg': '0.5rem',
+                        'xl': '0.75rem',
+                        '2xl': '1rem',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * { border-radius: 0.25rem !important; }
+        .rounded-full, .rounded-full * { border-radius: 9999px !important; }
+        body { font-family: 'Poppins', sans-serif; font-weight: 300; }
+        h1, h2, h3, h4, .font-bold { font-weight: 600 !important; }
+        .bg-primary { background-color: #3da9e4 !important; }
+        .text-primary { color: #3da9e4 !important; }
+    </style>
+</head>
+<body class="bg-white text-gray-900">
+    <!-- Navigation -->
+    <nav class="flex items-center justify-between px-10 py-6 border-b border-gray-50">
+        <div class="flex items-center space-x-12">
+            <h1 class="text-2xl font-black text-gray-900 tracking-tighter">iGate.</h1>
+            <div class="hidden md:flex items-center space-x-8 text-sm font-bold text-gray-500 uppercase tracking-widest">
+                <a href="#" class="hover:text-primary transition-colors">Solutions</a>
+                <a href="explore.html" class="hover:text-primary transition-colors">Explore Services</a>
+                <a href="#" class="hover:text-primary transition-colors">Pricing</a>
+            </div>
+        </div>
+        <div class="flex items-center space-x-6">
+            <a href="login.html" class="text-sm font-bold text-gray-500 uppercase tracking-widest hover:text-primary transition-colors">Login</a>
+            <a href="login.html" class="px-8 py-3 bg-primary text-white rounded-lg font-black text-sm hover:bg-primary-dark transition-all shadow-lg shadow-primary/20">Get Started</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="px-10 py-24 max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-20">
+        <div class="flex-1 space-y-8">
+            <div class="inline-flex items-center space-x-2 bg-primary-light px-4 py-2 rounded-full border border-primary/10">
+                <span class="w-2 h-2 bg-primary rounded-full animate-pulse"></span>
+                <span class="text-[10px] font-black uppercase text-primary tracking-widest">Saudi Arabia's #1 B2B Hub</span>
+            </div>
+            <h1 class="text-7xl font-black text-gray-900 leading-[1.1] tracking-tighter">
+                Scale your business with <span class="text-primary italic">Verified</span> Experts.
+            </h1>
+            <p class="text-xl text-gray-500 font-medium leading-relaxed max-w-xl">
+                The most efficient way for Saudi businesses to procure standardized HR, Legal, and Compliance services in a secure, escrow-backed ecosystem.
+            </p>
+            <div class="flex items-center space-x-4 pt-4">
+                <a href="explore.html" class="px-10 py-5 bg-gray-900 text-white rounded-lg font-black text-lg hover:bg-black transition-all shadow-2xl shadow-gray-200 flex items-center space-x-3">
+                    <span>Explore Catalog</span>
+                    <i data-lucide="arrow-right" class="w-6 h-6"></i>
+                </a>
+                <div class="flex -space-x-3">
+                    <div class="w-12 h-12 rounded-full border-4 border-white bg-blue-100 flex items-center justify-center text-xs font-bold text-blue-600">JS</div>
+                    <div class="w-12 h-12 rounded-full border-4 border-white bg-purple-100 flex items-center justify-center text-xs font-bold text-purple-600">AZ</div>
+                    <div class="w-12 h-12 rounded-full border-4 border-white bg-emerald-100 flex items-center justify-center text-xs font-bold text-emerald-600">MK</div>
+                    <div class="w-12 h-12 rounded-full border-4 border-white bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-400">+5k</div>
+                </div>
+            </div>
+        </div>
+        <div class="flex-1 relative">
+            <div class="w-full aspect-square bg-gradient-to-br from-primary-light to-white rounded-[4rem] relative overflow-hidden border border-primary/5">
+                <div class="absolute inset-10 bg-white rounded-[3rem] shadow-2xl border border-gray-50 p-10 flex flex-col justify-between">
+                    <div class="flex items-center justify-between">
+                        <div class="w-12 h-12 bg-primary text-white rounded-2xl flex items-center justify-center shadow-lg">
+                            <i data-lucide="shield-check" class="w-6 h-6"></i>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-[10px] font-black uppercase text-gray-400">Escrow Held</p>
+                            <p class="text-xl font-black text-gray-900">12,500 SAR</p>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                            <div class="h-full bg-primary w-[75%] rounded-full"></div>
+                        </div>
+                        <div class="flex justify-between items-center text-[10px] font-black uppercase text-gray-400">
+                            <span>Integration Task</span>
+                            <span class="text-primary">75% Done</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>lucide.createIcons();</script>
+</body>
+</html>

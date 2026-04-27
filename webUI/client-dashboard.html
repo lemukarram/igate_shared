@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client Dashboard | iGate</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3da9e4',
+                        'primary-dark': '#2a8cc2',
+                        'primary-light': '#ebf6fd',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * { border-radius: 0.25rem !important; }
+        .rounded-full, .rounded-full * { border-radius: 9999px !important; }
+        body { font-family: 'Poppins', sans-serif; font-weight: 300; }
+        h1, h2, h3, h4, .font-bold { font-weight: 600 !important; }
+    </style>
+</head>
+<body class="bg-white text-gray-900 overflow-hidden">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="w-64 border-r border-gray-100 flex flex-col h-full bg-white">
+            <div class="p-6">
+                <h1 class="text-2xl font-black text-gray-900 tracking-tighter">iGate.</h1>
+            </div>
+            <div class="px-6 mb-6">
+                <a href="explore.html" class="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-primary text-white rounded-lg font-bold text-sm shadow-sm">
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                    <span>Request Service</span>
+                </a>
+            </div>
+            <nav class="flex-1 px-3 space-y-1">
+                <a href="client-dashboard.html" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg bg-primary-light text-primary font-bold">
+                    <i data-lucide="layout-dashboard" class="w-4 h-4"></i><span class="text-sm">Dashboard</span>
+                </a>
+                <a href="portfolio.html" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-600 hover:bg-gray-50 transition-all">
+                    <i data-lucide="briefcase" class="w-4 h-4"></i><span class="text-sm font-bold">Portfolio</span>
+                </a>
+                <a href="explore.html" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-600 hover:bg-gray-50 transition-all">
+                    <i data-lucide="compass" class="w-4 h-4"></i><span class="text-sm font-bold">Explore</span>
+                </a>
+            </nav>
+            <div class="pt-8 px-6">
+                <p class="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-4">Active Projects</p>
+                <div class="space-y-2">
+                    <a href="project-view.html" class="flex items-center space-x-3 text-xs font-bold text-gray-500 hover:text-primary">
+                        <div class="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                        <span>ZATCA Compliance</span>
+                    </a>
+                </div>
+            </div>
+            <div class="p-4 border-t border-gray-100 mt-auto">
+                <div class="flex items-center space-x-3 p-2">
+                    <div class="w-8 h-8 bg-gray-900 rounded-lg flex items-center justify-center text-white font-bold text-xs">RC</div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs font-bold text-gray-900 truncate">Retail Corp</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main -->
+        <main class="flex-1 overflow-y-auto p-10">
+            <div class="max-w-7xl mx-auto space-y-10">
+                <div>
+                    <h1 class="text-4xl font-black text-gray-900 tracking-tight">Welcome, Client</h1>
+                    <p class="text-gray-500 font-medium mt-1">Manage your business operations and active subscriptions.</p>
+                </div>
+
+                <!-- Stats -->
+                <div class="grid grid-cols-4 gap-6">
+                    <div class="bg-gray-900 p-8 rounded-lg shadow-xl text-white">
+                        <p class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Active Projects</p>
+                        <h3 class="text-3xl font-black">03</h3>
+                    </div>
+                    <div class="bg-primary p-8 rounded-lg shadow-xl text-white">
+                        <p class="text-[10px] font-black uppercase tracking-widest text-primary-light/60 mb-2">Total Invested</p>
+                        <h3 class="text-3xl font-black">48,200 <span class="text-xs">SAR</span></h3>
+                    </div>
+                </div>
+
+                <!-- Projects -->
+                <div class="grid grid-cols-2 gap-8">
+                    <div class="bg-white border border-gray-100 rounded-lg p-8 shadow-sm">
+                        <h3 class="text-xl font-bold mb-8">Ongoing Services</h3>
+                        <div class="space-y-4">
+                            <a href="project-view.html" class="flex items-center justify-between p-5 rounded-lg bg-gray-50 hover:bg-primary-light transition-all border border-transparent hover:border-primary/20">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-12 h-12 bg-white rounded-lg flex items-center justify-center text-primary shadow-sm">
+                                        <i data-lucide="file-check" class="w-6 h-6"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-bold text-gray-900">ZATCA Compliance</p>
+                                        <p class="text-[10px] font-black uppercase text-gray-400">Expert HR Solutions</p>
+                                    </div>
+                                </div>
+                                <i data-lucide="chevron-right" class="w-5 h-5 text-gray-300"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script>lucide.createIcons();</script>
+</body>
+</html>

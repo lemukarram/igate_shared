@@ -1,0 +1,57 @@
+services:
+  # Web Service (Laravel + Nginx)
+  - type: web
+    name: igate-b2b
+    env: docker
+    dockerContext: .
+    dockerfilePath: Dockerfile.render
+    plan: free
+    region: frankfurt
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: APP_KEY
+        generateValue: true
+      - key: DB_CONNECTION
+        value: mysql
+      - key: DB_HOST
+        fromService:
+          name: igate-db
+          type: private
+          property: host
+      - key: DB_PORT
+        value: 3306
+      - key: DB_DATABASE
+        value: igate
+      - key: DB_USERNAME
+        value: igate
+      - key: DB_PASSWORD
+        fromService:
+          name: igate-db
+          type: private
+          property: password
+
+  # Database Service (MySQL)
+  - type: private
+    name: igate-db
+    env: docker
+    dockerContext: .
+    # Using public mysql image
+    image: mysql:8.0
+    plan: free
+    region: frankfurt
+    envVars:
+      - key: MYSQL_DATABASE
+        value: igate
+      - key: MYSQL_USER
+        value: igate
+      - key: MYSQL_PASSWORD
+        generateValue: true
+      - key: MYSQL_ROOT_PASSWORD
+        generateValue: true
+    disk:
+      name: mysql-data
+      mountPath: /var/lib/mysql
+      sizeGB: 1
