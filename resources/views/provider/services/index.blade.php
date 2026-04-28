@@ -32,7 +32,7 @@
             <h3 class="text-lg font-bold text-gray-900 mb-1">{{ $ps->service->name }}</h3>
             <p class="text-sm text-gray-500 mb-4">{{ Str::limit($ps->service->description, 60) }}</p>
             
-            <div class="flex items-center justify-between pt-4 border-t border-gray-50">
+            <div class="flex items-center justify-between pt-4 border-t border-gray-50 mb-4">
                 <div>
                     <span class="block text-xs text-gray-400 uppercase font-semibold">Price</span>
                     <span class="text-xl font-bold text-gray-900">{{ number_format($ps->price, 2) }} SAR</span>
@@ -42,6 +42,11 @@
                     <span class="text-sm font-bold text-gray-900">{{ $ps->delivery_time_days }} Days</span>
                 </div>
             </div>
+
+            <a href="{{ route('explore.show', $ps->service_id) }}" class="w-full flex items-center justify-center space-x-2 py-2 bg-gray-50 text-gray-700 rounded-xl font-bold hover:bg-gray-100 transition-all border border-gray-100">
+                <i data-lucide="eye" class="w-4 h-4"></i>
+                <span>View Scope & Details</span>
+            </a>
         </div>
         @empty
         <div class="col-span-full py-20 text-center">

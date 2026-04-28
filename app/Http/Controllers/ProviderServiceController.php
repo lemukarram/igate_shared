@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Service;
 use App\Models\ProviderService;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
 class ProviderServiceController extends Controller
@@ -18,6 +19,8 @@ class ProviderServiceController extends Controller
 
     public function store(Request $request)
     {
+        $user = Auth::user();
+        
         $validated = $request->validate([
             'service_id' => 'required|exists:services,id',
             'price' => 'required|numeric|min:0',
@@ -25,9 +28,17 @@ class ProviderServiceController extends Controller
             'provider_notes' => 'nullable|string',
         ]);
 
+        $existing = ProviderService::where('provider_id', $user->id)
+            ->where('service_id', $validated['service_id'])
+            ->exists();
+            
+        if (!$existing && $user->plan && $user->providerServices()->count() >= $user->plan->max_services) {
+            return redirect()->back()->withErrors(['error' => 'You have reached the maximum number of services allowed by your plan.']);
+        }
+
         ProviderService::updateOrCreate(
             [
-                'provider_id' => Auth::id(),
+                'provider_id' => $user->id,
                 'service_id' => $validated['service_id'],
             ],
             $validated

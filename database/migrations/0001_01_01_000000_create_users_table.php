@@ -15,7 +15,9 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
+            $table->string('phone')->nullable();
             $table->string('role')->default('client'); // admin, client, provider
+            $table->foreignId('plan_id')->nullable(); // will be constrained later or simply nullable integer
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();

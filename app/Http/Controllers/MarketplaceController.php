@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\Service;
 use App\Models\ProviderService;
 use App\Models\User;
+use App\Models\Company;
+use Illuminate\Support\Facades\Auth;
 
 class MarketplaceController extends Controller
 {
@@ -23,8 +25,22 @@ class MarketplaceController extends Controller
             ->with(['provider.providerProfile'])
             ->orderBy('price', 'asc')
             ->get();
+
+        $user = auth()->user();
+        $providerService = null;
+        $clientCount = 0;
+
+        if ($user && $user->role === 'provider') {
+            $providerService = ProviderService::where('service_id', $id)
+                ->where('provider_id', $user->id)
+                ->first();
             
-        return view('client.explore.show', compact('service', 'providers'));
+            if ($providerService) {
+                $clientCount = \App\Models\Project::where('provider_service_id', $providerService->id)->count();
+            }
+        }
+            
+        return view('client.explore.show', compact('service', 'providers', 'providerService', 'clientCount'));
     }
 
     public function preChat($serviceId, $providerId)
@@ -38,6 +54,51 @@ class MarketplaceController extends Controller
 
     public function portfolio()
     {
-        return view('client.portfolio');
+        $companies = Auth::user()->companies()->withCount('projects')->get();
+        return view('client.portfolio', compact('companies'));
+    }
+
+    public function storeCompany(Request $request)
+    {
+        $user = Auth::user();
+        if ($user->plan && $user->companies()->count() >= $user->plan->max_companies) {
+            return redirect()->back()->withErrors(['error' => 'You have reached the maximum number of companies allowed by your plan.']);
+        }
+
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'industry' => 'nullable|string|max:255',
+            'registration_number' => 'nullable|string|max:100',
+            'about' => 'nullable|string',
+        ]);
+
+        $user->companies()->create($data);
+        return redirect()->back()->with('success', 'Company added successfully.');
+    }
+
+    public function showCompany($id)
+    {
+        $company = Auth::user()->companies()->with(['projects.service', 'projects.provider'])->findOrFail($id);
+        // Getting active users attached could be via a 'company_user' table, but for now we'll mock users if none exist
+        return view('client.company_show', compact('company'));
+    }
+
+    public function updateCompany(Request $request, $id)
+    {
+        $company = Auth::user()->companies()->findOrFail($id);
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'industry' => 'nullable|string|max:255',
+            'registration_number' => 'nullable|string|max:100',
+            'about' => 'nullable|string',
+        ]);
+        $company->update($data);
+        return redirect()->back()->with('success', 'Company updated successfully.');
+    }
+
+    public function destroyCompany($id)
+    {
+        Auth::user()->companies()->findOrFail($id)->delete();
+        return redirect()->route('client.portfolio')->with('success', 'Company deleted successfully.');
     }
 }

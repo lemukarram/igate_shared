@@ -62,3 +62,14 @@ When responding to subsequent prompts to build this system, follow these steps:
 ## 8. Userinterface and UX
 focus on the ui of a multi agent ai system like minus.ai or other ai system like chatgpt or gemini where on the left menu bar we will have option like new request or add services then optionn like explore , manage everthing and like the history chats on ai system we want to have on going projects and clients. i put some screenshot for ui/ux better idea in /idea folder 1.png, 2.png , 3.png and 4.png use the same type of interface for all three roles admin provider and clients.
 fully focus on the interface should not be broken at all and add every single option carefully.
+
+Provider subscription plans:
+1- Basic [add or manage upto 1 services , add max 1 user, manage only 1 project or client]
+2- Professional [upto 3 servies, 3 users, 3 projects or clients]
+3- Enterprise [unlimited services, unlimited users, unlimited projects and clients]
+
+Client Subscription Plans:
+1- Basic [only 1 company allowed, 1 user, 1 service he can request, 1 project he can manage]
+2- Professional [3 companies, 3 users, 3 services and 3 projects]
+3- Enterprise [unlimited companies, unlimited users, unlimited services and unlimited projects]
+

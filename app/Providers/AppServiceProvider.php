@@ -34,9 +34,19 @@ class AppServiceProvider extends ServiceProvider
                     ->latest()
                     ->get();
                 
-                $view->with('ongoingProjects', $ongoingProjects);
+                $teamMembers = [];
+                if (Auth::user()->role === 'provider') {
+                    $team = \App\Models\Team::where('owner_id', Auth::id())->first();
+                    if ($team) {
+                        $teamMembers = $team->members()->with('user')->get();
+                    }
+                }
+                
+                $view->with('ongoingProjects', $ongoingProjects)
+                     ->with('teamMembers', collect($teamMembers));
             } else {
-                $view->with('ongoingProjects', collect());
+                $view->with('ongoingProjects', collect())
+                     ->with('teamMembers', collect());
             }
         });
     }

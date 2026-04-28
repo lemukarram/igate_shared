@@ -50,7 +50,30 @@
             @csrf
             <input type="hidden" name="provider_service_id" value="{{ $ps->id }}">
             
-            <div class="space-y-4">
+            @if($errors->has('error'))
+                <div class="p-4 bg-red-50 text-red-600 rounded-2xl text-sm font-bold border border-red-100">
+                    {{ $errors->first('error') }}
+                </div>
+            @endif
+
+            <div class="space-y-2">
+                <label class="text-sm font-bold text-gray-700">Select Company</label>
+                <select name="company_id" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-700 focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all">
+                    @if($companies->count() == 0)
+                        <option value="" disabled selected>No companies found. Please add a company in your portfolio first.</option>
+                    @else
+                        <option value="" disabled selected>Choose a company to assign this project...</option>
+                        @foreach($companies as $company)
+                            <option value="{{ $company->id }}">{{ $company->name }}</option>
+                        @endforeach
+                    @endif
+                </select>
+                @error('company_id')
+                    <p class="text-red-500 text-xs mt-1 font-semibold">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div class="space-y-4 pt-4">
                 <div class="p-4 border-2 border-blue-600 bg-blue-50/30 rounded-2xl flex items-center justify-between">
                     <div class="flex items-center space-x-3">
                         <i data-lucide="credit-card" class="w-6 h-6 text-blue-600"></i>

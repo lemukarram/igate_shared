@@ -15,6 +15,9 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+    Route::post('/register', [AuthController::class, 'register'])->name('register.post');
+    Route::get('/forgot-password', [AuthController::class, 'showForgot'])->name('password.request');
+    Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
 });
 
 // Landing Page for guests, Dashboard for auth users
@@ -63,8 +66,12 @@ Route::middleware(['auth', 'App\Http\Middleware\EnsureProviderIsOnboarded'])->gr
     // Pre-sale Chat
     Route::get('/explore/{serviceId}/provider/{providerId}/chat', [MarketplaceController::class, 'preChat'])->name('explore.chat');
 
-    // Client Portfolio
+    // Client Portfolio and Companies
     Route::get('/portfolio', [MarketplaceController::class, 'portfolio'])->name('client.portfolio');
+    Route::post('/companies', [MarketplaceController::class, 'storeCompany'])->name('companies.store');
+    Route::get('/companies/{id}', [MarketplaceController::class, 'showCompany'])->name('companies.show');
+    Route::put('/companies/{id}', [MarketplaceController::class, 'updateCompany'])->name('companies.update');
+    Route::delete('/companies/{id}', [MarketplaceController::class, 'destroyCompany'])->name('companies.destroy');
 
     // Checkout
     Route::get('/checkout/{providerServiceId}', [CheckoutController::class, 'review'])->name('checkout.review');

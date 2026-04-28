@@ -9,7 +9,11 @@ class Service extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'description', 'category', 'icon'];
+    protected $fillable = ['name', 'description', 'subtasks', 'category', 'icon'];
+
+    protected $casts = [
+        'subtasks' => 'array',
+    ];
 
     public function providerServices()
     {

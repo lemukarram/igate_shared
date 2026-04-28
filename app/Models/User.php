@@ -23,7 +23,14 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'phone',
+        'plan_id',
     ];
+
+    public function plan()
+    {
+        return $this->belongsTo(Plan::class);
+    }
 
     /**
      * Get the provider profile associated with the user.
@@ -31,6 +38,36 @@ class User extends Authenticatable
     public function providerProfile()
     {
         return $this->hasOne(ProviderProfile::class);
+    }
+
+    public function companies()
+    {
+        return $this->hasMany(Company::class, 'client_id');
+    }
+
+    public function providerServices()
+    {
+        return $this->hasMany(ProviderService::class, 'provider_id');
+    }
+
+    public function projects()
+    {
+        return $this->hasMany(Project::class, 'client_id');
+    }
+
+    public function providerProjects()
+    {
+        return $this->hasMany(Project::class, 'provider_id');
+    }
+
+    public function ownedTeams()
+    {
+        return $this->hasMany(Team::class, 'owner_id');
+    }
+
+    public function teamMemberships()
+    {
+        return $this->hasMany(TeamMember::class, 'user_id');
     }
 
     /**

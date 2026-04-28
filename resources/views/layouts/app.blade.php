@@ -180,7 +180,7 @@
                 <div class="w-56 bg-gray-50 border-r border-gray-100 p-8 flex flex-col">
                     <h3 class="text-[10px] font-medium uppercase tracking-widest text-gray-400 mb-8 px-2">Settings</h3>
                     <div class="space-y-1 flex-1">
-                        <template x-for="t in ['account', 'settings', 'permissions', 'plans', 'notifications', 'security']">
+                        <template x-for="t in ['account', 'company', 'settings', 'permissions', 'plans', 'notifications', 'security']">
                             <button @click="settingsTab = t" 
                                     :class="settingsTab === t ? 'bg-primary text-white font-medium' : 'text-gray-500 hover:bg-gray-100'" 
                                     class="w-full text-left px-4 py-2 rounded-md text-xs transition-all capitalize" 
@@ -196,12 +196,48 @@
                     <div class="space-y-6 flex-1 overflow-y-auto pr-4 custom-scrollbar">
                         <!-- Account Tab -->
                         <div x-show="settingsTab === 'account'" class="space-y-4 animate-in fade-in duration-300">
+                            <div class="flex items-center space-x-4 mb-4">
+                                <div class="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 border-2 border-dashed border-gray-300 cursor-pointer hover:bg-gray-50 transition-colors relative overflow-hidden group">
+                                    <i data-lucide="upload" class="w-6 h-6 group-hover:text-[#3da9e4] transition-colors"></i>
+                                    <input type="file" class="absolute inset-0 opacity-0 cursor-pointer">
+                                </div>
+                                <div>
+                                    <p class="text-sm font-semibold text-gray-900">Profile Picture</p>
+                                    <p class="text-xs text-gray-500">Upload a professional photo (JPG, PNG)</p>
+                                </div>
+                            </div>
                             <div class="grid grid-cols-2 gap-4">
                                 <div class="space-y-1"><label class="text-[10px] font-black uppercase tracking-widest text-gray-400">First Name</label><input type="text" value="{{ explode(' ', Auth::user()->name)[0] }}" class="w-full px-4 py-2.5 border border-gray-100 bg-gray-50 rounded-lg outline-none focus:ring-4 focus:ring-primary/10 text-sm font-medium"></div>
                                 <div class="space-y-1"><label class="text-[10px] font-black uppercase tracking-widest text-gray-400">Last Name</label><input type="text" value="{{ explode(' ', Auth::user()->name)[1] ?? '' }}" class="w-full px-4 py-2.5 border border-gray-100 bg-gray-50 rounded-lg outline-none focus:ring-4 focus:ring-primary/10 text-sm font-medium"></div>
                             </div>
                             <div class="space-y-1"><label class="text-[10px] font-black uppercase tracking-widest text-gray-400">Email Address</label><input type="email" value="{{ Auth::user()->email }}" class="w-full px-4 py-2.5 border border-gray-100 bg-gray-50 rounded-lg outline-none focus:ring-4 focus:ring-primary/10 text-sm font-medium"></div>
-                            <div class="space-y-1"><label class="text-[10px] font-black uppercase tracking-widest text-gray-400">Phone Number</label><input type="text" value="+966 50 000 0000" class="w-full px-4 py-2.5 border border-gray-100 bg-gray-50 rounded-lg outline-none focus:ring-4 focus:ring-primary/10 text-sm font-medium"></div>
+                            <div class="space-y-1"><label class="text-[10px] font-black uppercase tracking-widest text-gray-400">Phone Number</label><input type="text" value="{{ Auth::user()->phone ?? '+966 50 000 0000' }}" class="w-full px-4 py-2.5 border border-gray-100 bg-gray-50 rounded-lg outline-none focus:ring-4 focus:ring-primary/10 text-sm font-medium"></div>
+                        </div>
+
+                        <!-- Company Profile Tab -->
+                        <div x-show="settingsTab === 'company'" class="space-y-6 animate-in fade-in duration-300">
+                            <div class="flex items-center space-x-4 mb-2">
+                                <div class="w-20 h-20 bg-gray-50 rounded-lg flex items-center justify-center text-[#3da9e4] border border-gray-200 cursor-pointer hover:border-[#3da9e4] transition-all relative group overflow-hidden">
+                                    <i data-lucide="image" class="w-6 h-6 group-hover:scale-110 transition-transform"></i>
+                                    <input type="file" class="absolute inset-0 opacity-0 cursor-pointer">
+                                </div>
+                                <div>
+                                    <p class="text-sm font-semibold text-gray-900">Company Logo</p>
+                                    <p class="text-xs text-gray-500">Used on invoices and marketplace</p>
+                                </div>
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-[10px] font-black uppercase tracking-widest text-gray-400">About Company</label>
+                                <textarea rows="4" placeholder="Briefly describe your company, services, and industry..." class="w-full px-4 py-3 border border-gray-100 bg-gray-50 rounded-lg outline-none focus:ring-2 focus:ring-[#3da9e4]/50 focus:border-[#3da9e4] text-sm resize-none"></textarea>
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-[10px] font-black uppercase tracking-widest text-gray-400">Company Documents</label>
+                                <div class="w-full h-24 border-2 border-dashed border-gray-200 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors relative">
+                                    <i data-lucide="upload-cloud" class="w-5 h-5 text-gray-400 mb-1"></i>
+                                    <span class="text-xs font-medium text-gray-500">Upload Registration / Tax Certificates</span>
+                                    <input type="file" multiple class="absolute inset-0 opacity-0 cursor-pointer">
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Settings Tab -->
@@ -286,7 +322,12 @@
                 <table class="w-full text-left text-sm">
                     <thead class="bg-gray-50 text-[10px] uppercase tracking-widest text-gray-400"><tr class="divide-x divide-gray-100"><th class="px-6 py-3 font-medium">Name</th><th class="px-6 py-3 font-medium">Role</th><th class="px-6 py-3 font-medium">Status</th><th class="px-6 py-3 font-medium text-right">Actions</th></tr></thead>
                     <tbody class="divide-y divide-gray-50">
-                        <tr class="hover:bg-gray-50 transition-all"><td class="px-6 py-4 font-medium">{{ Auth::user()->name }}</td><td class="px-6 py-4 capitalize">{{ Auth::user()->role }}</td><td class="px-6 py-4"><span class="px-2 py-0.5 bg-green-50 text-green-600 rounded-full text-[10px] font-bold">Active</span></td><td class="px-6 py-4 text-right"><button class="text-primary font-medium">Edit</button></td></tr>
+                        <tr class="hover:bg-gray-50 transition-all"><td class="px-6 py-4 font-medium">{{ Auth::user()->name }}</td><td class="px-6 py-4 capitalize">{{ Auth::user()->role }} (Owner)</td><td class="px-6 py-4"><span class="px-2 py-0.5 bg-green-50 text-green-600 rounded-full text-[10px] font-bold">Active</span></td><td class="px-6 py-4 text-right"><button class="text-primary font-medium">Edit</button></td></tr>
+                        @if(isset($teamMembers))
+                            @foreach($teamMembers as $member)
+                            <tr class="hover:bg-gray-50 transition-all"><td class="px-6 py-4 font-medium">{{ $member->user->name ?? 'Invited' }}</td><td class="px-6 py-4 capitalize">{{ $member->role }}</td><td class="px-6 py-4"><span class="px-2 py-0.5 bg-green-50 text-green-600 rounded-full text-[10px] font-bold">Active</span></td><td class="px-6 py-4 text-right"><button class="text-primary font-medium">Edit</button></td></tr>
+                            @endforeach
+                        @endif
                     </tbody>
                 </table>
             </div>

@@ -19,6 +19,26 @@ class DatabaseSeeder extends Seeder
         // 1. Seed Services (12 Fixed Catalog)
         $this->call(ServiceSeeder::class);
 
+        // Seed Plans
+        $providerPlans = [
+            ['name' => 'Basic', 'type' => 'provider', 'max_services' => 1, 'max_users' => 1, 'max_projects' => 1, 'max_companies' => 0],
+            ['name' => 'Professional', 'type' => 'provider', 'max_services' => 3, 'max_users' => 3, 'max_projects' => 3, 'max_companies' => 0],
+            ['name' => 'Enterprise', 'type' => 'provider', 'max_services' => 999, 'max_users' => 999, 'max_projects' => 999, 'max_companies' => 0],
+        ];
+        $clientPlans = [
+            ['name' => 'Basic', 'type' => 'client', 'max_services' => 1, 'max_users' => 1, 'max_projects' => 1, 'max_companies' => 1],
+            ['name' => 'Professional', 'type' => 'client', 'max_services' => 3, 'max_users' => 3, 'max_projects' => 3, 'max_companies' => 3],
+            ['name' => 'Enterprise', 'type' => 'client', 'max_services' => 999, 'max_users' => 999, 'max_projects' => 999, 'max_companies' => 999],
+        ];
+
+        foreach (array_merge($providerPlans, $clientPlans) as $plan) {
+            \App\Models\Plan::firstOrCreate(['name' => $plan['name'], 'type' => $plan['type']], $plan);
+        }
+
+        $basicProviderPlan = \App\Models\Plan::where('name', 'Basic')->where('type', 'provider')->first();
+        $basicClientPlan = \App\Models\Plan::where('name', 'Basic')->where('type', 'client')->first();
+        $enterpriseProviderPlan = \App\Models\Plan::where('name', 'Enterprise')->where('type', 'provider')->first();
+
         // 2. Seed Super Admin
         User::updateOrCreate(
             ['email' => 'admin@igate.com'],
@@ -36,6 +56,7 @@ class DatabaseSeeder extends Seeder
                 'name' => 'Expert HR Solutions',
                 'password' => Hash::make('password'),
                 'role' => 'provider',
+                'plan_id' => $enterpriseProviderPlan->id,
             ]
         );
 
@@ -61,6 +82,7 @@ class DatabaseSeeder extends Seeder
                     'name' => $pData['name'],
                     'password' => Hash::make('password'),
                     'role' => 'provider',
+                    'plan_id' => $basicProviderPlan->id,
                 ]
             );
 
@@ -82,7 +104,13 @@ class DatabaseSeeder extends Seeder
                 'name' => 'Retail Corp',
                 'password' => Hash::make('password'),
                 'role' => 'client',
+                'plan_id' => $basicClientPlan->id,
             ]
+        );
+
+        $clientCompany = \App\Models\Company::firstOrCreate(
+            ['client_id' => $clientUser->id, 'name' => 'Retail Corp KSA'],
+            ['industry' => 'Retail', 'about' => 'Leading retail corporation in Saudi Arabia.']
         );
 
         // 5. Seed Active Projects for Demo
@@ -113,6 +141,7 @@ class DatabaseSeeder extends Seeder
             
             $project = Project::create([
                 'client_id' => $clientUser->id,
+                'company_id' => $clientCompany->id,
                 'provider_id' => $hrUser->id,
                 'service_id' => $dp['service']->id,
                 'status' => 'active',
