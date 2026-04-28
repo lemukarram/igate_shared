@@ -196,22 +196,28 @@
                     <div class="space-y-6 flex-1 overflow-y-auto pr-4 custom-scrollbar">
                         <!-- Account Tab -->
                         <div x-show="settingsTab === 'account'" class="space-y-4 animate-in fade-in duration-300">
-                            <div class="flex items-center space-x-4 mb-4">
-                                <div class="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 border-2 border-dashed border-gray-300 cursor-pointer hover:bg-gray-50 transition-colors relative overflow-hidden group">
-                                    <i data-lucide="upload" class="w-6 h-6 group-hover:text-[#3da9e4] transition-colors"></i>
-                                    <input type="file" class="absolute inset-0 opacity-0 cursor-pointer">
+                            <form action="{{ route('settings.profile') }}" method="POST" class="space-y-4">
+                                @csrf
+                                <div class="flex items-center space-x-4 mb-4">
+                                    <div class="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 border-2 border-dashed border-gray-300 cursor-pointer hover:bg-gray-50 transition-colors relative overflow-hidden group">
+                                        <i data-lucide="upload" class="w-6 h-6 group-hover:text-[#3da9e4] transition-colors"></i>
+                                        <input type="file" name="profile_picture" class="absolute inset-0 opacity-0 cursor-pointer">
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-semibold text-gray-900">Profile Picture</p>
+                                        <p class="text-xs text-gray-500">Upload a professional photo (JPG, PNG)</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p class="text-sm font-semibold text-gray-900">Profile Picture</p>
-                                    <p class="text-xs text-gray-500">Upload a professional photo (JPG, PNG)</p>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div class="space-y-1"><label class="text-[10px] font-black uppercase tracking-widest text-gray-400">First Name</label><input type="text" name="first_name" value="{{ explode(' ', Auth::user()->name)[0] }}" class="w-full px-4 py-2.5 border border-gray-100 bg-gray-50 rounded-lg outline-none focus:ring-4 focus:ring-primary/10 text-sm font-medium"></div>
+                                    <div class="space-y-1"><label class="text-[10px] font-black uppercase tracking-widest text-gray-400">Last Name</label><input type="text" name="last_name" value="{{ explode(' ', Auth::user()->name)[1] ?? '' }}" class="w-full px-4 py-2.5 border border-gray-100 bg-gray-50 rounded-lg outline-none focus:ring-4 focus:ring-primary/10 text-sm font-medium"></div>
                                 </div>
-                            </div>
-                            <div class="grid grid-cols-2 gap-4">
-                                <div class="space-y-1"><label class="text-[10px] font-black uppercase tracking-widest text-gray-400">First Name</label><input type="text" value="{{ explode(' ', Auth::user()->name)[0] }}" class="w-full px-4 py-2.5 border border-gray-100 bg-gray-50 rounded-lg outline-none focus:ring-4 focus:ring-primary/10 text-sm font-medium"></div>
-                                <div class="space-y-1"><label class="text-[10px] font-black uppercase tracking-widest text-gray-400">Last Name</label><input type="text" value="{{ explode(' ', Auth::user()->name)[1] ?? '' }}" class="w-full px-4 py-2.5 border border-gray-100 bg-gray-50 rounded-lg outline-none focus:ring-4 focus:ring-primary/10 text-sm font-medium"></div>
-                            </div>
-                            <div class="space-y-1"><label class="text-[10px] font-black uppercase tracking-widest text-gray-400">Email Address</label><input type="email" value="{{ Auth::user()->email }}" class="w-full px-4 py-2.5 border border-gray-100 bg-gray-50 rounded-lg outline-none focus:ring-4 focus:ring-primary/10 text-sm font-medium"></div>
-                            <div class="space-y-1"><label class="text-[10px] font-black uppercase tracking-widest text-gray-400">Phone Number</label><input type="text" value="{{ Auth::user()->phone ?? '+966 50 000 0000' }}" class="w-full px-4 py-2.5 border border-gray-100 bg-gray-50 rounded-lg outline-none focus:ring-4 focus:ring-primary/10 text-sm font-medium"></div>
+                                <div class="space-y-1"><label class="text-[10px] font-black uppercase tracking-widest text-gray-400">Email Address</label><input type="email" name="email" value="{{ Auth::user()->email }}" class="w-full px-4 py-2.5 border border-gray-100 bg-gray-50 rounded-lg outline-none focus:ring-4 focus:ring-primary/10 text-sm font-medium"></div>
+                                <div class="space-y-1"><label class="text-[10px] font-black uppercase tracking-widest text-gray-400">Phone Number</label><input type="text" name="phone" value="{{ Auth::user()->phone ?? '+966 50 000 0000' }}" class="w-full px-4 py-2.5 border border-gray-100 bg-gray-50 rounded-lg outline-none focus:ring-4 focus:ring-primary/10 text-sm font-medium"></div>
+                                <div class="pt-2 flex justify-end">
+                                    <button type="submit" class="px-6 py-2 bg-[#3da9e4] text-white rounded-md font-medium text-xs hover:bg-[#2b8bc2] transition-all">Save Account</button>
+                                </div>
+                            </form>
                         </div>
 
                         <!-- Company Profile Tab -->
@@ -272,14 +278,34 @@
                         <div x-show="settingsTab === 'plans'" class="space-y-4 animate-in fade-in duration-300">
                             <div class="p-6 border border-primary/20 bg-primary-light rounded-xl">
                                 <div class="flex items-center justify-between mb-4">
-                                    <div><p class="text-[10px] font-black text-primary uppercase tracking-widest mb-1">Current Plan</p><h3 class="text-2xl font-black text-gray-900">Basic Free</h3></div>
+                                    <div><p class="text-[10px] font-black text-primary uppercase tracking-widest mb-1">Current Plan</p><h3 class="text-2xl font-black text-gray-900">{{ Auth::user()->plan->name ?? 'Basic' }}</h3></div>
                                     <span class="px-3 py-1 bg-primary text-white rounded-full text-[10px] font-black uppercase">Active</span>
                                 </div>
                                 <div class="flex items-center justify-between text-sm">
-                                    <span class="text-gray-500 font-medium">Next billing date: <span class="text-gray-900 font-bold">Never</span></span>
+                                    <span class="text-gray-500 font-medium">Limits: {{ Auth::user()->plan->max_services ?? 1 }} Services, {{ Auth::user()->plan->max_projects ?? 1 }} Projects</span>
                                     <button class="text-primary font-black uppercase tracking-widest text-xs">View Invoices</button>
                                 </div>
                             </div>
+                            <form action="{{ route('settings.plan') }}" method="POST" class="space-y-4 mt-6">
+                                @csrf
+                                <h4 class="text-sm font-bold">Upgrade Plan</h4>
+                                <div class="grid grid-cols-1 gap-3">
+                                    @foreach(\App\Models\Plan::where('type', Auth::user()->role)->get() as $plan)
+                                    <label class="flex items-center justify-between p-4 border rounded-lg cursor-pointer transition-all hover:bg-gray-50 {{ Auth::user()->plan_id == $plan->id ? 'border-primary bg-primary-light' : 'border-gray-200' }}">
+                                        <div class="flex items-center space-x-3">
+                                            <input type="radio" name="plan_id" value="{{ $plan->id }}" {{ Auth::user()->plan_id == $plan->id ? 'checked' : '' }} class="w-4 h-4 text-primary focus:ring-primary">
+                                            <div>
+                                                <p class="font-bold text-sm">{{ $plan->name }}</p>
+                                                <p class="text-xs text-gray-500">Up to {{ $plan->max_services }} services</p>
+                                            </div>
+                                        </div>
+                                    </label>
+                                    @endforeach
+                                </div>
+                                <div class="pt-2 flex justify-end">
+                                    <button type="submit" class="px-6 py-2 bg-[#3da9e4] text-white rounded-md font-medium text-xs hover:bg-[#2b8bc2] transition-all">Update Plan</button>
+                                </div>
+                            </form>
                         </div>
 
                         <!-- Notifications Tab -->

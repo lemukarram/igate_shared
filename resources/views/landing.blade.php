@@ -104,7 +104,7 @@
             <!-- Dashboard Preview Graphic -->
             <div class="w-full lg:w-1/2 relative animate-float">
                 <div class="glass-card rounded-lg p-3 shadow-xl relative z-10 border-t border-l border-white/60">
-                    <img src="/images/logo/logo.png" class="w-full rounded-md opacity-20" alt="Dashboard Preview" style="min-height: 300px; object-fit: contain; background: #fafafa;">
+                    <img src="/images/igate-banner.jpg" class="w-full rounded-md " alt="Dashboard Preview" style="min-height: 300px; object-fit: contain; background: #fafafa;">
                     
                     <div class="absolute -left-6 top-10 bg-white p-4 rounded-lg shadow-lg border border-gray-100 flex items-center space-x-3">
                         <div class="w-10 h-10 bg-[#e6f4fd] rounded-md flex items-center justify-center theme-text">

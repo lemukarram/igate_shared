@@ -5,21 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Task extends Model
+class Message extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'project_id',
-        'provider_id',
-        'team_id',
-        'title',
-        'description',
-        'status',
-        'order',
-        'assigned_to',
-        'due_date',
-        'priority',
+        'user_id',
+        'message',
     ];
 
     public function project()
@@ -27,8 +20,8 @@ class Task extends Model
         return $this->belongsTo(Project::class);
     }
 
-    public function assignedUser()
+    public function user()
     {
-        return $this->belongsTo(User::class, 'assigned_to');
+        return $this->belongsTo(User::class);
     }
 }

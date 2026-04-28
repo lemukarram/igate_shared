@@ -67,7 +67,7 @@
                     <div class="flex-1">
                         <div class="flex items-center space-x-2 mb-1">
                             <span class="text-sm font-semibold text-gray-900">iGate System</span>
-                            <span class="text-xs text-gray-400">Project Created</span>
+                            <span class="text-xs text-gray-400">{{ $project->created_at->format('M d, g:i A') }}</span>
                         </div>
                         <div class="text-gray-700 text-sm leading-relaxed prose prose-sm max-w-none">
                             <p>Welcome to the project workspace. The escrow has been funded and the SLA timer has started. You can use this space to communicate, share files, and update milestones.</p>
@@ -75,53 +75,47 @@
                     </div>
                 </div>
 
-                <!-- Client Message -->
+                @foreach($messages as $msg)
                 <div class="flex space-x-4">
-                    <div class="w-8 h-8 rounded-full bg-gray-900 flex-shrink-0 flex items-center justify-center text-white text-xs font-bold">
-                        {{ substr($project->client->name, 0, 1) }}
-                    </div>
-                    <div class="flex-1">
-                        <div class="flex items-center space-x-2 mb-1">
-                            <span class="text-sm font-semibold text-gray-900">{{ $project->client->name }}</span>
-                            <span class="text-xs text-gray-400">10:45 AM</span>
-                        </div>
-                        <div class="text-gray-700 text-sm leading-relaxed">
-                            <p>Hello team, I've uploaded the initial required documents to the vault. Please let me know if you need anything else to start the first phase.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Provider Message -->
-                <div class="flex space-x-4">
+                    @if($msg->user_id === Auth::id())
                     <div class="w-8 h-8 rounded-full bg-[#3da9e4] flex-shrink-0 flex items-center justify-center text-white text-xs font-bold shadow-md shadow-[#3da9e4]/30">
-                        {{ substr(Auth::user()->name ?? 'Provider', 0, 1) }}
+                        {{ substr($msg->user->name, 0, 1) }}
                     </div>
+                    @else
+                    <div class="w-8 h-8 rounded-full bg-gray-900 flex-shrink-0 flex items-center justify-center text-white text-xs font-bold">
+                        {{ substr($msg->user->name, 0, 1) }}
+                    </div>
+                    @endif
                     <div class="flex-1">
                         <div class="flex items-center space-x-2 mb-1">
-                            <span class="text-sm font-semibold text-gray-900">You (Provider)</span>
-                            <span class="text-xs text-gray-400">10:48 AM</span>
+                            <span class="text-sm font-semibold text-gray-900">{{ $msg->user_id === Auth::id() ? 'You' : $msg->user->name }}</span>
+                            <span class="text-xs text-gray-400">{{ $msg->created_at->format('M d, g:i A') }}</span>
                         </div>
-                        <div class="text-gray-700 text-sm leading-relaxed bg-gray-50 p-4 rounded-lg border border-gray-100">
-                            <p>Thank you. We have received the documents and our team is reviewing them now. I will update the task board once the audit is complete.</p>
+                        <div class="text-gray-700 text-sm leading-relaxed {{ $msg->user_id === Auth::id() ? 'bg-gray-50 p-4 rounded-lg border border-gray-100' : '' }}">
+                            <p>{{ $msg->message }}</p>
                         </div>
                     </div>
                 </div>
+                @endforeach
             </div>
 
             <!-- Chat Input (Gemini Style) -->
             <div class="p-4 bg-white border-t border-gray-100">
-                <div class="relative bg-gray-50 border border-gray-200 rounded-2xl shadow-sm focus-within:ring-2 focus-within:ring-[#3da9e4]/50 focus-within:border-[#3da9e4] transition-all">
-                    <textarea placeholder="Type your message here..." rows="2" class="w-full pl-4 pr-16 py-3 bg-transparent outline-none font-medium text-sm text-gray-700 resize-none custom-scrollbar" style="max-height: 150px;"></textarea>
-                    <div class="absolute right-2 bottom-2 flex items-center space-x-1">
-                        <button class="p-2 text-gray-400 hover:text-gray-700 transition-colors rounded-full hover:bg-gray-200">
-                            <i data-lucide="mic" class="w-4 h-4"></i>
-                        </button>
-                        <button class="p-2 bg-[#3da9e4] text-white rounded-full flex items-center justify-center hover:bg-[#2b8bc2] transition-colors shadow-md disabled:opacity-50">
-                            <i data-lucide="arrow-up" class="w-4 h-4"></i>
-                        </button>
+                <form action="{{ route('projects.messages.store', $project->id) }}" method="POST">
+                    @csrf
+                    <div class="relative bg-gray-50 border border-gray-200 rounded-2xl shadow-sm focus-within:ring-2 focus-within:ring-[#3da9e4]/50 focus-within:border-[#3da9e4] transition-all">
+                        <textarea name="message" required placeholder="Type your message here..." rows="2" class="w-full pl-4 pr-16 py-3 bg-transparent outline-none font-medium text-sm text-gray-700 resize-none custom-scrollbar" style="max-height: 150px;"></textarea>
+                        <div class="absolute right-2 bottom-2 flex items-center space-x-1">
+                            <button type="button" class="p-2 text-gray-400 hover:text-gray-700 transition-colors rounded-full hover:bg-gray-200">
+                                <i data-lucide="mic" class="w-4 h-4"></i>
+                            </button>
+                            <button type="submit" class="p-2 bg-[#3da9e4] text-white rounded-full flex items-center justify-center hover:bg-[#2b8bc2] transition-colors shadow-md disabled:opacity-50">
+                                <i data-lucide="arrow-up" class="w-4 h-4"></i>
+                            </button>
+                        </div>
                     </div>
-                </div>
-                <p class="text-center text-[10px] text-gray-400 mt-2 font-medium">All communications are recorded and monitored for SLA compliance.</p>
+                    <p class="text-center text-[10px] text-gray-400 mt-2 font-medium">All communications are recorded and monitored for SLA compliance.</p>
+                </form>
             </div>
         </div>
 
@@ -155,35 +149,46 @@
                 </div>
                 
                 <div class="space-y-3">
-                    @php
-                        // Subtasks logic - mock data if none exists
-                        $subtasks = is_array($project->service->subtasks) && count($project->service->subtasks) > 0 
-                                    ? $project->service->subtasks 
-                                    : ['Initial audit and data gathering', 'ZATCA portal registration', 'Integration with existing ERP', 'Final compliance verification'];
-                    @endphp
-                    
-                    @foreach($subtasks as $index => $subtask)
-                    <div class="p-3 rounded-lg border {{ $index < 2 ? 'bg-gray-50 border-gray-200' : 'bg-white border-gray-100 hover:border-[#3da9e4]/30' }} transition-colors group">
+                    @forelse($project->tasks as $task)
+                    <div class="p-3 rounded-lg border {{ $task->status === 'done' ? 'bg-gray-50 border-gray-200' : 'bg-white border-gray-100 hover:border-[#3da9e4]/30' }} transition-colors group">
                         <div class="flex items-start space-x-3">
-                            <button class="mt-0.5 flex-shrink-0 w-5 h-5 rounded {{ $index < 2 ? 'bg-[#3da9e4] border-[#3da9e4] text-white' : 'bg-white border-gray-300 text-transparent hover:border-[#3da9e4]' }} border flex items-center justify-center transition-colors">
-                                <i data-lucide="check" class="w-3 h-3"></i>
-                            </button>
+                            <form action="{{ route('tasks.updateStatus', $task->id) }}" method="POST" class="mt-0.5">
+                                @csrf
+                                @method('PATCH')
+                                <input type="hidden" name="status" value="{{ $task->status === 'done' ? 'todo' : 'done' }}">
+                                <button type="submit" class="flex-shrink-0 w-5 h-5 rounded {{ $task->status === 'done' ? 'bg-[#3da9e4] border-[#3da9e4] text-white' : 'bg-white border-gray-300 text-transparent hover:border-[#3da9e4]' }} border flex items-center justify-center transition-colors">
+                                    <i data-lucide="check" class="w-3 h-3"></i>
+                                </button>
+                            </form>
                             <div class="flex-1">
-                                <p class="text-sm font-medium {{ $index < 2 ? 'text-gray-500 line-through' : 'text-gray-800' }}">{{ $subtask }}</p>
+                                <p class="text-sm font-medium {{ $task->status === 'done' ? 'text-gray-500 line-through' : 'text-gray-800' }}">{{ $task->title }}</p>
                                 <div class="mt-2 flex items-center justify-between">
-                                    <span class="text-[10px] font-semibold uppercase tracking-wider {{ $index < 2 ? 'text-green-500' : 'text-gray-400' }}">
-                                        {{ $index < 2 ? 'Completed' : 'Pending' }}
+                                    <span class="text-[10px] font-semibold uppercase tracking-wider {{ $task->status === 'done' ? 'text-green-500' : 'text-gray-400' }}">
+                                        {{ $task->status === 'done' ? 'Completed' : 'Pending' }}
                                     </span>
-                                    @if($index >= 2)
-                                    <button class="opacity-0 group-hover:opacity-100 transition-opacity text-[10px] bg-gray-100 hover:bg-gray-200 text-gray-600 px-2 py-0.5 rounded font-medium">Update</button>
-                                    @endif
                                 </div>
                             </div>
                         </div>
                     </div>
-                    @endforeach
+                    @empty
+                    <p class="text-sm text-gray-500 italic p-3 text-center">No tasks defined yet.</p>
+                    @endforelse
                 </div>
             </div>
+
+            <!-- Add Task Form -->
+            @if(Auth::user()->role === 'provider')
+            <div class="bg-white border border-gray-100 rounded-lg p-5 shadow-sm">
+                <h3 class="text-sm font-semibold text-gray-900 mb-3">Add New Task</h3>
+                <form action="{{ route('tasks.store') }}" method="POST" class="space-y-3">
+                    @csrf
+                    <input type="hidden" name="project_id" value="{{ $project->id }}">
+                    <input type="hidden" name="status" value="todo">
+                    <input type="text" name="title" required placeholder="Task description..." class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-md focus:ring-2 focus:ring-[#3da9e4]/50 focus:border-[#3da9e4] outline-none text-sm">
+                    <button type="submit" class="w-full py-2 bg-[#3da9e4] text-white rounded-md text-xs font-semibold hover:bg-[#2b8bc2] transition-colors">Add Task</button>
+                </form>
+            </div>
+            @endif
             
             <!-- Vault/Files widget -->
             <div class="bg-white border border-gray-100 rounded-lg p-5 shadow-sm">

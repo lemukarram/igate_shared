@@ -61,7 +61,11 @@ Route::middleware(['auth', 'App\Http\Middleware\EnsureProviderIsOnboarded'])->gr
     // Provider Specifics
     Route::get('/provider/clients', [ProviderServiceController::class, 'clients'])->name('provider.clients');
     Route::get('/provider/clients/{id}', [ProviderServiceController::class, 'clientShow'])->name('provider.clients.show');
-    Route::get('/provider/team-tasks', [ProviderServiceController::class, 'teamTasks'])->name('provider.team_tasks');
+    
+    // Team Tasks
+    Route::get('/provider/team-tasks', [App\Http\Controllers\TeamTaskController::class, 'index'])->name('provider.team_tasks');
+    Route::post('/provider/team-tasks', [App\Http\Controllers\TeamTaskController::class, 'store'])->name('provider.team_tasks.store');
+    Route::patch('/provider/team-tasks/{id}/status', [App\Http\Controllers\TeamTaskController::class, 'updateStatus'])->name('provider.team_tasks.status');
 
     // Pre-sale Chat
     Route::get('/explore/{serviceId}/provider/{providerId}/chat', [MarketplaceController::class, 'preChat'])->name('explore.chat');
@@ -79,6 +83,14 @@ Route::middleware(['auth', 'App\Http\Middleware\EnsureProviderIsOnboarded'])->gr
 
     // Project Workspace
     Route::get('/projects/{id}', [ProjectController::class, 'show'])->name('projects.show');
+    Route::post('/projects/{id}/messages', [ProjectController::class, 'sendMessage'])->name('projects.messages.store');
+
+    // Settings
+    Route::post('/settings/profile', [App\Http\Controllers\SettingsController::class, 'updateProfile'])->name('settings.profile');
+    Route::post('/settings/company', [App\Http\Controllers\SettingsController::class, 'updateCompany'])->name('settings.company');
+    Route::post('/settings/security', [App\Http\Controllers\SettingsController::class, 'updateSecurity'])->name('settings.security');
+    Route::post('/settings/plan', [App\Http\Controllers\SettingsController::class, 'updatePlan'])->name('settings.plan');
+    Route::patch('/settings/team-members/{id}', [App\Http\Controllers\SettingsController::class, 'updateTeamMember'])->name('settings.team_members.update');
 
     // Tasks
     Route::post('/tasks', [TaskController::class, 'store'])->name('tasks.store');
