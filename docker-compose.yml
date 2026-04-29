@@ -6,7 +6,8 @@ services:
     build:
       context: .
       dockerfile: docker/php/Dockerfile
-    image: igate-app
+    image: igate-shared-app:latest
+    container_name: igate_shared_app_${APP_ENV:-prod}
     restart: unless-stopped
     working_dir: /var/www
     environment:
@@ -22,13 +23,14 @@ services:
       - ./:/var/www
       - ./storage:/var/www/storage
     networks:
-      - igate-network
+      - igate_shared_network
     depends_on:
       - db
 
   # Nginx Service
   web:
     image: nginx:alpine
+    container_name: igate_shared_web_${APP_ENV:-prod}
     restart: unless-stopped
     ports:
       - "${WEB_PORT:-8001}:80"
@@ -38,11 +40,12 @@ services:
     depends_on:
       - app
     networks:
-      - igate-network
+      - igate_shared_network
 
   # MySQL Service
   db:
     image: mysql:8.0
+    container_name: igate_shared_db_${APP_ENV:-prod}
     restart: unless-stopped
     environment:
       MYSQL_DATABASE: ${DB_DATABASE:-igate}
@@ -50,14 +53,14 @@ services:
       MYSQL_PASSWORD: ${DB_PASSWORD:-root}
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root}
     volumes:
-      - dbdata:/var/lib/mysql
+      - igate_shared_db_data:/var/lib/mysql
     networks:
-      - igate-network
+      - igate_shared_network
 
 networks:
-  igate-network:
+  igate_shared_network:
     driver: bridge
 
 volumes:
-  dbdata:
+  igate_shared_db_data:
     driver: local
