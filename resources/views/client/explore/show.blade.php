@@ -56,6 +56,7 @@
                 </div>
             </div>
 
+            @if(auth()->user()->role === 'client')
             <div class="space-y-6">
                 <h2 class="text-xl font-bold text-gray-900">Available Providers</h2>
                 
@@ -112,6 +113,73 @@
                     @endforelse
                 </div>
             </div>
+            @endif
+
+            @if(auth()->user()->role === 'provider' && $providerService)
+            <div class="bg-white border border-gray-100 rounded-3xl p-8 shadow-sm">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl font-bold text-gray-900">My Offering Details</h2>
+                    <button onclick="document.getElementById('edit-service-modal').classList.remove('hidden')" class="px-4 py-2 bg-gray-900 text-white rounded-xl text-sm font-bold hover:bg-gray-800 transition-all flex items-center">
+                        <i data-lucide="edit-3" class="w-4 h-4 mr-2"></i> Edit Details
+                    </button>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                    <div class="p-6 bg-blue-50 rounded-2xl border border-blue-100">
+                        <span class="block text-xs text-blue-500 uppercase font-black tracking-widest mb-1">My Price</span>
+                        <span class="text-3xl font-black text-blue-700">{{ number_format($providerService->price, 0) }} <span class="text-sm">SAR</span></span>
+                    </div>
+                    <div class="p-6 bg-indigo-50 rounded-2xl border border-indigo-100">
+                        <span class="block text-xs text-indigo-500 uppercase font-black tracking-widest mb-1">Delivery Time</span>
+                        <span class="text-3xl font-black text-indigo-700">{{ $providerService->delivery_time_days }} <span class="text-sm">Days</span></span>
+                    </div>
+                </div>
+
+                <div>
+                    <span class="block text-xs text-gray-400 uppercase font-black tracking-widest mb-3">Service Notes / Terms</span>
+                    <div class="p-6 bg-gray-50 rounded-2xl border border-gray-100 text-gray-700 leading-relaxed italic">
+                        {{ $providerService->provider_notes ?? 'No specific notes added yet.' }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit Service Modal -->
+            <div id="edit-service-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+                <div class="bg-white rounded-[2rem] p-8 max-w-md w-full mx-4 shadow-2xl">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2">Edit My Offering</h3>
+                    <p class="text-gray-500 mb-6">Update your pricing and delivery time for this service.</p>
+                    
+                    <form action="{{ route('provider.services.update', $providerService->id) }}" method="POST" class="space-y-4">
+                        @csrf
+                        @method('PATCH')
+                        
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1">Price (SAR)</label>
+                            <input type="number" name="price" value="{{ $providerService->price }}" required class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1">Delivery Time (Days)</label>
+                            <input type="number" name="delivery_time_days" value="{{ $providerService->delivery_time_days }}" required class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1">Provider Notes</label>
+                            <textarea name="provider_notes" rows="4" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary focus:border-transparent">{{ $providerService->provider_notes }}</textarea>
+                        </div>
+
+                        <div class="flex items-center space-x-3 pt-4">
+                            <button type="button" onclick="document.getElementById('edit-service-modal').classList.add('hidden')" class="flex-1 px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition-all">
+                                Cancel
+                            </button>
+                            <button type="submit" class="flex-1 px-6 py-3 bg-primary text-white rounded-xl font-bold hover:bg-primary-dark transition-all shadow-sm">
+                                Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            @endif
         </div>
 
         <div class="space-y-6">

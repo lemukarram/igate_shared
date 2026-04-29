@@ -7,7 +7,7 @@
             <h1 class="text-2xl font-semibold text-gray-900 tracking-tight">Team Tasks</h1>
             <p class="text-gray-500 font-medium mt-1 text-xs uppercase tracking-wider">Internal Workforce Management</p>
         </div>
-        <button @click="showModal = true" class="px-5 py-2.5 bg-[#3da9e4] text-white rounded-lg font-medium text-sm hover:bg-[#2b8bc2] transition-all flex items-center space-x-2 shadow-md">
+        <button @click="openCreateModal()" class="px-5 py-2.5 bg-[#3da9e4] text-white rounded-lg font-medium text-sm hover:bg-[#2b8bc2] transition-all flex items-center space-x-2 shadow-md">
             <i data-lucide="plus" class="w-4 h-4"></i>
             <span>Create Internal Task</span>
         </button>
@@ -28,7 +28,9 @@
             <div class="space-y-4 flex-1 overflow-y-auto custom-scrollbar pr-1">
                 @if(isset($tasks['todo']))
                     @foreach($tasks['todo'] as $task)
-                    <div draggable="true" @dragstart="dragStart(event, {{ $task->id }})" class="bg-gray-50 p-4 rounded-lg border border-gray-100 group cursor-grab hover:border-[#3da9e4] transition-all">
+                    <div draggable="true" @dragstart="dragStart(event, {{ $task->id }})" 
+                         @click="openEditModal({{ $task->id }})"
+                         class="bg-gray-50 p-4 rounded-lg border border-gray-100 group cursor-grab hover:border-[#3da9e4] transition-all">
                         <div class="flex items-start justify-between mb-2">
                             <span class="px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider 
                                 {{ $task->priority === 'urgent' ? 'bg-red-50 text-red-600' : ($task->priority === 'high' ? 'bg-orange-50 text-orange-600' : 'bg-blue-50 text-blue-600') }}">
@@ -75,7 +77,9 @@
             <div class="space-y-4 flex-1 overflow-y-auto custom-scrollbar pr-1">
                 @if(isset($tasks['in_progress']))
                     @foreach($tasks['in_progress'] as $task)
-                    <div draggable="true" @dragstart="dragStart(event, {{ $task->id }})" class="bg-gray-50 p-4 rounded-lg border border-[#3da9e4]/30 group cursor-grab">
+                    <div draggable="true" @dragstart="dragStart(event, {{ $task->id }})" 
+                         @click="openEditModal({{ $task->id }})"
+                         class="bg-gray-50 p-4 rounded-lg border border-[#3da9e4]/30 group cursor-grab">
                         <div class="flex items-start justify-between mb-2">
                             <span class="px-2 py-0.5 bg-[#e6f4fd] text-[#3da9e4] rounded text-[10px] font-semibold uppercase tracking-wider">Active</span>
                             <i data-lucide="loader" class="w-4 h-4 text-[#3da9e4] animate-spin"></i>
@@ -113,7 +117,9 @@
             <div class="space-y-4 flex-1 overflow-y-auto custom-scrollbar pr-1">
                 @if(isset($tasks['done']))
                     @foreach($tasks['done'] as $task)
-                    <div draggable="true" @dragstart="dragStart(event, {{ $task->id }})" class="bg-gray-50 p-4 rounded-lg border border-gray-100 opacity-60 cursor-grab">
+                    <div draggable="true" @dragstart="dragStart(event, {{ $task->id }})" 
+                         @click="openEditModal({{ $task->id }})"
+                         class="bg-gray-50 p-4 rounded-lg border border-gray-100 opacity-60 cursor-grab">
                         <p class="text-sm font-medium text-gray-700 mb-2 line-through">{{ $task->title }}</p>
                         <p class="text-xs text-gray-400 font-medium">Completed {{ $task->updated_at->diffForHumans() }}</p>
                     </div>
@@ -123,81 +129,126 @@
         </div>
     </div>
 
-    <!-- Create Task Modal -->
+    <!-- Task Modal (Create/Edit) -->
     <div x-show="showModal" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
-        <div @click.away="showModal = false" class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-gray-100">
-            <div class="p-6 border-b border-gray-100 flex justify-between items-center">
-                <h2 class="text-xl font-semibold text-gray-900">Create New Task</h2>
-                <button @click="showModal = false" class="text-gray-400 hover:text-gray-600">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
+        <div @click.away="showModal = false" class="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden border border-gray-100 flex">
+            <!-- Left Side: Form -->
+            <div class="flex-1 overflow-y-auto custom-scrollbar border-r border-gray-100">
+                <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                    <h2 class="text-xl font-semibold text-gray-900" x-text="editMode ? 'Edit Task' : 'Create New Task'"></h2>
+                    <button @click="showModal = false" class="text-gray-400 hover:text-gray-600">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+                <form :action="editMode ? `/provider/team-tasks/${currentTask.id}` : '{{ route('provider.team_tasks.store') }}'" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <template x-if="editMode">
+                        @method('PATCH')
+                    </template>
+
+                    <div class="p-6 space-y-5">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Task Title *</label>
+                            <input type="text" name="title" x-model="formData.title" required placeholder="E.g. Review legal documents" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#3da9e4]/50 focus:border-[#3da9e4] outline-none text-sm">
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-5">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Assign To</label>
+                                <select name="assigned_to" x-model="formData.assigned_to" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#3da9e4]/50 outline-none text-sm">
+                                    <option value="">Unassigned</option>
+                                    @if(isset($teamMembers))
+                                        @foreach($teamMembers as $member)
+                                        <option value="{{ $member->user->id }}">{{ $member->user->name }} ({{ ucfirst($member->role) }})</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Deadline</label>
+                                <input type="date" name="due_date" x-model="formData.due_date" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#3da9e4]/50 outline-none text-sm text-gray-700">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-5">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Priority</label>
+                                <select name="priority" x-model="formData.priority" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#3da9e4]/50 outline-none text-sm">
+                                    <option value="normal">Normal</option>
+                                    <option value="high">High</option>
+                                    <option value="urgent">Urgent</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                                <select name="status" x-model="formData.status" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#3da9e4]/50 outline-none text-sm">
+                                    <option value="todo">Preparation</option>
+                                    <option value="in_progress">In Execution</option>
+                                    <option value="review">Review</option>
+                                    <option value="done">Validation (Done)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Task Description & Comments</label>
+                            <textarea name="description" x-model="formData.description" rows="3" placeholder="Add task details or initial comments..." class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#3da9e4]/50 focus:border-[#3da9e4] outline-none text-sm resize-none"></textarea>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Attachments</label>
+                            <div @click="$refs.fileInput.click()" class="border-2 border-dashed border-gray-200 rounded-lg p-6 text-center hover:bg-gray-50 transition-colors cursor-pointer">
+                                <i data-lucide="upload-cloud" class="w-8 h-8 text-gray-400 mx-auto mb-2"></i>
+                                <p class="text-sm text-gray-500 font-medium">Click to upload multiple files or drag and drop</p>
+                                <p class="text-xs text-gray-400 mt-1">PDF, DOCX, JPG up to 10MB</p>
+                                <input type="file" name="files[]" multiple x-ref="fileInput" class="hidden">
+                            </div>
+                        </div>
+
+                        <!-- Existing Files -->
+                        <template x-if="editMode && currentTask.documents && currentTask.documents.length > 0">
+                            <div class="space-y-2">
+                                <label class="block text-sm font-medium text-gray-700">Existing Attachments</label>
+                                <div class="grid grid-cols-1 gap-2">
+                                    <template x-for="doc in currentTask.documents" :key="doc.id">
+                                        <div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg border border-gray-100">
+                                            <div class="flex items-center space-x-2">
+                                                <i data-lucide="file" class="w-4 h-4 text-gray-400"></i>
+                                                <span class="text-xs text-gray-600 font-medium" x-text="doc.name"></span>
+                                            </div>
+                                            <a :href="'/storage/' + doc.file_path" target="_blank" class="text-[#3da9e4] hover:underline text-[10px] font-bold">View</a>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                    <div class="p-6 border-t border-gray-100 flex justify-end space-x-3 bg-gray-50 rounded-b-lg">
+                        <button type="button" @click="showModal = false" class="px-5 py-2.5 text-gray-600 bg-white border border-gray-200 rounded-lg font-medium text-sm hover:bg-gray-100 transition-colors shadow-sm">Cancel</button>
+                        <button type="submit" class="px-5 py-2.5 bg-[#3da9e4] text-white rounded-lg font-medium text-sm hover:bg-[#2b8bc2] transition-all shadow-sm" x-text="editMode ? 'Update Task' : 'Save Task'"></button>
+                    </div>
+                </form>
             </div>
-            <form action="{{ route('provider.team_tasks.store') }}" method="POST">
-                @csrf
-                <div class="p-6 space-y-5">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Task Title *</label>
-                        <input type="text" name="title" required placeholder="E.g. Review legal documents" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#3da9e4]/50 focus:border-[#3da9e4] outline-none text-sm">
-                    </div>
-                    
-                    <div class="grid grid-cols-2 gap-5">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Assign To</label>
-                            <select name="assigned_to" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#3da9e4]/50 outline-none text-sm">
-                                <option value="">Unassigned</option>
-                                @if(isset($teamMembers))
-                                    @foreach($teamMembers as $member)
-                                    <option value="{{ $member->user->id }}">{{ $member->user->name }} ({{ ucfirst($member->role) }})</option>
-                                    @endforeach
-                                @endif
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Deadline</label>
-                            <input type="date" name="due_date" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#3da9e4]/50 outline-none text-sm text-gray-700">
-                        </div>
-                    </div>
 
-                    <div class="grid grid-cols-2 gap-5">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Priority</label>
-                            <select name="priority" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#3da9e4]/50 outline-none text-sm">
-                                <option value="normal">Normal</option>
-                                <option value="high">High</option>
-                                <option value="urgent">Urgent</option>
-                            </select>
+            <!-- Right Side: History -->
+            <div class="w-72 bg-gray-50/50 overflow-y-auto custom-scrollbar p-6" x-show="editMode">
+                <h3 class="text-sm font-bold text-gray-900 mb-6 flex items-center">
+                    <i data-lucide="history" class="w-4 h-4 mr-2 text-[#3da9e4]"></i>
+                    Task History
+                </h3>
+                <div class="space-y-6 relative before:absolute before:left-2 before:top-2 before:bottom-2 before:w-px before:bg-gray-200">
+                    <template x-for="history in currentTask.histories" :key="history.id">
+                        <div class="relative pl-6">
+                            <div class="absolute left-0 top-1.5 w-4 h-4 rounded-full bg-white border-2 border-[#3da9e4] z-10"></div>
+                            <div class="space-y-1">
+                                <p class="text-xs text-gray-900 font-bold" x-text="history.user.name"></p>
+                                <p class="text-[10px] text-gray-500 font-medium" x-text="history.action === 'created' ? 'Created this task' : (history.field + ' changed to ' + history.new_value)"></p>
+                                <p class="text-[8px] text-gray-400 font-medium italic" x-text="formatDate(history.created_at)"></p>
+                            </div>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                            <select name="status" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#3da9e4]/50 outline-none text-sm">
-                                <option value="todo">Preparation</option>
-                                <option value="in_progress">In Execution</option>
-                                <option value="review">Review</option>
-                                <option value="done">Validation (Done)</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Task Description & Comments</label>
-                        <textarea name="description" rows="3" placeholder="Add task details or initial comments..." class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#3da9e4]/50 focus:border-[#3da9e4] outline-none text-sm resize-none"></textarea>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Attachments</label>
-                        <div class="border-2 border-dashed border-gray-200 rounded-lg p-6 text-center hover:bg-gray-50 transition-colors cursor-pointer">
-                            <i data-lucide="upload-cloud" class="w-8 h-8 text-gray-400 mx-auto mb-2"></i>
-                            <p class="text-sm text-gray-500 font-medium">Click to upload multiple files or drag and drop</p>
-                            <p class="text-xs text-gray-400 mt-1">PDF, DOCX, JPG up to 10MB</p>
-                            <input type="file" multiple class="hidden">
-                        </div>
-                    </div>
+                    </template>
                 </div>
-                <div class="p-6 border-t border-gray-100 flex justify-end space-x-3 bg-gray-50 rounded-b-lg">
-                    <button type="button" @click="showModal = false" class="px-5 py-2.5 text-gray-600 bg-white border border-gray-200 rounded-lg font-medium text-sm hover:bg-gray-100 transition-colors shadow-sm">Cancel</button>
-                    <button type="submit" class="px-5 py-2.5 bg-[#3da9e4] text-white rounded-lg font-medium text-sm hover:bg-[#2b8bc2] transition-colors shadow-sm">Save Task</button>
-                </div>
-            </form>
+            </div>
         </div>
     </div>
 </div>
@@ -206,8 +257,59 @@
     document.addEventListener('alpine:init', () => {
         Alpine.data('taskManager', () => ({
             showModal: false,
+            editMode: false,
             draggedTaskId: null,
             dragOverColumn: null,
+            currentTask: {},
+            formData: {
+                title: '',
+                description: '',
+                assigned_to: '',
+                due_date: '',
+                priority: 'normal',
+                status: 'todo'
+            },
+
+            openCreateModal() {
+                this.editMode = false;
+                this.formData = {
+                    title: '',
+                    description: '',
+                    assigned_to: '',
+                    due_date: '',
+                    priority: 'normal',
+                    status: 'todo'
+                };
+                this.showModal = true;
+                this.$nextTick(() => lucide.createIcons());
+            },
+
+            async openEditModal(taskId) {
+                try {
+                    let response = await fetch(`/provider/team-tasks/${taskId}`);
+                    if (response.ok) {
+                        this.currentTask = await response.json();
+                        this.formData = {
+                            title: this.currentTask.title,
+                            description: this.currentTask.description,
+                            assigned_to: this.currentTask.assigned_to,
+                            due_date: this.currentTask.due_date,
+                            priority: this.currentTask.priority,
+                            status: this.currentTask.status
+                        };
+                        this.editMode = true;
+                        this.showModal = true;
+                        this.$nextTick(() => lucide.createIcons());
+                    }
+                } catch (error) {
+                    console.error("Error fetching task details:", error);
+                }
+            },
+
+            formatDate(dateStr) {
+                const date = new Date(dateStr);
+                return date.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+            },
 
             dragStart(event, taskId) {
                 this.draggedTaskId = taskId;
@@ -218,8 +320,6 @@
                 if (!this.draggedTaskId) return;
                 
                 let status = column;
-                
-                // Optimistic UI update could go here
                 
                 try {
                     let response = await fetch(`/provider/team-tasks/${this.draggedTaskId}/status`, {
@@ -234,8 +334,6 @@
                     
                     if (response.ok) {
                         window.location.reload();
-                    } else {
-                        console.error("Failed to update status");
                     }
                 } catch (error) {
                     console.error("Error updating status:", error);

@@ -47,6 +47,20 @@ class ProviderServiceController extends Controller
         return redirect()->back()->with('success', 'Service offering updated successfully.');
     }
 
+    public function update(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'price' => 'required|numeric|min:0',
+            'delivery_time_days' => 'required|integer|min:1',
+            'provider_notes' => 'nullable|string',
+        ]);
+
+        $ps = ProviderService::where('provider_id', \Illuminate\Support\Facades\Auth::id())->findOrFail($id);
+        $ps->update($validated);
+
+        return redirect()->back()->with('success', 'Service details updated successfully.');
+    }
+
     public function clients()
     {
         $clients = \App\Models\Project::where('provider_id', Auth::id())

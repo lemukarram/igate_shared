@@ -123,98 +123,236 @@
         <div class="lg:col-span-1 space-y-6 overflow-y-auto custom-scrollbar pr-1">
             
             <!-- Progress Summary -->
-            <div class="bg-white border border-gray-100 rounded-lg p-5 shadow-sm">
-                <div class="flex justify-between items-end mb-3">
-                    <div>
-                        <p class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Project Progress</p>
-                        <h3 class="text-2xl font-bold text-gray-900">40%</h3>
+    @php
+        $totalTasks = $project->tasks->count();
+        $completedTasks = $project->tasks->where('status', 'done')->count();
+        $progress = $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100) : 0;
+    @endphp
+    <div class="bg-white border border-gray-100 rounded-lg p-5 shadow-sm">
+        <div class="flex justify-between items-end mb-3">
+            <div>
+                <p class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Project Progress</p>
+                <h3 class="text-2xl font-bold text-gray-900">{{ $progress }}%</h3>
+            </div>
+            <div class="w-10 h-10 rounded-full border-4 border-[#e6f4fd] flex items-center justify-center relative">
+                <svg class="absolute inset-0 w-full h-full text-[#3da9e4] -rotate-90" viewBox="0 0 36 36">
+                    <path class="stroke-current" stroke-dasharray="100 100" :stroke-dashoffset="100 - {{ $progress }}" stroke-width="4" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                </svg>
+                <i data-lucide="activity" class="w-4 h-4 text-[#3da9e4]"></i>
+            </div>
+        </div>
+        <div class="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+            <div class="h-full bg-[#3da9e4] rounded-full transition-all duration-1000" style="width: {{ $progress }}%"></div>
+        </div>
+    </div>
+
+    <!-- Sub-tasks / Deliverables -->
+    <div class="bg-white border border-gray-100 rounded-lg p-5 shadow-sm flex flex-col">
+        <div class="flex items-center justify-between mb-5">
+            <h3 class="text-sm font-semibold text-gray-900">Service Tasks</h3>
+        </div>
+        
+        <div class="space-y-3">
+            @forelse($project->tasks as $task)
+            <div class="p-3 rounded-lg border {{ $task->status === 'done' ? 'bg-gray-50 border-gray-200' : 'bg-white border-gray-100 hover:border-[#3da9e4]/30' }} transition-colors group cursor-pointer" onclick="openProjectTaskModal({{ $task->id }})">
+                <div class="flex items-start space-x-3">
+                    <div class="mt-0.5">
+                        <div class="flex-shrink-0 w-5 h-5 rounded {{ $task->status === 'done' ? 'bg-[#3da9e4] border-[#3da9e4] text-white' : 'bg-white border-gray-300 text-transparent hover:border-[#3da9e4]' }} border flex items-center justify-center transition-colors">
+                            <i data-lucide="check" class="w-3 h-3"></i>
+                        </div>
                     </div>
-                    <div class="w-10 h-10 rounded-full border-4 border-[#e6f4fd] flex items-center justify-center relative">
-                        <svg class="absolute inset-0 w-full h-full text-[#3da9e4] -rotate-90" viewBox="0 0 36 36">
-                            <path class="stroke-current" stroke-dasharray="100 100" stroke-dashoffset="60" stroke-width="4" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                        </svg>
-                        <i data-lucide="activity" class="w-4 h-4 text-[#3da9e4]"></i>
+                    <div class="flex-1">
+                        <p class="text-sm font-medium {{ $task->status === 'done' ? 'text-gray-500 line-through' : 'text-gray-800' }}">{{ $task->title }}</p>
+                        <div class="mt-2 flex items-center justify-between">
+                            <span class="text-[10px] font-semibold uppercase tracking-wider {{ $task->status === 'done' ? 'text-green-500' : 'text-gray-400' }}">
+                                {{ $task->status === 'done' ? 'Completed' : 'Pending' }}
+                            </span>
+                        </div>
                     </div>
-                </div>
-                <div class="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
-                    <div class="h-full bg-[#3da9e4] w-[40%] rounded-full transition-all duration-1000"></div>
                 </div>
             </div>
+            @empty
+            <p class="text-sm text-gray-500 italic p-3 text-center">No tasks defined yet.</p>
+            @endforelse
+        </div>
+    </div>
 
-            <!-- Sub-tasks / Deliverables -->
-            <div class="bg-white border border-gray-100 rounded-lg p-5 shadow-sm flex flex-col">
-                <div class="flex items-center justify-between mb-5">
-                    <h3 class="text-sm font-semibold text-gray-900">Service Tasks</h3>
-                    <button class="text-xs text-[#3da9e4] font-medium hover:underline">Edit</button>
+    <!-- Add Task Form -->
+    @if(Auth::user()->role === 'provider')
+    <div class="bg-white border border-gray-100 rounded-lg p-5 shadow-sm">
+        <h3 class="text-sm font-semibold text-gray-900 mb-3">Add New Task</h3>
+        <form action="{{ route('tasks.store') }}" method="POST" enctype="multipart/form-data" class="space-y-3">
+            @csrf
+            <input type="hidden" name="project_id" value="{{ $project->id }}">
+            <input type="hidden" name="status" value="todo">
+            <input type="text" name="title" required placeholder="Task description..." class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-md focus:ring-2 focus:ring-[#3da9e4]/50 focus:border-[#3da9e4] outline-none text-sm">
+            <div class="flex items-center space-x-2">
+                <label class="flex-1 flex items-center justify-center py-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 border-dashed rounded-md text-[10px] font-medium text-gray-600 cursor-pointer">
+                    <i data-lucide="paperclip" class="w-3 h-3 mr-1"></i>
+                    <span>Attach Files</span>
+                    <input type="file" name="files[]" multiple class="hidden">
+                </label>
+                <button type="submit" class="px-4 py-2 bg-[#3da9e4] text-white rounded-md text-xs font-semibold hover:bg-[#2b8bc2] transition-colors">Add</button>
+            </div>
+        </form>
+    </div>
+    @endif
+    
+    <!-- Vault/Files widget -->
+    <div class="bg-white border border-gray-100 rounded-lg p-5 shadow-sm">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-semibold text-gray-900">Project Files</h3>
+            <i data-lucide="folder" class="w-4 h-4 text-gray-400"></i>
+        </div>
+        <div class="space-y-2">
+            @forelse($project->documents as $doc)
+            <div class="flex items-center justify-between p-2 rounded hover:bg-gray-50 cursor-pointer transition-colors border border-transparent hover:border-gray-100">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 rounded bg-blue-50 flex items-center justify-center text-[#3da9e4]">
+                        <i data-lucide="file-text" class="w-4 h-4"></i>
+                    </div>
+                    <div class="overflow-hidden">
+                        <p class="text-xs font-medium text-gray-800 truncate" title="{{ $doc->name }}">{{ $doc->name }}</p>
+                        <p class="text-[10px] text-gray-400">{{ number_format($doc->file_size / 1024 / 1024, 2) }} MB • {{ $doc->created_at->diffForHumans() }}</p>
+                    </div>
+                </div>
+                <a href="{{ asset('storage/' . $doc->file_path) }}" target="_blank" class="text-gray-400 hover:text-[#3da9e4]">
+                    <i data-lucide="download" class="w-3 h-3"></i>
+                </a>
+            </div>
+            @empty
+            <p class="text-[10px] text-gray-400 italic text-center py-4">No files uploaded yet.</p>
+            @endforelse
+        </div>
+        <button onclick="document.getElementById('project-file-upload-modal').classList.remove('hidden')" class="w-full mt-3 py-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 border-dashed rounded-lg text-xs font-medium text-gray-600 transition-colors flex items-center justify-center space-x-2">
+            <i data-lucide="upload" class="w-3 h-3"></i>
+            <span>Upload File</span>
+        </button>
+    </div>
+
+    <!-- File Upload Modal -->
+    <div id="project-file-upload-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center hidden px-4">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">
+            <h3 class="text-lg font-bold text-gray-900 mb-2">Upload Project File</h3>
+            <p class="text-xs text-gray-500 mb-6">This file will be shared with the client in the project vault.</p>
+            
+            <form action="{{ route('documents.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+                @csrf
+                <input type="hidden" name="project_id" value="{{ $project->id }}">
+                <div class="border-2 border-dashed border-gray-200 rounded-xl p-8 text-center hover:bg-gray-50 transition-colors cursor-pointer" onclick="this.querySelector('input').click()">
+                    <i data-lucide="upload-cloud" class="w-10 h-10 text-gray-400 mx-auto mb-2"></i>
+                    <p class="text-sm text-gray-500 font-medium">Click to select file</p>
+                    <input type="file" name="file" required class="hidden" onchange="this.previousElementSibling.innerText = this.files[0].name">
+                </div>
+                <div class="flex space-x-3 pt-2">
+                    <button type="button" onclick="document.getElementById('project-file-upload-modal').classList.add('hidden')" class="flex-1 py-2.5 bg-gray-100 text-gray-600 rounded-lg font-bold text-sm">Cancel</button>
+                    <button type="submit" class="flex-1 py-2.5 bg-[#3da9e4] text-white rounded-lg font-bold text-sm">Upload</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Task Detail Modal (Similar to Team Task Modal) -->
+    <div id="project-task-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center hidden px-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col md:flex-row">
+            <div class="flex-1 overflow-y-auto p-6 custom-scrollbar border-r border-gray-100">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold text-gray-900">Task Details</h2>
+                    <button onclick="document.getElementById('project-task-modal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
                 </div>
                 
-                <div class="space-y-3">
-                    @forelse($project->tasks as $task)
-                    <div class="p-3 rounded-lg border {{ $task->status === 'done' ? 'bg-gray-50 border-gray-200' : 'bg-white border-gray-100 hover:border-[#3da9e4]/30' }} transition-colors group">
-                        <div class="flex items-start space-x-3">
-                            <form action="{{ route('tasks.updateStatus', $task->id) }}" method="POST" class="mt-0.5">
-                                @csrf
-                                @method('PATCH')
-                                <input type="hidden" name="status" value="{{ $task->status === 'done' ? 'todo' : 'done' }}">
-                                <button type="submit" class="flex-shrink-0 w-5 h-5 rounded {{ $task->status === 'done' ? 'bg-[#3da9e4] border-[#3da9e4] text-white' : 'bg-white border-gray-300 text-transparent hover:border-[#3da9e4]' }} border flex items-center justify-center transition-colors">
-                                    <i data-lucide="check" class="w-3 h-3"></i>
-                                </button>
-                            </form>
-                            <div class="flex-1">
-                                <p class="text-sm font-medium {{ $task->status === 'done' ? 'text-gray-500 line-through' : 'text-gray-800' }}">{{ $task->title }}</p>
-                                <div class="mt-2 flex items-center justify-between">
-                                    <span class="text-[10px] font-semibold uppercase tracking-wider {{ $task->status === 'done' ? 'text-green-500' : 'text-gray-400' }}">
-                                        {{ $task->status === 'done' ? 'Completed' : 'Pending' }}
-                                    </span>
-                                </div>
-                            </div>
+                <form id="project-task-edit-form" method="POST" enctype="multipart/form-data" class="space-y-5">
+                    @csrf
+                    @method('PATCH')
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Title</label>
+                        <input type="text" name="title" id="task-title" required class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Status</label>
+                            <select name="status" id="task-status" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm">
+                                <option value="todo">To Do</option>
+                                <option value="in_progress">In Progress</option>
+                                <option value="done">Done</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Priority</label>
+                            <select name="priority" id="task-priority" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm">
+                                <option value="normal">Normal</option>
+                                <option value="high">High</option>
+                                <option value="urgent">Urgent</option>
+                            </select>
                         </div>
                     </div>
-                    @empty
-                    <p class="text-sm text-gray-500 italic p-3 text-center">No tasks defined yet.</p>
-                    @endforelse
-                </div>
-            </div>
-
-            <!-- Add Task Form -->
-            @if(Auth::user()->role === 'provider')
-            <div class="bg-white border border-gray-100 rounded-lg p-5 shadow-sm">
-                <h3 class="text-sm font-semibold text-gray-900 mb-3">Add New Task</h3>
-                <form action="{{ route('tasks.store') }}" method="POST" class="space-y-3">
-                    @csrf
-                    <input type="hidden" name="project_id" value="{{ $project->id }}">
-                    <input type="hidden" name="status" value="todo">
-                    <input type="text" name="title" required placeholder="Task description..." class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-md focus:ring-2 focus:ring-[#3da9e4]/50 focus:border-[#3da9e4] outline-none text-sm">
-                    <button type="submit" class="w-full py-2 bg-[#3da9e4] text-white rounded-md text-xs font-semibold hover:bg-[#2b8bc2] transition-colors">Add Task</button>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Description</label>
+                        <textarea name="description" id="task-description" rows="4" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm resize-none"></textarea>
+                    </div>
+                    
+                    @if(Auth::user()->role === 'provider')
+                    <div class="flex space-x-3 pt-4 border-t border-gray-100">
+                        <button type="submit" class="px-6 py-2.5 bg-[#3da9e4] text-white rounded-lg font-bold text-sm">Save Changes</button>
+                    </div>
+                    @endif
                 </form>
             </div>
-            @endif
             
-            <!-- Vault/Files widget -->
-            <div class="bg-white border border-gray-100 rounded-lg p-5 shadow-sm">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-sm font-semibold text-gray-900">Project Files</h3>
-                    <i data-lucide="folder" class="w-4 h-4 text-gray-400"></i>
+            <div class="w-full md:w-80 bg-gray-50 p-6 overflow-y-auto custom-scrollbar">
+                <h3 class="text-sm font-bold text-gray-900 mb-6 flex items-center">
+                    <i data-lucide="history" class="w-4 h-4 mr-2 text-[#3da9e4]"></i>
+                    History
+                </h3>
+                <div id="task-history-list" class="space-y-6 relative before:absolute before:left-2 before:top-2 before:bottom-2 before:w-px before:bg-gray-200">
+                    <!-- Loaded via JS -->
                 </div>
-                <div class="space-y-2">
-                    <div class="flex items-center justify-between p-2 rounded hover:bg-gray-50 cursor-pointer transition-colors border border-transparent hover:border-gray-100">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-8 h-8 rounded bg-red-50 flex items-center justify-center text-red-500">
-                                <i data-lucide="file-text" class="w-4 h-4"></i>
-                            </div>
-                            <div>
-                                <p class="text-xs font-medium text-gray-800">Commercial_Register.pdf</p>
-                                <p class="text-[10px] text-gray-400">2.4 MB • 2 hrs ago</p>
-                            </div>
-                        </div>
-                        <i data-lucide="download" class="w-3 h-3 text-gray-400 hover:text-[#3da9e4]"></i>
-                    </div>
-                </div>
-                <button class="w-full mt-3 py-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 border-dashed rounded-lg text-xs font-medium text-gray-600 transition-colors flex items-center justify-center space-x-2">
-                    <i data-lucide="upload" class="w-3 h-3"></i>
-                    <span>Upload File</span>
-                </button>
             </div>
+        </div>
+    </div>
+
+    <script>
+        async function openProjectTaskModal(taskId) {
+            const modal = document.getElementById('project-task-modal');
+            const form = document.getElementById('project-task-edit-form');
+            const historyList = document.getElementById('task-history-list');
+            
+            modal.classList.remove('hidden');
+            
+            try {
+                const response = await fetch(`/provider/team-tasks/${taskId}`);
+                const task = await response.json();
+                
+                form.action = `/provider/team-tasks/${taskId}`;
+                document.getElementById('task-title').value = task.title;
+                document.getElementById('task-status').value = task.status;
+                document.getElementById('task-priority').value = task.priority || 'normal';
+                document.getElementById('task-description').value = task.description || '';
+                
+                historyList.innerHTML = '';
+                task.histories.forEach(h => {
+                    const div = document.createElement('div');
+                    div.className = 'relative pl-6';
+                    div.innerHTML = `
+                        <div class="absolute left-0 top-1.5 w-4 h-4 rounded-full bg-white border-2 border-[#3da9e4] z-10"></div>
+                        <div class="space-y-1">
+                            <p class="text-[10px] text-gray-900 font-bold">${h.user.name}</p>
+                            <p class="text-[9px] text-gray-500 font-medium">${h.action === 'created' ? 'Created task' : (h.field + ' -> ' + h.new_value)}</p>
+                            <p class="text-[8px] text-gray-400 italic">${new Date(h.created_at).toLocaleString()}</p>
+                        </div>
+                    `;
+                    historyList.appendChild(div);
+                });
+                
+                lucide.createIcons();
+            } catch (e) {
+                console.error(e);
+            }
+        }
+    </script>
+
         </div>
     </div>
 </div>

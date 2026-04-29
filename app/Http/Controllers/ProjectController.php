@@ -21,6 +21,21 @@ class ProjectController extends Controller
         }
 
         $project = $query->findOrFail($id);
+
+        // Auto-populate tasks from service subtasks if none exist
+        if ($project->tasks->isEmpty() && $project->service && $project->service->subtasks) {
+            foreach ($project->service->subtasks as $subtask) {
+                \App\Models\Task::create([
+                    'project_id' => $project->id,
+                    'provider_id' => $project->provider_id,
+                    'title' => $subtask,
+                    'status' => 'todo',
+                ]);
+            }
+            // Refresh tasks relation
+            $project->load('tasks');
+        }
+
         $messages = Message::where('project_id', $project->id)->with('user')->oldest()->get();
 
         return view('projects.show', compact('project', 'messages'));

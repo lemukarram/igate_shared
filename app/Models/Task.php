@@ -31,4 +31,14 @@ class Task extends Model
     {
         return $this->belongsTo(User::class, 'assigned_to');
     }
+
+    public function documents()
+    {
+        return $this->hasMany(Document::class);
+    }
+
+    public function histories()
+    {
+        return $this->hasMany(TaskHistory::class)->latest();
+    }
 }

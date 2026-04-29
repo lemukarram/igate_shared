@@ -25,11 +25,12 @@
 
     <!-- Package Upgrade Options -->
     <div class="mb-16 grid grid-cols-1 md:grid-cols-3 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
-        <!-- Basic -->
+        @if(auth()->user()->role === 'provider')
+        <!-- Provider Basic -->
         <div class="bg-white border border-gray-100 rounded-lg p-8 shadow-sm hover:shadow-md transition-all flex flex-col">
             <div class="mb-6">
                 <h3 class="text-lg font-black text-gray-900">Basic</h3>
-                <p class="text-sm text-gray-400 font-medium">For small businesses</p>
+                <p class="text-sm text-gray-400 font-medium">Freelancer start</p>
             </div>
             <div class="mb-8 flex items-baseline">
                 <span class="text-4xl font-black text-gray-900">0</span>
@@ -38,17 +39,98 @@
             <ul class="space-y-4 mb-10 flex-1">
                 <li class="flex items-center text-sm font-medium text-gray-600">
                     <i data-lucide="check" class="w-4 h-4 text-green-500 mr-3"></i>
-                    Upto 3 services
+                    1 Service Offering
                 </li>
                 <li class="flex items-center text-sm font-medium text-gray-600">
                     <i data-lucide="check" class="w-4 h-4 text-green-500 mr-3"></i>
-                    Standard Support
+                    1 User Account
+                </li>
+                <li class="flex items-center text-sm font-medium text-gray-600">
+                    <i data-lucide="check" class="w-4 h-4 text-green-500 mr-3"></i>
+                    1 Active Project
                 </li>
             </ul>
             <button class="w-full py-3 bg-gray-50 text-gray-900 rounded-lg font-bold text-sm hover:bg-gray-100 transition-all">Current Plan</button>
         </div>
 
-        <!-- Professional -->
+        <!-- Provider Professional -->
+        <div class="bg-white border-2 border-primary rounded-lg p-8 shadow-xl shadow-primary/5 relative flex flex-col">
+            <div class="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-primary text-white rounded-full text-[10px] font-black uppercase tracking-widest">Growth</div>
+            <div class="mb-6">
+                <h3 class="text-lg font-black text-gray-900">Professional</h3>
+                <p class="text-sm text-gray-400 font-medium">Small Agency</p>
+            </div>
+            <div class="mb-8 flex items-baseline">
+                <span class="text-4xl font-black text-gray-900">1,500</span>
+                <span class="text-gray-400 font-bold ml-1 text-xs uppercase">SAR / month</span>
+            </div>
+            <ul class="space-y-4 mb-10 flex-1">
+                <li class="flex items-center text-sm font-medium text-gray-600">
+                    <i data-lucide="check" class="w-4 h-4 text-green-500 mr-3"></i>
+                    3 Service Offerings
+                </li>
+                <li class="flex items-center text-sm font-medium text-gray-600">
+                    <i data-lucide="check" class="w-4 h-4 text-green-500 mr-3"></i>
+                    3 User Accounts
+                </li>
+                <li class="flex items-center text-sm font-medium text-gray-600">
+                    <i data-lucide="check" class="w-4 h-4 text-green-500 mr-3"></i>
+                    3 Active Projects
+                </li>
+            </ul>
+            <button class="w-full py-3 bg-primary text-white rounded-lg font-bold text-sm hover:bg-primary-dark transition-all shadow-lg shadow-primary/20">Upgrade Now</button>
+        </div>
+
+        <!-- Provider Enterprise -->
+        <div class="bg-gray-900 border border-gray-800 rounded-lg p-8 shadow-sm flex flex-col text-white">
+            <div class="mb-6">
+                <h3 class="text-lg font-black text-white">Enterprise</h3>
+                <p class="text-sm text-gray-400 font-medium">Large Agency</p>
+            </div>
+            <div class="mb-8 flex items-baseline">
+                <span class="text-4xl font-black text-white">Custom</span>
+            </div>
+            <ul class="space-y-4 mb-10 flex-1">
+                <li class="flex items-center text-sm font-medium text-gray-300">
+                    <i data-lucide="check" class="w-4 h-4 text-primary mr-3"></i>
+                    Unlimited Services
+                </li>
+                <li class="flex items-center text-sm font-medium text-gray-300">
+                    <i data-lucide="check" class="w-4 h-4 text-primary mr-3"></i>
+                    Unlimited Users
+                </li>
+                <li class="flex items-center text-sm font-medium text-gray-300">
+                    <i data-lucide="check" class="w-4 h-4 text-primary mr-3"></i>
+                    Unlimited Projects
+                </li>
+            </ul>
+            <button class="w-full py-3 bg-white/10 text-white rounded-lg font-bold text-sm hover:bg-white/20 transition-all">Contact Sales</button>
+        </div>
+        @else
+        <!-- Client Basic -->
+        <div class="bg-white border border-gray-100 rounded-lg p-8 shadow-sm hover:shadow-md transition-all flex flex-col">
+            <div class="mb-6">
+                <h3 class="text-lg font-black text-gray-900">Basic</h3>
+                <p class="text-sm text-gray-400 font-medium">Small business</p>
+            </div>
+            <div class="mb-8 flex items-baseline">
+                <span class="text-4xl font-black text-gray-900">0</span>
+                <span class="text-gray-400 font-bold ml-1 text-xs uppercase">SAR / month</span>
+            </div>
+            <ul class="space-y-4 mb-10 flex-1">
+                <li class="flex items-center text-sm font-medium text-gray-600">
+                    <i data-lucide="check" class="w-4 h-4 text-green-500 mr-3"></i>
+                    1 Service Request
+                </li>
+                <li class="flex items-center text-sm font-medium text-gray-600">
+                    <i data-lucide="check" class="w-4 h-4 text-green-500 mr-3"></i>
+                    1 User Account
+                </li>
+            </ul>
+            <button class="w-full py-3 bg-gray-50 text-gray-900 rounded-lg font-bold text-sm hover:bg-gray-100 transition-all">Current Plan</button>
+        </div>
+
+        <!-- Client Professional -->
         <div class="bg-white border-2 border-primary rounded-lg p-8 shadow-xl shadow-primary/5 relative flex flex-col">
             <div class="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-primary text-white rounded-full text-[10px] font-black uppercase tracking-widest">Most Popular</div>
             <div class="mb-6">
@@ -62,21 +144,17 @@
             <ul class="space-y-4 mb-10 flex-1">
                 <li class="flex items-center text-sm font-medium text-gray-600">
                     <i data-lucide="check" class="w-4 h-4 text-green-500 mr-3"></i>
-                    Upto 10 services
+                    3 Service Requests
                 </li>
                 <li class="flex items-center text-sm font-medium text-gray-600">
                     <i data-lucide="check" class="w-4 h-4 text-green-500 mr-3"></i>
-                    Priority Support
-                </li>
-                <li class="flex items-center text-sm font-medium text-gray-600">
-                    <i data-lucide="check" class="w-4 h-4 text-green-500 mr-3"></i>
-                    Account Manager
+                    3 User Accounts
                 </li>
             </ul>
             <button class="w-full py-3 bg-primary text-white rounded-lg font-bold text-sm hover:bg-primary-dark transition-all shadow-lg shadow-primary/20">Upgrade Now</button>
         </div>
 
-        <!-- Enterprise -->
+        <!-- Client Enterprise -->
         <div class="bg-gray-900 border border-gray-800 rounded-lg p-8 shadow-sm flex flex-col text-white">
             <div class="mb-6">
                 <h3 class="text-lg font-black text-white">Enterprise</h3>
@@ -88,19 +166,16 @@
             <ul class="space-y-4 mb-10 flex-1">
                 <li class="flex items-center text-sm font-medium text-gray-300">
                     <i data-lucide="check" class="w-4 h-4 text-primary mr-3"></i>
-                    Unlimited services
+                    Unlimited Requests
                 </li>
                 <li class="flex items-center text-sm font-medium text-gray-300">
                     <i data-lucide="check" class="w-4 h-4 text-primary mr-3"></i>
-                    24/7 Dedicated Support
-                </li>
-                <li class="flex items-center text-sm font-medium text-gray-300">
-                    <i data-lucide="check" class="w-4 h-4 text-primary mr-3"></i>
-                    Custom Integration
+                    Unlimited Users
                 </li>
             </ul>
             <button class="w-full py-3 bg-white/10 text-white rounded-lg font-bold text-sm hover:bg-white/20 transition-all">Contact Sales</button>
         </div>
+        @endif
     </div>
 
     <!-- Service Cards Grid -->

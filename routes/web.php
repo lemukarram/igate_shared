@@ -52,6 +52,7 @@ Route::middleware(['auth', 'App\Http\Middleware\EnsureProviderIsOnboarded'])->gr
     // Provider Portfolio
     Route::get('/provider/portfolio', [ProviderServiceController::class, 'index'])->name('provider.services.index');
     Route::post('/provider/portfolio', [ProviderServiceController::class, 'store'])->name('provider.services.store');
+    Route::patch('/provider/portfolio/{id}', [ProviderServiceController::class, 'update'])->name('provider.services.update');
     Route::delete('/provider/portfolio/{id}', [ProviderServiceController::class, 'destroy'])->name('provider.services.destroy');
 
     // Client Explore
@@ -65,6 +66,8 @@ Route::middleware(['auth', 'App\Http\Middleware\EnsureProviderIsOnboarded'])->gr
     // Team Tasks
     Route::get('/provider/team-tasks', [App\Http\Controllers\TeamTaskController::class, 'index'])->name('provider.team_tasks');
     Route::post('/provider/team-tasks', [App\Http\Controllers\TeamTaskController::class, 'store'])->name('provider.team_tasks.store');
+    Route::get('/provider/team-tasks/{id}', [App\Http\Controllers\TeamTaskController::class, 'show'])->name('provider.team_tasks.show');
+    Route::patch('/provider/team-tasks/{id}', [App\Http\Controllers\TeamTaskController::class, 'update'])->name('provider.team_tasks.update');
     Route::patch('/provider/team-tasks/{id}/status', [App\Http\Controllers\TeamTaskController::class, 'updateStatus'])->name('provider.team_tasks.status');
 
     // Pre-sale Chat
