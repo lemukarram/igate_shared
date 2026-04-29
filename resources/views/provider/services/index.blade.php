@@ -21,7 +21,7 @@
                 <span x-text="lang === 'ar' ? 'الخدمات النشطة' : 'Active Offerings'"></span>
             </h2>
             
-            <div class="grid grid-cols-1 gap-4">
+            <div class="grid grid-cols-2 gap-4">
                 @forelse($myServices as $ps)
                 <div class="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all">
                     <div class="flex items-center justify-between mb-6">

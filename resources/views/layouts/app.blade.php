@@ -399,6 +399,12 @@
         function i18nManager() {
             return {
                 lang: localStorage.getItem('igate_lang') || 'en',
+                settingsOpen: false,
+                addServiceOpen: false,
+                viewUsersOpen: false,
+                addUserOpen: false,
+                settingsTab: 'account',
+                profileOpen: false,
                 dict: {
                     en: {
                         common: {
@@ -412,7 +418,10 @@
                             save: "Save Changes",
                             cancel: "Cancel",
                             search: "Search...",
-                            back: "Back"
+                            back: "Back",
+                            upload: "Upload",
+                            view_users: "View Users",
+                            add_user: "Add User"
                         },
                         explore: {
                             request: "Request Service",
@@ -434,7 +443,10 @@
                             save: "حفظ التغييرات",
                             cancel: "إلغاء",
                             search: "بحث...",
-                            back: "رجوع"
+                            back: "رجوع",
+                            upload: "رفع",
+                            view_users: "عرض المستخدمين",
+                            add_user: "إضافة مستخدم"
                         },
                         explore: {
                             request: "طلب خدمة",

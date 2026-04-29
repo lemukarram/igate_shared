@@ -57,7 +57,13 @@
                     </div>
                     <div class="flex-1">
                         <div class="flex items-center gap-2 mb-1">
-                            <span class="text-sm font-semibold text-gray-900">{{ $msg->user_id === Auth::id() ? (lang === 'ar' ? 'أنت' : 'You') : $msg->user->name }}</span>
+                            <span class="text-sm font-semibold text-gray-900">
+                                @if($msg->user_id === Auth::id())
+                                    <span x-text="lang === 'ar' ? 'أنت' : 'You'"></span>
+                                @else
+                                    {{ $msg->user->name }}
+                                @endif
+                            </span>
                             <span class="text-xs text-gray-400">{{ $msg->created_at->format('M d, g:i A') }}</span>
                         </div>
                         <div class="text-gray-700 text-sm leading-relaxed {{ $msg->user_id === Auth::id() ? 'bg-gray-50 p-4 rounded-lg border border-gray-100' : '' }}">
