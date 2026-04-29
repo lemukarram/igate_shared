@@ -1,79 +1,60 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="w-full max-w-7xl mx-auto space-y-10 animate-in fade-in duration-700">
+<div class="max-w-7xl w-full space-y-8 animate-in fade-in duration-700" x-data="{ lang: localStorage.getItem('igate_lang') || 'en' }">
     <div class="flex items-center justify-between">
         <div>
-            <h1 class="text-4xl font-black text-gray-900 tracking-tight">My Clients</h1>
-            <p class="text-gray-500 font-medium mt-1 text-lg">Manage relationships and active subscriptions.</p>
+            <h1 class="text-2xl font-bold text-gray-900" x-text="lang === 'ar' ? 'قائمة العملاء' : 'My Clients'"></h1>
+            <p class="text-gray-500 mt-1" x-text="lang === 'ar' ? 'إدارة العملاء والمشاريع النشطة.' : 'Manage your active client relationships and projects.'"></p>
+        </div>
+        <div class="flex gap-3">
+            <button class="px-5 py-2.5 bg-white border border-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50 transition-all flex items-center gap-2">
+                <i data-lucide="filter" class="w-4 h-4 text-gray-400"></i>
+                <span x-text="lang === 'ar' ? 'تصفية' : 'Filter'"></span>
+            </button>
         </div>
     </div>
 
-    <!-- Stats -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="bg-primary-light p-8 rounded-lg border border-primary/10">
-            <p class="text-[10px] font-black uppercase tracking-widest text-primary mb-2">Total Clients</p>
-            <h3 class="text-3xl font-black text-primary-dark">{{ $clients->count() }}</h3>
-        </div>
-        <div class="bg-primary-light p-8 rounded-lg border border-primary/10">
-            <p class="text-[10px] font-black uppercase tracking-widest text-primary mb-2">Active Subscriptions</p>
-            <h3 class="text-3xl font-black text-primary-dark">{{ $ongoingProjects->count() }}</h3>
-        </div>
-        <div class="bg-primary-light p-8 rounded-lg border border-primary/10">
-            <p class="text-[10px] font-black uppercase tracking-widest text-primary mb-2">Retention Rate</p>
-            <h3 class="text-3xl font-black text-primary-dark">85%</h3>
-        </div>
-    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        @forelse($clients as $clientId => $clientProjects)
+            @php $client = $clientProjects->first()->client; @endphp
+            <div class="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all flex flex-col">
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="w-14 h-14 bg-primary-light rounded-xl flex items-center justify-center text-primary font-black text-xl">
+                        {{ substr($client->name, 0, 1) }}
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900">{{ $client->name }}</h3>
+                        <p class="text-xs text-gray-400 font-medium">{{ $client->email }}</p>
+                    </div>
+                </div>
 
-    <!-- Client List -->
-    <div class="bg-white border border-gray-100 rounded-lg overflow-hidden shadow-sm">
-        <table class="w-full text-left">
-            <thead class="bg-gray-50 border-b border-gray-100">
-                <tr>
-                    <th class="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400">Client Name</th>
-                    <th class="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400">Subscribed Services</th>
-                    <th class="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-gray-400">Status</th>
-                    <th class="px-8 py-5 text-right text-[10px] font-black uppercase tracking-widest text-gray-400">Actions</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-50">
-                @foreach($clients as $clientId => $projects)
-                <tr class="hover:bg-gray-50 transition-all group">
-                    <td class="px-8 py-6">
-                        <div class="flex items-center space-x-4">
-                            <div class="w-10 h-10 bg-primary-light rounded-lg flex items-center justify-center text-primary font-black">
-                                {{ substr($projects->first()->client->name, 0, 2) }}
-                            </div>
-                            <div>
-                                <p class="text-sm font-bold text-gray-900">{{ $projects->first()->client->name }}</p>
-                                <p class="text-xs text-gray-400">{{ $projects->first()->client->email }}</p>
-                            </div>
+                <div class="space-y-3 flex-1 mb-6">
+                    <div class="flex justify-between text-xs font-bold text-gray-400 uppercase tracking-widest">
+                        <span x-text="lang === 'ar' ? 'المشاريع النشطة' : 'Active Projects'"></span>
+                        <span class="text-gray-900">{{ $clientProjects->count() }}</span>
+                    </div>
+                    <div class="space-y-2">
+                        @foreach($clientProjects as $project)
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100">
+                            <span class="text-sm font-medium text-gray-700">{{ $project->service->name }}</span>
+                            <span class="text-[10px] font-black uppercase text-green-500 bg-green-50 px-2 py-0.5 rounded-md" x-text="lang === 'ar' ? 'نشط' : 'Active'"></span>
                         </div>
-                    </td>
-                    <td class="px-8 py-6">
-                        <div class="flex flex-wrap gap-2">
-                            @foreach($projects as $p)
-                            <span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-md text-[10px] font-bold">{{ $p->service->name }}</span>
-                            @endforeach
-                        </div>
-                    </td>
-                    <td class="px-8 py-6">
-                        <span class="px-3 py-1 bg-green-50 text-green-600 rounded-full text-[10px] font-black uppercase tracking-widest">Active</span>
-                    </td>
-                    <td class="px-8 py-6 text-right">
-                        <div class="flex items-center justify-end space-x-3">
-                            <a href="{{ route('provider.clients.show', $clientId) }}" class="p-2 hover:bg-white hover:shadow-sm rounded-md transition-all text-gray-400 hover:text-primary">
-                                <i data-lucide="eye" class="w-5 h-5"></i>
-                            </a>
-                            <button class="p-2 hover:bg-white hover:shadow-sm rounded-md transition-all text-gray-400 hover:text-primary">
-                                <i data-lucide="message-square" class="w-5 h-5"></i>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
+                        @endforeach
+                    </div>
+                </div>
+
+                <a href="{{ route('provider.clients.show', $client->id) }}" class="w-full py-3 bg-gray-900 text-white rounded-xl text-center text-sm font-bold hover:bg-black transition-all">
+                    <span x-text="lang === 'ar' ? 'عرض ملف العميل' : 'View Client Profile'"></span>
+                </a>
+            </div>
+        @empty
+            <div class="col-span-full py-20 text-center bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200">
+                <i data-lucide="users" class="w-12 h-12 text-gray-300 mx-auto mb-4"></i>
+                <h3 class="text-xl font-bold text-gray-900" x-text="lang === 'ar' ? 'لا يوجد عملاء بعد' : 'No clients yet'"></h3>
+                <p class="text-gray-500 mt-2" x-text="lang === 'ar' ? 'بمجرد أن يطلب العملاء خدماتك، سيظهرون هنا.' : 'Once clients request your services, they will appear here.'"></p>
+            </div>
+        @endforelse
     </div>
 </div>
 @endsection

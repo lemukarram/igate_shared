@@ -1,110 +1,99 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-6xl w-full space-y-8 p-4">
-    <div class="flex items-center justify-between">
+<div class="max-w-7xl w-full space-y-8 animate-in fade-in duration-700" x-data="{ lang: localStorage.getItem('igate_lang') || 'en' }">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-            <h1 class="text-3xl font-bold text-gray-900">My Service Portfolio</h1>
-            <p class="text-gray-500">Manage the services you offer on iGate Shared Services.</p>
+            <h1 class="text-2xl font-bold text-gray-900" x-text="lang === 'ar' ? 'خدماتي وعروضي' : 'My Services & Portfolio'"></h1>
+            <p class="text-gray-500 mt-1" x-text="lang === 'ar' ? 'إدارة الأسعار ونطاق التسليم لكل خدمة تقدمها.' : 'Manage pricing and delivery scope for each standardized service you provide.'"></p>
         </div>
-        <button onclick="document.getElementById('addServiceModal').classList.remove('hidden')" 
-                class="px-6 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-100 flex items-center space-x-2">
+        <button @click="addServiceOpen = true" class="px-6 py-3 bg-primary text-white rounded-xl font-bold hover:bg-primary-dark transition-all flex items-center gap-2 shadow-lg shadow-primary/20">
             <i data-lucide="plus" class="w-5 h-5"></i>
-            <span>Add Service</span>
+            <span x-text="lang === 'ar' ? 'إضافة خدمة جديدة' : 'Add New Service'"></span>
         </button>
     </div>
 
-    <!-- Active Services Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        @forelse($myServices as $ps)
-        <div class="bg-white border border-gray-100 rounded-3xl p-6 shadow-sm hover:shadow-md transition-all group relative">
-            <div class="flex items-start justify-between mb-4">
-                <div class="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600">
-                    <i data-lucide="{{ $ps->service->icon }}" class="w-6 h-6"></i>
-                </div>
-                <form action="{{ route('provider.services.destroy', $ps->id) }}" method="POST">
-                    @csrf @method('DELETE')
-                    <button type="submit" class="text-gray-300 hover:text-red-500 transition-colors">
-                        <i data-lucide="trash-2" class="w-5 h-5"></i>
-                    </button>
-                </form>
-            </div>
-            <h3 class="text-lg font-bold text-gray-900 mb-1">{{ $ps->service->name }}</h3>
-            <p class="text-sm text-gray-500 mb-4">{{ Str::limit($ps->service->description, 60) }}</p>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- My Active Offerings -->
+        <div class="lg:col-span-2 space-y-6">
+            <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-500"></i>
+                <span x-text="lang === 'ar' ? 'الخدمات النشطة' : 'Active Offerings'"></span>
+            </h2>
             
-            <div class="flex items-center justify-between pt-4 border-t border-gray-50 mb-4">
-                <div>
-                    <span class="block text-xs text-gray-400 uppercase font-semibold">Price</span>
-                    <span class="text-xl font-bold text-gray-900">{{ number_format($ps->price, 2) }} SAR</span>
-                </div>
-                <div class="text-right">
-                    <span class="block text-xs text-gray-400 uppercase font-semibold">Delivery</span>
-                    <span class="text-sm font-bold text-gray-900">{{ $ps->delivery_time_days }} Days</span>
-                </div>
-            </div>
+            <div class="grid grid-cols-1 gap-4">
+                @forelse($myServices as $ps)
+                <div class="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-primary-light rounded-xl flex items-center justify-center text-primary">
+                                <i data-lucide="{{ $ps->service->icon }}" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-900 text-lg">{{ $ps->service->name }}</h3>
+                                <span class="text-[10px] font-black uppercase text-gray-400 tracking-widest">{{ $ps->service->category }}</span>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <a href="{{ route('explore.show', $ps->service->id) }}" class="p-2 text-gray-400 hover:text-primary transition-colors">
+                                <i data-lucide="edit-3" class="w-5 h-5"></i>
+                            </a>
+                            <form action="{{ route('provider.services.destroy', $ps->id) }}" method="POST" onsubmit="return confirm('Are you sure?')">
+                                @csrf @method('DELETE')
+                                <button type="submit" class="p-2 text-gray-400 hover:text-red-500 transition-colors">
+                                    <i data-lucide="trash-2" class="w-5 h-5"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
 
-            <a href="{{ route('explore.show', $ps->service_id) }}" class="w-full flex items-center justify-center space-x-2 py-2 bg-gray-50 text-gray-700 rounded-xl font-bold hover:bg-gray-100 transition-all border border-gray-100">
-                <i data-lucide="eye" class="w-4 h-4"></i>
-                <span>View Scope & Details</span>
-            </a>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                        <div>
+                            <span class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1" x-text="lang === 'ar' ? 'السعر' : 'Price'"></span>
+                            <span class="text-sm font-bold text-gray-900">{{ number_format($ps->price, 0) }} <span x-text="lang === 'ar' ? 'ر.س' : 'SAR'"></span></span>
+                        </div>
+                        <div>
+                            <span class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1" x-text="lang === 'ar' ? 'مدة التسليم' : 'Delivery'"></span>
+                            <span class="text-sm font-bold text-gray-900">{{ $ps->delivery_time_days }} <span x-text="lang === 'ar' ? 'أيام' : 'Days'"></span></span>
+                        </div>
+                        <div>
+                            <span class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1" x-text="lang === 'ar' ? 'العملاء' : 'Clients'"></span>
+                            <span class="text-sm font-bold text-gray-900">0</span>
+                        </div>
+                        <div>
+                            <span class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1" x-text="lang === 'ar' ? 'التقييم' : 'Rating'"></span>
+                            <span class="flex items-center text-sm font-bold text-amber-500">
+                                <i data-lucide="star" class="w-3 h-3 fill-current mr-1"></i> 5.0
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                @empty
+                <div class="py-12 text-center bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                    <p class="text-gray-500 font-medium" x-text="lang === 'ar' ? 'لم تضف أي خدمات بعد.' : 'No services added yet.'"></p>
+                </div>
+                @endforelse
+            </div>
         </div>
-        @empty
-        <div class="col-span-full py-20 text-center">
-            <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i data-lucide="briefcase" class="w-10 h-10 text-gray-300"></i>
+
+        <!-- Catalog Sidebar -->
+        <div class="space-y-6">
+            <h2 class="text-lg font-bold text-gray-900" x-text="lang === 'ar' ? 'دليل الخدمات الموحد' : 'Standard Catalog'"></h2>
+            <div class="bg-gray-900 rounded-3xl p-6 text-white shadow-xl shadow-gray-200">
+                <p class="text-xs text-gray-400 font-bold uppercase tracking-widest mb-4" x-text="lang === 'ar' ? 'لماذا الخدمات الموحدة؟' : 'Why Standardized?'"></p>
+                <p class="text-sm text-gray-300 leading-relaxed mb-6" x-text="lang === 'ar' ? 'تضمن الخدمات الموحدة في آي غيت جودة تسليم ثابتة وتوقعات واضحة لكل من العميل والمزود.' : 'iGate standardized services ensure consistent delivery quality and clear expectations for both client and provider.'"></p>
+                <ul class="space-y-4">
+                    <li class="flex items-center gap-3 text-xs font-bold">
+                        <i data-lucide="shield-check" class="w-4 h-4 text-primary"></i>
+                        <span x-text="lang === 'ar' ? 'مدفوعات مضمونة' : 'Guaranteed Payments'"></span>
+                    </li>
+                    <li class="flex items-center gap-3 text-xs font-bold">
+                        <i data-lucide="clock" class="w-4 h-4 text-primary"></i>
+                        <span x-text="lang === 'ar' ? 'حماية اتفاقية الخدمة' : 'SLA Protection'"></span>
+                    </li>
+                </ul>
             </div>
-            <h3 class="text-lg font-semibold text-gray-900">No services added yet</h3>
-            <p class="text-gray-500 max-w-xs mx-auto">Click "Add Service" to start offering your professional services to clients.</p>
         </div>
-        @endforelse
-    </div>
-</div>
-
-<!-- Simple Modal (Hidden by default) -->
-<div id="addServiceModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center hidden">
-    <div class="bg-white w-full max-w-lg rounded-3xl p-8 shadow-2xl animate-in zoom-in duration-200">
-        <div class="flex items-center justify-between mb-6">
-            <h2 class="text-2xl font-bold">Add Service to Portfolio</h2>
-            <button onclick="document.getElementById('addServiceModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
-                <i data-lucide="x" class="w-6 h-6"></i>
-            </button>
-        </div>
-
-        <form action="{{ route('provider.services.store') }}" method="POST" class="space-y-6">
-            @csrf
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Select iGate Shared Services Standard Service</label>
-                <select name="service_id" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all">
-                    @foreach($allServices as $s)
-                    <option value="{{ $s->id }}">{{ $s->name }} ({{ $s->category }})</option>
-                    @endforeach
-                </select>
-                <p class="mt-1 text-xs text-gray-400 italic">* Scope is fixed per iGate Shared Services standards.</p>
-            </div>
-
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Price (SAR)</label>
-                    <input type="number" name="price" step="0.01" required placeholder="0.00"
-                           class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all">
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">SLA (Days)</label>
-                    <input type="number" name="delivery_time_days" required placeholder="e.g. 7"
-                           class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all">
-                </div>
-            </div>
-
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Provider Notes (Optional)</label>
-                <textarea name="provider_notes" rows="3" placeholder="Additional details about your specific approach..."
-                          class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all"></textarea>
-            </div>
-
-            <button type="submit" class="w-full py-4 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-100">
-                Add to Portfolio
-            </button>
-        </form>
     </div>
 </div>
 @endsection

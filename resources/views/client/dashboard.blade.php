@@ -1,104 +1,95 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="w-full max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-6 duration-700">
-    <div class="flex items-center justify-between">
+<div class="max-w-7xl w-full space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700" x-data="{ lang: localStorage.getItem('igate_lang') || 'en' }">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-            <h1 class="text-4xl font-black text-gray-900 tracking-tight">Welcome, {{ Auth::user()->name }}</h1>
-            <p class="text-gray-500 font-medium mt-1 text-lg">Manage your business operations and active subscriptions.</p>
+            <h1 class="text-3xl font-bold text-gray-900" x-text="lang === 'ar' ? 'أهلاً بك، ' + '{{ Auth::user()->name }}' : 'Welcome back, ' + '{{ Auth::user()->name }}'"></h1>
+            <p class="text-gray-500 mt-1" x-text="lang === 'ar' ? 'إدارة مشاريعك وطلبات الخدمات بكل سهولة.' : 'Manage your projects and service requests seamlessly.'"></p>
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="{{ route('explore.index') }}" class="px-5 py-2.5 bg-primary text-white rounded-lg text-sm font-bold hover:bg-primary-dark transition-all flex items-center gap-2 shadow-lg shadow-primary/20">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                <span x-text="lang === 'ar' ? 'طلب خدمة جديدة' : 'New Service Request'"></span>
+            </a>
         </div>
     </div>
 
     <!-- Stats Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div class="bg-gradient-to-br from-indigo-600 to-blue-700 p-8 rounded-[2.5rem] shadow-xl shadow-blue-100 text-white relative overflow-hidden group">
-            <div class="relative z-10">
-                <p class="text-[10px] font-black uppercase tracking-[0.2em] opacity-80 mb-2">Active Projects</p>
-                <h3 class="text-3xl font-black mb-1 leading-none">{{ $ongoingProjects->count() }}</h3>
-                <p class="text-xs font-bold text-blue-100">Across 3 categories</p>
-            </div>
-            <i data-lucide="layers" class="absolute -right-4 -bottom-4 w-24 h-24 text-white/10 group-hover:scale-110 transition-transform"></i>
-        </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        @php
+            $stats = [
+                ['label' => ['en' => 'Active Projects', 'ar' => 'المشاريع النشطة'], 'value' => $ongoingProjects->count(), 'icon' => 'activity', 'color' => 'text-blue-600', 'bg' => 'bg-blue-50'],
+                ['label' => ['en' => 'Total Spent', 'ar' => 'إجمالي المنفق'], 'value' => 'SAR 42,000', 'icon' => 'credit-card', 'color' => 'text-emerald-600', 'bg' => 'bg-emerald-50'],
+                ['label' => ['en' => 'Subscribed Services', 'ar' => 'الخدمات المشترك بها'], 'value' => '5', 'icon' => 'package', 'color' => 'text-purple-600', 'bg' => 'bg-purple-50'],
+            ];
+        @endphp
 
-        <div class="bg-gradient-to-br from-purple-500 to-indigo-700 p-8 rounded-[2.5rem] shadow-xl shadow-purple-100 text-white relative overflow-hidden group">
-            <div class="relative z-10">
-                <p class="text-[10px] font-black uppercase tracking-[0.2em] opacity-80 mb-2">Total Invested</p>
-                <h3 class="text-3xl font-black mb-1 leading-none">48,200 <span class="text-sm">SAR</span></h3>
-                <p class="text-xs font-bold text-purple-100">Held in escrow: 12,000 SAR</p>
+        @foreach($stats as $stat)
+        <div class="bg-white p-6 border border-gray-100 rounded-2xl shadow-sm hover:shadow-md transition-all">
+            <div class="w-12 h-12 {{ $stat['bg'] }} {{ $stat['color'] }} rounded-xl flex items-center justify-center mb-4">
+                <i data-lucide="{{ $stat['icon'] }}" class="w-6 h-6"></i>
             </div>
-            <i data-lucide="shield-check" class="absolute -right-4 -bottom-4 w-24 h-24 text-white/10 group-hover:scale-110 transition-transform"></i>
+            <h3 class="text-3xl font-bold text-gray-900">{{ $stat['value'] }}</h3>
+            <p class="text-gray-400 text-sm font-bold mt-1 uppercase tracking-wider" x-text="lang === 'ar' ? '{{ $stat['label']['ar'] }}' : '{{ $stat['label']['en'] }}'"></p>
         </div>
-
-        <div class="bg-gradient-to-br from-emerald-500 to-teal-700 p-8 rounded-[2.5rem] shadow-xl shadow-emerald-100 text-white relative overflow-hidden group">
-            <div class="relative z-10">
-                <p class="text-[10px] font-black uppercase tracking-[0.2em] opacity-80 mb-2">Completed Tasks</p>
-                <h3 class="text-3xl font-black mb-1 leading-none">124</h3>
-                <p class="text-xs font-bold text-emerald-100">85% efficiency rate</p>
-            </div>
-            <i data-lucide="check-circle-2" class="absolute -right-4 -bottom-4 w-24 h-24 text-white/10 group-hover:scale-110 transition-transform"></i>
-        </div>
-
-        <div class="bg-gradient-to-br from-orange-500 to-rose-600 p-8 rounded-[2.5rem] shadow-xl shadow-amber-100 text-white relative overflow-hidden group">
-            <div class="relative z-10">
-                <p class="text-[10px] font-black uppercase tracking-[0.2em] opacity-80 mb-2">Messages</p>
-                <h3 class="text-3xl font-black mb-1 leading-none">12</h3>
-                <p class="text-xs font-bold text-amber-100">3 unread notifications</p>
-            </div>
-            <i data-lucide="message-square" class="absolute -right-4 -bottom-4 w-24 h-24 text-white/10 group-hover:scale-110 transition-transform"></i>
-        </div>
+        @endforeach
     </div>
 
-    <!-- Main Workspace Section -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <!-- Recent Projects -->
-        <div class="bg-white border border-gray-100 rounded-[2.5rem] p-8 shadow-sm">
-            <h3 class="text-xl font-bold mb-8">Recent Projects</h3>
-            <div class="space-y-4">
-                @forelse($ongoingProjects->take(3) as $p)
-                <a href="{{ route('projects.show', $p->id) }}" class="flex items-center justify-between p-5 rounded-3xl bg-gray-50 hover:bg-blue-50 hover:scale-[1.02] transition-all border border-transparent hover:border-blue-100">
-                    <div class="flex items-center space-x-4">
-                        <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-blue-600 shadow-sm">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Active Projects List -->
+        <div class="lg:col-span-2 space-y-6">
+            <div class="flex items-center justify-between">
+                <h3 class="text-lg font-bold text-gray-900" x-text="lang === 'ar' ? 'المشاريع الجارية' : 'Ongoing Projects'"></h3>
+                <a href="#" class="text-xs font-bold text-primary hover:underline" x-text="lang === 'ar' ? 'عرض الكل' : 'View All'"></a>
+            </div>
+            
+            <div class="grid grid-cols-1 gap-4">
+                @forelse($ongoingProjects as $p)
+                <div class="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-primary-light rounded-xl flex items-center justify-center text-primary">
                             <i data-lucide="{{ $p->service->icon }}" class="w-6 h-6"></i>
                         </div>
                         <div>
-                            <p class="text-sm font-bold text-gray-900">{{ $p->service->name }}</p>
-                            <p class="text-[10px] font-black uppercase text-gray-400 tracking-widest">{{ $p->provider->providerProfile->company_name }}</p>
+                            <h4 class="font-bold text-gray-900">{{ $p->service->name }}</h4>
+                            <p class="text-xs text-gray-400 font-medium">{{ $p->provider->providerProfile->company_name ?? 'iGate Partner' }}</p>
                         </div>
                     </div>
-                    <i data-lucide="chevron-right" class="w-5 h-5 text-gray-300"></i>
-                </a>
+                    <div class="text-end">
+                        <div class="flex items-center gap-2 mb-1">
+                            <div class="w-24 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                                <div class="h-full bg-primary w-2/3"></div>
+                            </div>
+                            <span class="text-[10px] font-bold text-gray-400">65%</span>
+                        </div>
+                        <a href="{{ route('projects.show', $p->id) }}" class="text-xs font-bold text-primary hover:underline" x-text="lang === 'ar' ? 'عرض التقدم' : 'Track Progress'"></a>
+                    </div>
+                </div>
                 @empty
-                <div class="py-12 text-center">
-                    <p class="text-gray-400 text-sm font-medium italic">No active projects yet.</p>
+                <div class="py-20 text-center bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200">
+                    <i data-lucide="plus-circle" class="w-12 h-12 text-gray-300 mx-auto mb-4"></i>
+                    <h4 class="text-xl font-bold text-gray-900" x-text="lang === 'ar' ? 'لا توجد مشاريع نشطة' : 'No active projects'"></h4>
+                    <p class="text-gray-500 mt-2" x-text="lang === 'ar' ? 'استكشف الخدمات وابدأ مشروعك الأول اليوم.' : 'Explore services and start your first project today.'"></p>
                 </div>
                 @endforelse
             </div>
         </div>
 
-        <!-- Quick Actions -->
-        <div class="bg-white border border-gray-100 rounded-[2.5rem] p-8 shadow-sm">
-            <h3 class="text-xl font-bold mb-8">Quick Actions</h3>
-            <div class="grid grid-cols-2 gap-4">
-                <a href="{{ route('explore.index') }}" class="p-6 bg-blue-50 rounded-[2rem] border border-blue-100 hover:bg-blue-600 hover:text-white transition-all group">
-                    <i data-lucide="plus-circle" class="w-8 h-8 mb-4 group-hover:text-white text-blue-600 transition-colors"></i>
-                    <p class="font-bold">New Request</p>
-                    <p class="text-[10px] opacity-70">Browse the catalog</p>
-                </a>
-                <div class="p-6 bg-purple-50 rounded-[2rem] border border-purple-100 hover:bg-purple-600 hover:text-white transition-all group cursor-pointer">
-                    <i data-lucide="credit-card" class="w-8 h-8 mb-4 group-hover:text-white text-purple-600 transition-colors"></i>
-                    <p class="font-bold">Billing</p>
-                    <p class="text-[10px] opacity-70">Manage payments</p>
+        <!-- Quick Explore Sidebar -->
+        <div class="bg-gray-900 rounded-3xl p-8 text-white">
+            <h3 class="text-xl font-bold mb-6" x-text="lang === 'ar' ? 'خدمات مقترحة' : 'Recommended Services'"></h3>
+            <div class="space-y-4">
+                @foreach(['ZATCA Compliance', 'Legal Review', 'HR Management'] as $rec)
+                <div class="p-4 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all cursor-pointer group">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold text-primary uppercase tracking-widest">{{ $rec }}</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4 text-white group-hover:translate-x-1 transition-transform rtl:group-hover:-translate-x-1"></i>
+                    </div>
+                    <p class="text-[10px] text-gray-400 leading-relaxed" x-text="lang === 'ar' ? 'نظام متكامل لضمان التوافق مع الأنظمة السعودية.' : 'Complete solution for Saudi regulatory compliance.'"></p>
                 </div>
-                <div class="p-6 bg-emerald-50 rounded-[2rem] border border-emerald-100 hover:bg-emerald-600 hover:text-white transition-all group cursor-pointer">
-                    <i data-lucide="life-buoy" class="w-8 h-8 mb-4 group-hover:text-white text-emerald-600 transition-colors"></i>
-                    <p class="font-bold">Support</p>
-                    <p class="text-[10px] opacity-70">Get help fast</p>
-                </div>
-                <div class="p-6 bg-gray-50 rounded-[2rem] border border-gray-100 hover:bg-gray-900 hover:text-white transition-all group cursor-pointer">
-                    <i data-lucide="settings" class="w-8 h-8 mb-4 group-hover:text-white text-gray-900 transition-colors"></i>
-                    <p class="font-bold">Settings</p>
-                    <p class="text-[10px] opacity-70">System config</p>
-                </div>
+                @endforeach
             </div>
         </div>
     </div>

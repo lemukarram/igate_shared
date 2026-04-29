@@ -1,26 +1,27 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="w-full max-w-7xl mx-auto h-[calc(100vh-8rem)] flex flex-col space-y-6 animate-in fade-in duration-700">
+<div class="w-full max-w-7xl mx-auto h-[calc(100vh-8rem)] flex flex-col space-y-6 animate-in fade-in duration-700" 
+     x-data="projectWorkspace()">
     
-    <!-- Top Header: Client & Project Info -->
+    <!-- Top Header -->
     <div class="bg-white border border-gray-100 rounded-lg p-5 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div class="flex items-center space-x-4">
-            <div class="w-12 h-12 bg-[#e6f4fd] rounded-lg flex items-center justify-center text-[#3da9e4]">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-primary-light rounded-lg flex items-center justify-center text-primary">
                 <i data-lucide="{{ $project->service->icon ?? 'briefcase' }}" class="w-6 h-6"></i>
             </div>
             <div>
                 <h1 class="text-xl font-semibold text-gray-900 tracking-tight">{{ $project->service->name }}</h1>
-                <div class="flex items-center space-x-2 text-xs font-medium text-gray-500 mt-1">
+                <div class="flex items-center gap-2 text-xs font-medium text-gray-500 mt-1">
                     <span class="bg-gray-100 px-2 py-0.5 rounded text-gray-700">PRJ-{{ str_pad($project->id, 5, '0', STR_PAD_LEFT) }}</span>
                     <span>•</span>
-                    <span class="text-green-600 flex items-center"><span class="w-1.5 h-1.5 rounded-full bg-green-500 mr-1.5 animate-pulse"></span>Active</span>
+                    <span class="text-green-600 flex items-center"><span class="w-1.5 h-1.5 rounded-full bg-green-500 me-1.5 animate-pulse"></span><span x-text="t('project.active')"></span></span>
                 </div>
             </div>
         </div>
 
-        <div class="flex items-center space-x-6 border-l border-gray-100 pl-6">
-            <div class="flex items-center space-x-3">
+        <div class="flex items-center gap-6 border-s border-gray-100 ps-6">
+            <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-gray-900 rounded-lg flex items-center justify-center text-white font-semibold text-sm">
                     {{ substr($project->client->name, 0, 2) }}
                 </div>
@@ -29,9 +30,9 @@
                     <p class="text-xs text-gray-500 font-medium">{{ $project->company->name ?? 'Enterprise Client' }}</p>
                 </div>
             </div>
-            <div class="text-right hidden sm:block">
-                <p class="text-sm font-semibold text-gray-900">{{ number_format($project->total_amount, 0) }} SAR</p>
-                <p class="text-xs text-gray-500 font-medium">Total Budget</p>
+            <div class="text-end hidden sm:block">
+                <p class="text-sm font-semibold text-gray-900">{{ number_format($project->total_amount, 0) }} {{ Auth::user()->role === 'provider' ? 'SAR' : 'ر.س' }}</p>
+                <p class="text-xs text-gray-500 font-medium" x-text="t('project.total_budget')"></p>
             </div>
         </div>
     </div>
@@ -39,56 +40,24 @@
     <!-- Main Content Area -->
     <div class="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6 min-h-0">
         
-        <!-- Main Area: AI Style Chat (lg:col-span-2) -->
+        <!-- Main Area: Chat Workspace -->
         <div class="lg:col-span-2 bg-white border border-gray-100 rounded-lg shadow-sm flex flex-col min-h-0 overflow-hidden">
-            <!-- Chat Header -->
             <div class="p-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-                <div class="flex items-center space-x-2">
-                    <i data-lucide="message-square" class="w-4 h-4 text-[#3da9e4]"></i>
-                    <h3 class="text-sm font-semibold text-gray-800">Project Workspace</h3>
-                </div>
-                <div class="flex space-x-2">
-                    <button class="p-1.5 text-gray-400 hover:text-[#3da9e4] transition-colors rounded-md hover:bg-[#e6f4fd]">
-                        <i data-lucide="paperclip" class="w-4 h-4"></i>
-                    </button>
-                    <button class="p-1.5 text-gray-400 hover:text-gray-900 transition-colors rounded-md hover:bg-gray-100">
-                        <i data-lucide="more-vertical" class="w-4 h-4"></i>
-                    </button>
+                <div class="flex items-center gap-2">
+                    <i data-lucide="message-square" class="w-4 h-4 text-primary"></i>
+                    <h3 class="text-sm font-semibold text-gray-800" x-text="t('project.workspace')"></h3>
                 </div>
             </div>
             
-            <!-- Chat Messages (AI Style) -->
             <div class="flex-1 p-6 overflow-y-auto space-y-6 custom-scrollbar bg-white">
-                <!-- System/AI welcome message -->
-                <div class="flex space-x-4">
-                    <div class="w-8 h-8 rounded-full bg-[#e6f4fd] flex-shrink-0 flex items-center justify-center border border-[#3da9e4]/20">
-                        <img src="/images/logo/icon.png" onerror="this.src='data:image/svg+xml;base64,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%233da9e4%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22M12 2v20%22/><path d=%22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6%22/></svg>'" class="w-5 h-5 object-contain" alt="AI">
-                    </div>
-                    <div class="flex-1">
-                        <div class="flex items-center space-x-2 mb-1">
-                            <span class="text-sm font-semibold text-gray-900">iGate System</span>
-                            <span class="text-xs text-gray-400">{{ $project->created_at->format('M d, g:i A') }}</span>
-                        </div>
-                        <div class="text-gray-700 text-sm leading-relaxed prose prose-sm max-w-none">
-                            <p>Welcome to the project workspace. The escrow has been funded and the SLA timer has started. You can use this space to communicate, share files, and update milestones.</p>
-                        </div>
-                    </div>
-                </div>
-
                 @foreach($messages as $msg)
-                <div class="flex space-x-4">
-                    @if($msg->user_id === Auth::id())
-                    <div class="w-8 h-8 rounded-full bg-[#3da9e4] flex-shrink-0 flex items-center justify-center text-white text-xs font-bold shadow-md shadow-[#3da9e4]/30">
+                <div class="flex gap-4">
+                    <div class="w-8 h-8 rounded-full {{ $msg->user_id === Auth::id() ? 'bg-primary' : 'bg-gray-900' }} flex-shrink-0 flex items-center justify-center text-white text-xs font-bold shadow-sm">
                         {{ substr($msg->user->name, 0, 1) }}
                     </div>
-                    @else
-                    <div class="w-8 h-8 rounded-full bg-gray-900 flex-shrink-0 flex items-center justify-center text-white text-xs font-bold">
-                        {{ substr($msg->user->name, 0, 1) }}
-                    </div>
-                    @endif
                     <div class="flex-1">
-                        <div class="flex items-center space-x-2 mb-1">
-                            <span class="text-sm font-semibold text-gray-900">{{ $msg->user_id === Auth::id() ? 'You' : $msg->user->name }}</span>
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="text-sm font-semibold text-gray-900">{{ $msg->user_id === Auth::id() ? (lang === 'ar' ? 'أنت' : 'You') : $msg->user->name }}</span>
                             <span class="text-xs text-gray-400">{{ $msg->created_at->format('M d, g:i A') }}</span>
                         </div>
                         <div class="text-gray-700 text-sm leading-relaxed {{ $msg->user_id === Auth::id() ? 'bg-gray-50 p-4 rounded-lg border border-gray-100' : '' }}">
@@ -99,278 +68,133 @@
                 @endforeach
             </div>
 
-            <!-- Chat Input (Gemini Style) -->
+            <!-- Chat Input -->
             <div class="p-4 bg-white border-t border-gray-100">
                 <form action="{{ route('projects.messages.store', $project->id) }}" method="POST">
                     @csrf
-                    <div class="relative bg-gray-50 border border-gray-200 rounded-2xl shadow-sm focus-within:ring-2 focus-within:ring-[#3da9e4]/50 focus-within:border-[#3da9e4] transition-all">
-                        <textarea name="message" required placeholder="Type your message here..." rows="2" class="w-full pl-4 pr-16 py-3 bg-transparent outline-none font-medium text-sm text-gray-700 resize-none custom-scrollbar" style="max-height: 150px;"></textarea>
-                        <div class="absolute right-2 bottom-2 flex items-center space-x-1">
-                            <button type="button" class="p-2 text-gray-400 hover:text-gray-700 transition-colors rounded-full hover:bg-gray-200">
-                                <i data-lucide="mic" class="w-4 h-4"></i>
-                            </button>
-                            <button type="submit" class="p-2 bg-[#3da9e4] text-white rounded-full flex items-center justify-center hover:bg-[#2b8bc2] transition-colors shadow-md disabled:opacity-50">
-                                <i data-lucide="arrow-up" class="w-4 h-4"></i>
+                    <div class="relative bg-gray-50 border border-gray-200 rounded-2xl shadow-sm focus-within:ring-2 focus-within:ring-primary/50 focus-within:border-primary transition-all">
+                        <textarea name="message" required :placeholder="t('project.type_message')" rows="2" class="w-full ps-4 pe-16 py-3 bg-transparent outline-none font-medium text-sm text-gray-700 resize-none custom-scrollbar"></textarea>
+                        <div class="absolute inset-y-2 end-2 flex items-center gap-1">
+                            <button type="submit" class="p-2 bg-primary text-white rounded-full flex items-center justify-center hover:bg-primary-dark transition-colors shadow-md">
+                                <i data-lucide="arrow-up" class="w-4 h-4 flip-rtl"></i>
                             </button>
                         </div>
                     </div>
-                    <p class="text-center text-[10px] text-gray-400 mt-2 font-medium">All communications are recorded and monitored for SLA compliance.</p>
+                    <p class="text-center text-[10px] text-gray-400 mt-2 font-medium" x-text="t('project.sla_notice')"></p>
                 </form>
             </div>
         </div>
 
-        <!-- Right Side: Sub-tasks and Progress (lg:col-span-1) -->
-        <div class="lg:col-span-1 space-y-6 overflow-y-auto custom-scrollbar pr-1">
+        <!-- Right Side: Tasks & Progress -->
+        <div class="lg:col-span-1 space-y-6 overflow-y-auto custom-scrollbar pe-1">
             
-            <!-- Progress Summary -->
-    @php
-        $totalTasks = $project->tasks->count();
-        $completedTasks = $project->tasks->where('status', 'done')->count();
-        $progress = $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100) : 0;
-    @endphp
-    <div class="bg-white border border-gray-100 rounded-lg p-5 shadow-sm">
-        <div class="flex justify-between items-end mb-3">
-            <div>
-                <p class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Project Progress</p>
-                <h3 class="text-2xl font-bold text-gray-900">{{ $progress }}%</h3>
-            </div>
-            <div class="w-10 h-10 rounded-full border-4 border-[#e6f4fd] flex items-center justify-center relative">
-                <svg class="absolute inset-0 w-full h-full text-[#3da9e4] -rotate-90" viewBox="0 0 36 36">
-                    <path class="stroke-current" stroke-dasharray="100 100" :stroke-dashoffset="100 - {{ $progress }}" stroke-width="4" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                </svg>
-                <i data-lucide="activity" class="w-4 h-4 text-[#3da9e4]"></i>
-            </div>
-        </div>
-        <div class="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
-            <div class="h-full bg-[#3da9e4] rounded-full transition-all duration-1000" style="width: {{ $progress }}%"></div>
-        </div>
-    </div>
-
-    <!-- Sub-tasks / Deliverables -->
-    <div class="bg-white border border-gray-100 rounded-lg p-5 shadow-sm flex flex-col">
-        <div class="flex items-center justify-between mb-5">
-            <h3 class="text-sm font-semibold text-gray-900">Service Tasks</h3>
-        </div>
-        
-        <div class="space-y-3">
-            @forelse($project->tasks as $task)
-            <div class="p-3 rounded-lg border {{ $task->status === 'done' ? 'bg-gray-50 border-gray-200' : 'bg-white border-gray-100 hover:border-[#3da9e4]/30' }} transition-colors group cursor-pointer" onclick="openProjectTaskModal({{ $task->id }})">
-                <div class="flex items-start space-x-3">
-                    <div class="mt-0.5">
-                        <div class="flex-shrink-0 w-5 h-5 rounded {{ $task->status === 'done' ? 'bg-[#3da9e4] border-[#3da9e4] text-white' : 'bg-white border-gray-300 text-transparent hover:border-[#3da9e4]' }} border flex items-center justify-center transition-colors">
-                            <i data-lucide="check" class="w-3 h-3"></i>
-                        </div>
-                    </div>
-                    <div class="flex-1">
-                        <p class="text-sm font-medium {{ $task->status === 'done' ? 'text-gray-500 line-through' : 'text-gray-800' }}">{{ $task->title }}</p>
-                        <div class="mt-2 flex items-center justify-between">
-                            <span class="text-[10px] font-semibold uppercase tracking-wider {{ $task->status === 'done' ? 'text-green-500' : 'text-gray-400' }}">
-                                {{ $task->status === 'done' ? 'Completed' : 'Pending' }}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            @empty
-            <p class="text-sm text-gray-500 italic p-3 text-center">No tasks defined yet.</p>
-            @endforelse
-        </div>
-    </div>
-
-    <!-- Add Task Form -->
-    @if(Auth::user()->role === 'provider')
-    <div class="bg-white border border-gray-100 rounded-lg p-5 shadow-sm">
-        <h3 class="text-sm font-semibold text-gray-900 mb-3">Add New Task</h3>
-        <form action="{{ route('tasks.store') }}" method="POST" enctype="multipart/form-data" class="space-y-3">
-            @csrf
-            <input type="hidden" name="project_id" value="{{ $project->id }}">
-            <input type="hidden" name="status" value="todo">
-            <input type="text" name="title" required placeholder="Task description..." class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-md focus:ring-2 focus:ring-[#3da9e4]/50 focus:border-[#3da9e4] outline-none text-sm">
-            <div class="flex items-center space-x-2">
-                <label class="flex-1 flex items-center justify-center py-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 border-dashed rounded-md text-[10px] font-medium text-gray-600 cursor-pointer">
-                    <i data-lucide="paperclip" class="w-3 h-3 mr-1"></i>
-                    <span>Attach Files</span>
-                    <input type="file" name="files[]" multiple class="hidden">
-                </label>
-                <button type="submit" class="px-4 py-2 bg-[#3da9e4] text-white rounded-md text-xs font-semibold hover:bg-[#2b8bc2] transition-colors">Add</button>
-            </div>
-        </form>
-    </div>
-    @endif
-    
-    <!-- Vault/Files widget -->
-    <div class="bg-white border border-gray-100 rounded-lg p-5 shadow-sm">
-        <div class="flex items-center justify-between mb-4">
-            <h3 class="text-sm font-semibold text-gray-900">Project Files</h3>
-            <i data-lucide="folder" class="w-4 h-4 text-gray-400"></i>
-        </div>
-        <div class="space-y-2">
-            @forelse($project->documents as $doc)
-            <div class="flex items-center justify-between p-2 rounded hover:bg-gray-50 cursor-pointer transition-colors border border-transparent hover:border-gray-100">
-                <div class="flex items-center space-x-3">
-                    <div class="w-8 h-8 rounded bg-blue-50 flex items-center justify-center text-[#3da9e4]">
-                        <i data-lucide="file-text" class="w-4 h-4"></i>
-                    </div>
-                    <div class="overflow-hidden">
-                        <p class="text-xs font-medium text-gray-800 truncate" title="{{ $doc->name }}">{{ $doc->name }}</p>
-                        <p class="text-[10px] text-gray-400">{{ number_format($doc->file_size / 1024 / 1024, 2) }} MB • {{ $doc->created_at->diffForHumans() }}</p>
-                    </div>
-                </div>
-                <a href="{{ asset('storage/' . $doc->file_path) }}" target="_blank" class="text-gray-400 hover:text-[#3da9e4]">
-                    <i data-lucide="download" class="w-3 h-3"></i>
-                </a>
-            </div>
-            @empty
-            <p class="text-[10px] text-gray-400 italic text-center py-4">No files uploaded yet.</p>
-            @endforelse
-        </div>
-        <button onclick="document.getElementById('project-file-upload-modal').classList.remove('hidden')" class="w-full mt-3 py-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 border-dashed rounded-lg text-xs font-medium text-gray-600 transition-colors flex items-center justify-center space-x-2">
-            <i data-lucide="upload" class="w-3 h-3"></i>
-            <span>Upload File</span>
-        </button>
-    </div>
-
-    <!-- File Upload Modal -->
-    <div id="project-file-upload-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center hidden px-4">
-        <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">
-            <h3 class="text-lg font-bold text-gray-900 mb-2">Upload Project File</h3>
-            <p class="text-xs text-gray-500 mb-6">This file will be shared with the client in the project vault.</p>
-            
-            <form action="{{ route('documents.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
-                @csrf
-                <input type="hidden" name="project_id" value="{{ $project->id }}">
-                <div class="border-2 border-dashed border-gray-200 rounded-xl p-8 text-center hover:bg-gray-50 transition-colors cursor-pointer" onclick="this.querySelector('input').click()">
-                    <i data-lucide="upload-cloud" class="w-10 h-10 text-gray-400 mx-auto mb-2"></i>
-                    <p class="text-sm text-gray-500 font-medium">Click to select file</p>
-                    <input type="file" name="file" required class="hidden" onchange="this.previousElementSibling.innerText = this.files[0].name">
-                </div>
-                <div class="flex space-x-3 pt-2">
-                    <button type="button" onclick="document.getElementById('project-file-upload-modal').classList.add('hidden')" class="flex-1 py-2.5 bg-gray-100 text-gray-600 rounded-lg font-bold text-sm">Cancel</button>
-                    <button type="submit" class="flex-1 py-2.5 bg-[#3da9e4] text-white rounded-lg font-bold text-sm">Upload</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Task Detail Modal (Similar to Team Task Modal) -->
-    <div id="project-task-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center hidden px-4">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col md:flex-row">
-            <div class="flex-1 overflow-y-auto p-6 custom-scrollbar border-r border-gray-100">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-xl font-bold text-gray-900">Task Details</h2>
-                    <button onclick="document.getElementById('project-task-modal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
-                        <i data-lucide="x" class="w-5 h-5"></i>
-                    </button>
-                </div>
-                
-                <form id="project-task-edit-form" method="POST" enctype="multipart/form-data" class="space-y-5">
-                    @csrf
-                    @method('PATCH')
+            <!-- Progress -->
+            <div class="bg-white border border-gray-100 rounded-lg p-5 shadow-sm">
+                <div class="flex justify-between items-end mb-3">
                     <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Title</label>
-                        <input type="text" name="title" id="task-title" required class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm">
+                        <p class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1" x-text="t('project.progress')"></p>
+                        @php
+                            $totalTasks = $project->tasks->count();
+                            $completedTasks = $project->tasks->where('status', 'done')->count();
+                            $progress = $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100) : 0;
+                        @endphp
+                        <h3 class="text-2xl font-bold text-gray-900">{{ $progress }}%</h3>
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Status</label>
-                            <select name="status" id="task-status" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm">
-                                <option value="todo">To Do</option>
-                                <option value="in_progress">In Progress</option>
-                                <option value="done">Done</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Priority</label>
-                            <select name="priority" id="task-priority" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm">
-                                <option value="normal">Normal</option>
-                                <option value="high">High</option>
-                                <option value="urgent">Urgent</option>
-                            </select>
-                        </div>
+                    <div class="w-10 h-10 rounded-full border-4 border-primary-light flex items-center justify-center">
+                        <i data-lucide="activity" class="w-4 h-4 text-primary"></i>
                     </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Description</label>
-                        <textarea name="description" id="task-description" rows="4" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm resize-none"></textarea>
-                    </div>
-                    
-                    @if(Auth::user()->role === 'provider')
-                    <div class="flex space-x-3 pt-4 border-t border-gray-100">
-                        <button type="submit" class="px-6 py-2.5 bg-[#3da9e4] text-white rounded-lg font-bold text-sm">Save Changes</button>
-                    </div>
-                    @endif
-                </form>
-            </div>
-            
-            <div class="w-full md:w-80 bg-gray-50 p-6 overflow-y-auto custom-scrollbar">
-                <h3 class="text-sm font-bold text-gray-900 mb-6 flex items-center">
-                    <i data-lucide="history" class="w-4 h-4 mr-2 text-[#3da9e4]"></i>
-                    History
-                </h3>
-                <div id="task-history-list" class="space-y-6 relative before:absolute before:left-2 before:top-2 before:bottom-2 before:w-px before:bg-gray-200">
-                    <!-- Loaded via JS -->
+                </div>
+                <div class="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                    <div class="h-full bg-primary transition-all duration-1000" style="width: {{ $progress }}%"></div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <script>
-        async function openProjectTaskModal(taskId) {
-            const modal = document.getElementById('project-task-modal');
-            const form = document.getElementById('project-task-edit-form');
-            const historyList = document.getElementById('task-history-list');
-            
-            modal.classList.remove('hidden');
-            
-            try {
-                const response = await fetch(`/provider/team-tasks/${taskId}`);
-                const task = await response.json();
-                
-                form.action = `/provider/team-tasks/${taskId}`;
-                document.getElementById('task-title').value = task.title;
-                document.getElementById('task-status').value = task.status;
-                document.getElementById('task-priority').value = task.priority || 'normal';
-                document.getElementById('task-description').value = task.description || '';
-                
-                historyList.innerHTML = '';
-                task.histories.forEach(h => {
-                    const div = document.createElement('div');
-                    div.className = 'relative pl-6';
-                    div.innerHTML = `
-                        <div class="absolute left-0 top-1.5 w-4 h-4 rounded-full bg-white border-2 border-[#3da9e4] z-10"></div>
-                        <div class="space-y-1">
-                            <p class="text-[10px] text-gray-900 font-bold">${h.user.name}</p>
-                            <p class="text-[9px] text-gray-500 font-medium">${h.action === 'created' ? 'Created task' : (h.field + ' -> ' + h.new_value)}</p>
-                            <p class="text-[8px] text-gray-400 italic">${new Date(h.created_at).toLocaleString()}</p>
+            <!-- Service Tasks -->
+            <div class="bg-white border border-gray-100 rounded-lg p-5 shadow-sm flex flex-col">
+                <h3 class="text-sm font-semibold text-gray-900 mb-5" x-text="t('project.service_tasks')"></h3>
+                <div class="space-y-3">
+                    @forelse($project->tasks as $task)
+                    <div class="p-3 rounded-lg border {{ $task->status === 'done' ? 'bg-gray-50 border-gray-200' : 'bg-white border-gray-100 hover:border-primary/20' }} transition-colors cursor-pointer group" onclick="openProjectTaskModal({{ $task->id }})">
+                        <div class="flex items-start gap-3">
+                            <div class="flex-shrink-0 w-5 h-5 rounded {{ $task->status === 'done' ? 'bg-primary border-primary text-white' : 'bg-white border-gray-300 text-transparent group-hover:border-primary' }} border flex items-center justify-center transition-colors">
+                                <i data-lucide="check" class="w-3 h-3"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm font-medium {{ $task->status === 'done' ? 'text-gray-500 line-through' : 'text-gray-800' }}">{{ $task->title }}</p>
+                            </div>
                         </div>
-                    `;
-                    historyList.appendChild(div);
-                });
-                
-                lucide.createIcons();
-            } catch (e) {
-                console.error(e);
-            }
-        }
-    </script>
+                    </div>
+                    @empty
+                    <p class="text-sm text-gray-500 italic p-3 text-center" x-text="lang === 'ar' ? 'لا توجد مهام حالياً' : 'No tasks yet'"></p>
+                    @endforelse
+                </div>
+            </div>
 
+            <!-- Vault -->
+            <div class="bg-white border border-gray-100 rounded-lg p-5 shadow-sm">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-sm font-semibold text-gray-900" x-text="t('project.vault')"></h3>
+                    <i data-lucide="folder" class="w-4 h-4 text-gray-400"></i>
+                </div>
+                <div class="space-y-2">
+                    @forelse($project->documents as $doc)
+                    <div class="flex items-center justify-between p-2 rounded hover:bg-gray-50 transition-all border border-transparent hover:border-gray-100">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded bg-primary-light flex items-center justify-center text-primary">
+                                <i data-lucide="file-text" class="w-4 h-4"></i>
+                            </div>
+                            <div class="overflow-hidden">
+                                <p class="text-xs font-medium text-gray-800 truncate max-w-[120px]">{{ $doc->name }}</p>
+                                <p class="text-[10px] text-gray-400">{{ $doc->created_at->diffForHumans() }}</p>
+                            </div>
+                        </div>
+                        <a href="{{ asset('storage/' . $doc->file_path) }}" target="_blank" class="text-gray-400 hover:text-primary">
+                            <i data-lucide="download" class="w-3 h-3"></i>
+                        </a>
+                    </div>
+                    @empty
+                    <p class="text-[10px] text-gray-400 italic text-center py-4" x-text="lang === 'ar' ? 'لم يتم رفع ملفات بعد' : 'No files uploaded yet'"></p>
+                    @endforelse
+                </div>
+                @if(Auth::user()->role === 'provider')
+                <button onclick="document.getElementById('project-file-upload-modal').classList.remove('hidden')" class="w-full mt-3 py-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 border-dashed rounded-lg text-xs font-medium text-gray-600 transition-all flex items-center justify-center gap-2">
+                    <i data-lucide="upload" class="w-3 h-3"></i>
+                    <span x-text="t('common.upload')"></span>
+                </button>
+                @endif
+            </div>
         </div>
     </div>
 </div>
 
+<script>
+    function projectWorkspace() {
+        return {
+            lang: localStorage.getItem('igate_lang') || 'en',
+            dict: {
+                en: {
+                    common: { upload: "Upload File" },
+                    project: { workspace: "Project Workspace", active: "Active", total_budget: "Total Budget", progress: "Project Progress", service_tasks: "Service Tasks", vault: "Project Vault", type_message: "Type your message here...", sla_notice: "Communications recorded for SLA." }
+                },
+                ar: {
+                    common: { upload: "رفع ملف" },
+                    project: { workspace: "مساحة عمل المشروع", active: "نشط", total_budget: "الميزانية الإجمالية", progress: "إنجاز المشروع", service_tasks: "مهام الخدمة", vault: "خزنة الملفات", type_message: "اكتب رسالتك هنا...", sla_notice: "المراسلات مسجلة لضمان مستوى الخدمة." }
+                }
+            },
+            t(key) {
+                const keys = key.split('.');
+                let result = this.dict[this.lang];
+                for (const k of keys) result = result ? result[k] : null;
+                return result || key;
+            },
+            init() { lucide.createIcons(); }
+        }
+    }
+</script>
+
 <style>
-    /* Custom scrollbar for chat area to make it look cleaner */
-    .custom-scrollbar::-webkit-scrollbar {
-        width: 4px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-track {
-        background: transparent;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-        background-color: #e5e7eb;
-        border-radius: 20px;
-    }
-    .custom-scrollbar:hover::-webkit-scrollbar-thumb {
-        background-color: #d1d5db;
-    }
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 10px; }
+    [dir="rtl"] .flip-rtl { transform: scaleX(-1); }
 </style>
 @endsection

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html :lang="lang" :dir="lang === 'ar' ? 'rtl' : 'ltr'" x-data="i18nManager()">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -48,81 +48,84 @@
         [class*="rounded-[2."], [class*="rounded-[3."], [class*="rounded-2xl"], [class*="rounded-3xl"] {
             border-radius: 0.5rem !important;
         }
+
+        [dir="rtl"] .flip-rtl { transform: scaleX(-1); }
     </style>
 </head>
-<body class="bg-white text-gray-900 overflow-hidden" x-data="{ 
-    settingsOpen: false, 
-    addServiceOpen: false, 
-    viewUsersOpen: false, 
-    addUserOpen: false,
-    settingsTab: 'account',
-    profileOpen: false
-}">
+<body class="bg-white text-gray-900 overflow-hidden" x-init="init()">
     <div class="flex h-screen">
         <!-- Sidebar -->
-        <div class="w-64 border-r border-gray-100 flex flex-col h-full bg-white">
+        <div class="w-64 border-e border-gray-100 flex flex-col h-full bg-white">
             <div class="p-6">
                 <img src="/images/logo/logo.png" alt="iGate Shared Services" class="h-10 w-auto object-contain">
             </div>
 
             <div class="px-6 mb-6">
                 @if(Auth::user()->role === 'client')
-                    <a href="{{ route('explore.index') }}" class="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition-all font-medium shadow-sm">
+                    <a href="{{ route('explore.index') }}" class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition-all font-medium shadow-sm">
                         <i data-lucide="plus" class="w-4 h-4"></i>
-                        <span>Request Service</span>
+                        <span x-text="t('explore.request')"></span>
                     </a>
                 @elseif(Auth::user()->role === 'provider')
-                    <button @click="addServiceOpen = true" class="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition-all font-medium shadow-sm">
+                    <button @click="addServiceOpen = true" class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition-all font-medium shadow-sm">
                         <i data-lucide="plus" class="w-4 h-4"></i>
-                        <span>Add Service</span>
+                        <span x-text="t('explore.add_to_portfolio')"></span>
                     </button>
                 @endif
             </div>
 
             <nav class="flex-1 px-3 space-y-1 overflow-y-auto custom-scrollbar">
                 @if(Auth::user()->role === 'admin')
-                    <a href="/" class="sidebar-item {{ request()->is('/') ? 'active' : '' }} flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-600 transition-all">
+                    <a href="/" class="sidebar-item {{ request()->is('/') ? 'active' : '' }} flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 transition-all">
                         <i data-lucide="bar-chart-3" class="w-4 h-4"></i><span class="text-sm font-medium">Analytics</span>
                     </a>
                 @elseif(Auth::user()->role === 'provider')
-                    <a href="/provider/dashboard" class="sidebar-item {{ request()->routeIs('provider.dashboard') ? 'active' : '' }} flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-600 transition-all">
-                        <i data-lucide="layout-dashboard" class="w-4 h-4"></i><span class="text-sm font-medium">Dashboard</span>
+                    <a href="/provider/dashboard" class="sidebar-item {{ request()->routeIs('provider.dashboard') ? 'active' : '' }} flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 transition-all">
+                        <i data-lucide="layout-dashboard" class="w-4 h-4"></i><span class="text-sm font-medium" x-text="t('common.dashboard')"></span>
                     </a>
-                    <a href="{{ route('provider.services.index') }}" class="sidebar-item {{ request()->routeIs('provider.services.*') ? 'active' : '' }} flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-600 transition-all">
-                        <i data-lucide="briefcase" class="w-4 h-4"></i><span class="text-sm font-medium">My Services</span>
+                    <a href="{{ route('provider.services.index') }}" class="sidebar-item {{ request()->routeIs('provider.services.*') ? 'active' : '' }} flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 transition-all">
+                        <i data-lucide="briefcase" class="w-4 h-4"></i><span class="text-sm font-medium" x-text="lang === 'ar' ? 'خدماتي' : 'My Services'"></span>
                     </a>
-                    <a href="{{ route('explore.index') }}" class="sidebar-item {{ request()->routeIs('explore.*') ? 'active' : '' }} flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-600 transition-all">
-                        <i data-lucide="compass" class="w-4 h-4"></i><span class="text-sm font-medium">Explore</span>
+                    <a href="{{ route('explore.index') }}" class="sidebar-item {{ request()->routeIs('explore.*') ? 'active' : '' }} flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 transition-all">
+                        <i data-lucide="compass" class="w-4 h-4"></i><span class="text-sm font-medium" x-text="t('common.explore')"></span>
                     </a>
-                    <a href="{{ route('provider.clients') }}" class="sidebar-item {{ request()->routeIs('provider.clients*') ? 'active' : '' }} flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-600 transition-all">
-                        <i data-lucide="users" class="w-4 h-4"></i><span class="text-sm font-medium">My Clients</span>
+                    <a href="{{ route('provider.clients') }}" class="sidebar-item {{ request()->routeIs('provider.clients*') ? 'active' : '' }} flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 transition-all">
+                        <i data-lucide="users" class="w-4 h-4"></i><span class="text-sm font-medium" x-text="t('common.clients')"></span>
                     </a>
-                    <a href="{{ route('provider.team_tasks') }}" class="sidebar-item {{ request()->routeIs('provider.team_tasks*') ? 'active' : '' }} flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-600 transition-all">
-                        <i data-lucide="check-square" class="w-4 h-4"></i><span class="text-sm font-medium">Team Tasks</span>
+                    <a href="{{ route('provider.team_tasks') }}" class="sidebar-item {{ request()->routeIs('provider.team_tasks*') ? 'active' : '' }} flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 transition-all">
+                        <i data-lucide="check-square" class="w-4 h-4"></i><span class="text-sm font-medium" x-text="t('common.team')"></span>
                     </a>
                 @elseif(Auth::user()->role === 'client')
-                    <a href="/" class="sidebar-item {{ request()->is('/') ? 'active' : '' }} flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-600 transition-all">
-                        <i data-lucide="home" class="w-4 h-4"></i><span class="text-sm font-medium">Dashboard</span>
+                    <a href="/" class="sidebar-item {{ request()->is('/') ? 'active' : '' }} flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 transition-all">
+                        <i data-lucide="home" class="w-4 h-4"></i><span class="text-sm font-medium" x-text="t('common.dashboard')"></span>
                     </a>
-                    <a href="{{ route('client.portfolio') }}" class="sidebar-item {{ request()->routeIs('client.portfolio') ? 'active' : '' }} flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-600 transition-all">
+                    <a href="{{ route('client.portfolio') }}" class="sidebar-item {{ request()->routeIs('client.portfolio') ? 'active' : '' }} flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 transition-all">
                         <i data-lucide="briefcase" class="w-4 h-4"></i><span class="text-sm font-medium">Portfolio</span>
                     </a>
-                    <a href="{{ route('explore.index') }}" class="sidebar-item {{ request()->routeIs('explore.*') ? 'active' : '' }} flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-600 transition-all">
-                        <i data-lucide="search" class="w-4 h-4"></i><span class="text-sm font-medium">Explore</span>
+                    <a href="{{ route('explore.index') }}" class="sidebar-item {{ request()->routeIs('explore.*') ? 'active' : '' }} flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 transition-all">
+                        <i data-lucide="search" class="w-4 h-4"></i><span class="text-sm font-medium" x-text="t('common.explore')"></span>
                     </a>
-                    <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-600 transition-all">
+                    <a href="#" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 transition-all">
                         <i data-lucide="message-square" class="w-4 h-4"></i><span class="text-sm font-medium">Messages</span>
                     </a>
                 @endif
 
+                <!-- Language Toggle Section -->
+                <div class="pt-4 px-3">
+                    <button @click="toggleLang()" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-primary bg-primary-light transition-all border border-primary/10">
+                        <i data-lucide="languages" class="w-4 h-4"></i>
+                        <span class="text-xs font-bold" x-text="lang === 'en' ? 'العربية' : 'English'"></span>
+                    </button>
+                </div>
+
                 <div class="pt-8 px-3">
                     <div class="flex items-center justify-between text-[10px] font-medium uppercase tracking-widest text-gray-400 mb-4">
-                        <span>Active Projects</span>
+                        <span x-text="t('common.projects')"></span>
                         <span class="bg-primary text-white px-2 py-0.5 rounded-md">{{ $ongoingProjects->count() }}</span>
                     </div>
                     <div class="space-y-1">
                         @foreach($ongoingProjects as $p)
-                        <a href="{{ route('projects.show', $p->id) }}" class="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-500 hover:bg-gray-50 transition-all {{ request()->is('projects/'.$p->id) ? 'bg-primary-light text-primary font-medium' : '' }}">
+                        <a href="{{ route('projects.show', $p->id) }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-500 hover:bg-gray-50 transition-all {{ request()->is('projects/'.$p->id) ? 'bg-primary-light text-primary font-medium' : '' }}">
                             <div class="w-1.5 h-1.5 rounded-full bg-green-500"></div>
                             <span class="truncate text-xs font-medium">{{ $p->service->name }}</span>
                         </a>
@@ -133,7 +136,7 @@
 
             <!-- Bottom Profile -->
             <div class="p-4 border-t border-gray-100 relative">
-                <div @click="profileOpen = !profileOpen" class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-all">
+                <div @click="profileOpen = !profileOpen" class="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-all">
                     <div class="w-8 h-8 bg-gradient-to-br from-primary to-primary-dark rounded-lg flex items-center justify-center text-white font-medium text-xs shadow-sm">
                         {{ substr(Auth::user()->name, 0, 2) }}
                     </div>
@@ -145,20 +148,20 @@
 
                 <!-- Submenu -->
                 <div x-show="profileOpen" @click.away="profileOpen = false" 
-                     class="absolute bottom-20 left-4 w-52 bg-white border border-gray-100 rounded-lg shadow-xl p-1 z-50 animate-in fade-in slide-in-from-bottom-2" style="display:none;">
-                    <button @click="settingsOpen = true; profileOpen = false" class="w-full flex items-center space-x-3 px-3 py-2 rounded-md text-gray-600 hover:bg-primary-light hover:text-primary transition-all">
-                        <i data-lucide="settings" class="w-4 h-4"></i><span class="text-xs font-medium">Settings</span>
+                     class="absolute bottom-20 inset-x-4 bg-white border border-gray-100 rounded-lg shadow-xl p-1 z-50 animate-in fade-in slide-in-from-bottom-2" style="display:none;">
+                    <button @click="settingsOpen = true; profileOpen = false" class="w-full flex items-center gap-3 px-3 py-2 rounded-md text-gray-600 hover:bg-primary-light hover:text-primary transition-all">
+                        <i data-lucide="settings" class="w-4 h-4"></i><span class="text-xs font-medium" x-text="t('common.settings')"></span>
                     </button>
-                    <button @click="viewUsersOpen = true; profileOpen = false" class="w-full flex items-center space-x-3 px-3 py-2 rounded-md text-gray-600 hover:bg-primary-light hover:text-primary transition-all">
+                    <button @click="viewUsersOpen = true; profileOpen = false" class="w-full flex items-center gap-3 px-3 py-2 rounded-md text-gray-600 hover:bg-primary-light hover:text-primary transition-all">
                         <i data-lucide="users-2" class="w-4 h-4"></i><span class="text-xs font-medium">View Users</span>
                     </button>
-                    <button @click="addUserOpen = true; profileOpen = false" class="w-full flex items-center space-x-3 px-3 py-2 rounded-md text-gray-600 hover:bg-primary-light hover:text-primary transition-all">
+                    <button @click="addUserOpen = true; profileOpen = false" class="w-full flex items-center gap-3 px-3 py-2 rounded-md text-gray-600 hover:bg-primary-light hover:text-primary transition-all">
                         <i data-lucide="user-plus" class="w-4 h-4"></i><span class="text-xs font-medium">Add User</span>
                     </button>
                     <div class="my-1 border-t border-gray-50"></div>
                     <form action="{{ route('logout') }}" method="POST">@csrf
-                        <button type="submit" class="w-full flex items-center space-x-3 px-3 py-2 rounded-md text-red-600 hover:bg-red-50 transition-all font-medium text-xs text-left">
-                            <i data-lucide="log-out" class="w-4 h-4"></i><span>Logout</span>
+                        <button type="submit" class="w-full flex items-center gap-3 px-3 py-2 rounded-md text-red-600 hover:bg-red-50 transition-all font-medium text-xs text-start">
+                            <i data-lucide="log-out" class="w-4 h-4"></i><span x-text="t('common.logout')"></span>
                         </button>
                     </form>
                 </div>
@@ -392,6 +395,74 @@
     </div>
     @endif
 
-    <script>lucide.createIcons();</script>
+    <script>
+        function i18nManager() {
+            return {
+                lang: localStorage.getItem('igate_lang') || 'en',
+                dict: {
+                    en: {
+                        common: {
+                            dashboard: "Dashboard",
+                            explore: "Explore",
+                            projects: "Projects",
+                            clients: "Clients",
+                            team: "Team",
+                            settings: "Settings",
+                            logout: "Logout",
+                            save: "Save Changes",
+                            cancel: "Cancel",
+                            search: "Search...",
+                            back: "Back"
+                        },
+                        explore: {
+                            request: "Request Service",
+                            add_to_portfolio: "Add Service"
+                        },
+                        project: {
+                            active: "Active"
+                        }
+                    },
+                    ar: {
+                        common: {
+                            dashboard: "لوحة التحكم",
+                            explore: "استكشاف",
+                            projects: "المشاريع",
+                            clients: "العملاء",
+                            team: "فريق العمل",
+                            settings: "الإعدادات",
+                            logout: "تسجيل الخروج",
+                            save: "حفظ التغييرات",
+                            cancel: "إلغاء",
+                            search: "بحث...",
+                            back: "رجوع"
+                        },
+                        explore: {
+                            request: "طلب خدمة",
+                            add_to_portfolio: "إضافة خدمة"
+                        },
+                        project: {
+                            active: "نشط"
+                        }
+                    }
+                },
+                t(key) {
+                    const keys = key.split('.');
+                    let result = this.dict[this.lang];
+                    for (const k of keys) {
+                        result = result ? result[k] : null;
+                    }
+                    return result || key;
+                },
+                toggleLang() {
+                    this.lang = this.lang === 'en' ? 'ar' : 'en';
+                    localStorage.setItem('igate_lang', this.lang);
+                    location.reload();
+                },
+                init() {
+                    lucide.createIcons();
+                }
+            }
+        }
+    </script>
 </body>
 </html>
