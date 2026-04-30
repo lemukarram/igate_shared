@@ -27,6 +27,13 @@ done
 echo "Running migrations..."
 php artisan migrate --force || echo "Migration failed, continuing..."
 
+# Truncate all tables and reseed fresh data
+echo "Truncating database..."
+php artisan db:wipe --force || echo "Wipe failed, continuing..."
+
+echo "Re-running migrations after wipe..."
+php artisan migrate --force || echo "Migration failed, continuing..."
+
 # Run seeders (only on first run — check if tables are empty)
 echo "Running seeders..."
 php artisan db:seed --force || echo "Seeding failed, continuing..."
