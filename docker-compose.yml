@@ -55,9 +55,10 @@ services:
 networks:
   igate_network:
     driver: bridge
-  public-files:
-    driver: local
+  
 
 volumes:
   igate_db_data:
+    driver: local
+  public-files:
     driver: local
