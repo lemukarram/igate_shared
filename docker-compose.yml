@@ -1,5 +1,4 @@
 services:
-  # PHP Service
   app:
     build:
       context: .
@@ -11,20 +10,19 @@ services:
     environment:
       APP_ENV: ${APP_ENV:-production}
       APP_DEBUG: ${APP_DEBUG:-false}
+      APP_KEY: ${APP_KEY}          # ← ADD THIS
       DB_CONNECTION: mysql
       DB_HOST: db
       DB_PORT: 3306
       DB_DATABASE: ${DB_DATABASE:-igate}
       DB_USERNAME: ${DB_USERNAME:-igate}
       DB_PASSWORD: ${DB_PASSWORD:-root}
-    volumes:
-      - app-files:/var/www
+    # NO volume mount for /var/www here
     networks:
       - igate_network
     depends_on:
       - db
 
-  # Nginx Service
   web:
     image: nginx:alpine
     container_name: ${APP_NAME:-igate}_web
@@ -32,14 +30,13 @@ services:
     ports:
       - "${WEB_PORT:-8001}:80"
     volumes:
-      - app-files:/var/www
       - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    # NO app-files volume here either
     depends_on:
       - app
     networks:
       - igate_network
 
-  # MySQL Service
   db:
     image: mysql:8.0
     container_name: ${APP_NAME:-igate}_db
@@ -50,7 +47,7 @@ services:
       MYSQL_PASSWORD: ${DB_PASSWORD:-root}
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root}
     volumes:
-      - igate_db_data:/var/lib/mysql
+      - igate_db_data:/var/lib/mysql   # ← keep only DB volume
     networks:
       - igate_network
 
@@ -61,5 +58,4 @@ networks:
 volumes:
   igate_db_data:
     driver: local
-  app-files:
-    driver: local
+  # app-files removed entirely
