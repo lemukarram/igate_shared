@@ -26,16 +26,16 @@ services:
       db:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "php-fpm -t && echo ok"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 60s
+      test: ["CMD-SHELL", "cat /proc/net/tcp | grep 2328 || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 90s
 
   web:
     image: nginx:alpine
     container_name: ${APP_NAME:-igate}_web
-    restart: unless-stopped
+    restart: always
     ports:
       - "${WEB_PORT:-8001}:80"
     volumes:
