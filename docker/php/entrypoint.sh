@@ -23,20 +23,19 @@ until php artisan db:show > /dev/null 2>&1; do
     sleep 3
 done
 
-# Run migrations
-echo "Running migrations..."
-php artisan migrate --force || echo "Migration failed, continuing..."
-
-# Truncate all tables and reseed fresh data
-echo "Truncating database..."
-php artisan db:wipe --force || echo "Wipe failed, continuing..."
-
-echo "Re-running migrations after wipe..."
-php artisan migrate --force || echo "Migration failed, continuing..."
-
-# Run seeders (only on first run — check if tables are empty)
-echo "Running seeders..."
-php artisan db:seed --force || echo "Seeding failed, continuing..."
+# Fresh wipe + migrate + seed only if DB_SEED=true
+if [ "$DB_SEED" = "true" ]; then
+    echo "DB_SEED=true detected — wiping database..."
+    php artisan db:wipe --force || echo "Wipe failed, continuing..."
+    echo "Running migrations..."
+    php artisan migrate --force || echo "Migration failed, continuing..."
+    echo "Running seeders..."
+    php artisan db:seed --force || echo "Seeding failed, continuing..."
+else
+    # Normal deploy — just migrate, never touch existing data
+    echo "Running migrations..."
+    php artisan migrate --force || echo "Migration failed, continuing..."
+fi
 
 # Cache for production
 if [ "$APP_ENV" = "production" ]; then
