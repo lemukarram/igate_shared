@@ -33,6 +33,7 @@ WORKDIR /var/www
 
 # Copy existing application directory contents
 COPY . /var/www
+COPY docker/php/www.conf /usr/local/etc/php-fpm.d/www.conf
 
 # Copy entrypoint script
 COPY docker/php/entrypoint.sh /usr/local/bin/entrypoint.sh
