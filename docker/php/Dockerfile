@@ -31,6 +31,9 @@ RUN chown -R www-data:www-data /var/www
 # Copy FPM config
 COPY docker/php/www.conf /usr/local/etc/php-fpm.d/www.conf
 
+# Override the default zz-docker.conf to force IPv4
+RUN echo '[www]\nlisten = 0.0.0.0:9000' > /usr/local/etc/php-fpm.d/zz-docker.conf
+
 # Copy entrypoint
 COPY docker/php/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
