@@ -21,6 +21,7 @@ services:
       - public-files:/var/www/public
     networks:
       - igate_network
+      - dokploy-network
     depends_on:
       db:
         condition: service_healthy
@@ -45,6 +46,7 @@ services:
         condition: service_healthy
     networks:
       - igate_network
+      - dokploy-network
 
   db:
     image: mysql:8.0
@@ -69,6 +71,8 @@ services:
 networks:
   igate_network:
     driver: bridge
+  dokploy-network:
+    external: true
 
 volumes:
   igate_db_data:
