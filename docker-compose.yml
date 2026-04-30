@@ -22,7 +22,14 @@ services:
     networks:
       - igate_network
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "php-fpm -t && echo ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
 
   web:
     image: nginx:alpine
@@ -34,7 +41,8 @@ services:
       - public-files:/var/www/public
       - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
     depends_on:
-      - app
+      app:
+        condition: service_healthy
     networks:
       - igate_network
 
@@ -51,11 +59,16 @@ services:
       - igate_db_data:/var/lib/mysql
     networks:
       - igate_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD:-root}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
 networks:
   igate_network:
     driver: bridge
-  
 
 volumes:
   igate_db_data:
