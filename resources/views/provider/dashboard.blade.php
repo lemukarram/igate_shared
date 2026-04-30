@@ -1,15 +1,33 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="w-full max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-6 duration-700" x-data="{ lang: localStorage.getItem('igate_lang') || 'en' }">
-    <div class="flex items-center justify-between">
+<div class="w-full max-w-7xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-6 duration-700">
+    <div class="flex items-center justify-between" x-data="{ statusModalOpen: false }">
         <div>
             <h1 class="text-4xl font-black text-gray-900 tracking-tight" x-text="lang === 'ar' ? 'لوحة التحكم' : 'Dashboard'"></h1>
             <p class="text-gray-500 font-medium mt-1 text-lg" x-text="lang === 'ar' ? 'نظرة عامة فورية على أداء وكالتك.' : 'Real-time overview of your agency\'s performance.'"></p>
         </div>
         <div class="flex items-center gap-3">
-            <span class="px-4 py-2 bg-green-50 text-green-600 rounded-xl text-sm font-black uppercase tracking-widest border border-green-100" 
-                  x-text="lang === 'ar' ? 'الحالة المباشرة: نشط' : 'Live Status: Active'"></span>
+            <button @click="statusModalOpen = true" class="px-4 py-2 bg-green-50 text-green-600 rounded-[0.5rem] text-sm font-black uppercase tracking-widest border border-green-100 hover:bg-green-100 transition-all" 
+                  x-text="lang === 'ar' ? 'الحالة المباشرة: نشط' : 'Live Status: Active'"></button>
+        </div>
+
+        <!-- Status Toggle Modal -->
+        <div x-show="statusModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center" style="display: none;">
+            <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="statusModalOpen = false"></div>
+            <div class="bg-white w-full max-w-sm rounded-xl shadow-2xl relative z-10 p-6 border border-gray-100">
+                <h2 class="text-xl font-bold mb-4" x-text="lang === 'ar' ? 'تغيير حالة التواجد' : 'Change Live Status'"></h2>
+                <div class="space-y-2">
+                    <button @click="statusModalOpen = false" class="w-full flex items-center gap-3 p-3 border border-gray-100 rounded-lg cursor-pointer hover:bg-gray-50 text-green-600 font-bold">
+                        <div class="w-2 h-2 rounded-full bg-green-500"></div>
+                        <span x-text="lang === 'ar' ? 'نشط' : 'Active'"></span>
+                    </button>
+                    <button @click="statusModalOpen = false" class="w-full flex items-center gap-3 p-3 border border-gray-100 rounded-lg cursor-pointer hover:bg-gray-50 text-gray-400 font-bold">
+                        <div class="w-2 h-2 rounded-full bg-gray-300"></div>
+                        <span x-text="lang === 'ar' ? 'غير نشط' : 'Inactive'"></span>
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 

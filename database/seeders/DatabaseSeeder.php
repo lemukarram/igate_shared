@@ -16,8 +16,26 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        // Seed Service Categories
+        $categories = [
+            ['name' => 'HR & Recruitment', 'slug' => 'hr-recruitment'],
+            ['name' => 'Financial Services', 'slug' => 'financial-services'],
+            ['name' => 'Legal & Compliance', 'slug' => 'legal-compliance'],
+            ['name' => 'Marketing & Sales', 'slug' => 'marketing-sales'],
+        ];
+
+        foreach ($categories as $cat) {
+            \App\Models\ServiceCategory::firstOrCreate(['slug' => $cat['slug']], $cat);
+        }
+
         // 1. Seed Services (12 Fixed Catalog)
         $this->call(ServiceSeeder::class);
+
+        // Link services to categories (Mock)
+        $cats = \App\Models\ServiceCategory::all();
+        \App\Models\Service::all()->each(function($s) use ($cats) {
+            $s->update(['service_category_id' => $cats->random()->id]);
+        });
 
         // Seed Plans
         $providerPlans = [

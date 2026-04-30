@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-7xl w-full p-4 mx-auto" x-data="{ lang: localStorage.getItem('igate_lang') || 'en' }">
+<div class="max-w-7xl w-full p-4 mx-auto">
     <!-- Header -->
     <div class="mb-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
         <h1 class="text-4xl font-black text-gray-900 tracking-tight" x-text="lang === 'ar' ? 'استكشاف الخدمات' : 'Explore Services'"></h1>
@@ -17,9 +17,12 @@
 
     <!-- Filter Pills -->
     <div class="flex overflow-x-auto pb-4 mb-8 gap-3 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200 no-scrollbar">
-        <button class="whitespace-nowrap px-6 py-2.5 rounded-full text-sm font-bold bg-gray-900 text-white shadow-lg shadow-gray-200 transition-all" x-text="lang === 'ar' ? 'جميع الخدمات' : 'All Services'"></button>
+        <a href="{{ route('explore.index') }}" 
+           class="whitespace-nowrap px-6 py-2.5 rounded-[0.5rem] text-sm font-bold {{ !request('category') ? 'bg-gray-900 text-white shadow-lg shadow-gray-200' : 'bg-white text-gray-500 border border-gray-100 hover:border-primary/20 hover:text-primary hover:bg-primary-light' }} transition-all" 
+           x-text="lang === 'ar' ? 'جميع الخدمات' : 'All Services'"></a>
         @foreach($categories as $category)
-            <button class="whitespace-nowrap px-6 py-2.5 rounded-full text-sm font-bold bg-white text-gray-500 border border-gray-100 hover:border-primary/20 hover:text-primary hover:bg-primary-light transition-all">{{ $category->category }}</button>
+            <a href="{{ route('explore.index', ['category' => $category->slug]) }}" 
+               class="whitespace-nowrap px-6 py-2.5 rounded-[0.5rem] text-sm font-bold {{ request('category') === $category->slug ? 'bg-gray-900 text-white shadow-lg shadow-gray-200' : 'bg-white text-gray-500 border border-gray-100 hover:border-primary/20 hover:text-primary hover:bg-primary-light' }} transition-all">{{ $category->name }}</a>
         @endforeach
     </div>
 

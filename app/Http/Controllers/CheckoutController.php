@@ -21,15 +21,15 @@ class CheckoutController extends Controller
 
     public function process(Request $request)
     {
-        $request->validate([
+        $user = Auth::user();
+        if ($user->plan && $user->projects()->count() >= $user->plan->max_projects) {
+            return redirect()->back()->withErrors(['error' => 'You have reached the maximum number of projects allowed by your client plan. Please upgrade to request more services.']);
+        }
+
+        $validated = $request->validate([
             'provider_service_id' => 'required|exists:provider_services,id',
             'company_id' => 'required|exists:companies,id',
         ]);
-
-        $user = Auth::user();
-        if ($user->plan && $user->projects()->count() >= $user->plan->max_projects) {
-            return redirect()->back()->withErrors(['error' => 'You have reached the maximum number of projects allowed by your plan. Please upgrade to continue.']);
-        }
 
         $ps = ProviderService::findOrFail($request->provider_service_id);
 

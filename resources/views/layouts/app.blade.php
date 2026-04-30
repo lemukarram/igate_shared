@@ -27,7 +27,7 @@
         
         /* Restricted Border Radius and Theme Color Overrides */
         * { 
-            border-radius: 0.25rem !important; 
+            border-radius: 0.5rem !important; 
         }
         .rounded-full, .rounded-full * { border-radius: 9999px !important; }
         
@@ -52,7 +52,7 @@
         [dir="rtl"] .flip-rtl { transform: scaleX(-1); }
     </style>
 </head>
-<body class="bg-white text-gray-900 overflow-hidden" x-init="init()">
+<body class="bg-white text-gray-900 overflow-hidden" x-data="i18nManager()" x-init="init()">
     <div class="flex h-screen">
         <!-- Sidebar -->
         <div class="w-64 border-e border-gray-100 flex flex-col h-full bg-white">
@@ -67,7 +67,7 @@
                         <span x-text="t('explore.request')"></span>
                     </a>
                 @elseif(Auth::user()->role === 'provider')
-                    <button @click="addServiceOpen = true" class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition-all font-medium shadow-sm">
+                    <button @click="addServiceOpen = true" class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-primary text-white rounded-[0.5rem] hover:bg-primary-dark transition-all font-medium shadow-sm">
                         <i data-lucide="plus" class="w-4 h-4"></i>
                         <span x-text="t('explore.add_to_portfolio')"></span>
                     </button>
@@ -218,7 +218,7 @@
                                 <div class="space-y-1"><label class="text-[10px] font-black uppercase tracking-widest text-gray-400">Email Address</label><input type="email" name="email" value="{{ Auth::user()->email }}" class="w-full px-4 py-2.5 border border-gray-100 bg-gray-50 rounded-lg outline-none focus:ring-4 focus:ring-primary/10 text-sm font-medium"></div>
                                 <div class="space-y-1"><label class="text-[10px] font-black uppercase tracking-widest text-gray-400">Phone Number</label><input type="text" name="phone" value="{{ Auth::user()->phone ?? '+966 50 000 0000' }}" class="w-full px-4 py-2.5 border border-gray-100 bg-gray-50 rounded-lg outline-none focus:ring-4 focus:ring-primary/10 text-sm font-medium"></div>
                                 <div class="pt-2 flex justify-end">
-                                    <button type="submit" class="px-6 py-2 bg-[#3da9e4] text-white rounded-md font-medium text-xs hover:bg-[#2b8bc2] transition-all">Save Account</button>
+                                    <button type="submit" class="px-6 py-2 bg-[#3da9e4] text-white rounded-md font-medium text-xs hover:bg-[#2b8bc2] transition-all" x-text="lang === 'ar' ? 'حفظ التغييرات' : 'Save Changes'"></button>
                                 </div>
                             </form>
                         </div>
@@ -306,7 +306,7 @@
                                     @endforeach
                                 </div>
                                 <div class="pt-2 flex justify-end">
-                                    <button type="submit" class="px-6 py-2 bg-[#3da9e4] text-white rounded-md font-medium text-xs hover:bg-[#2b8bc2] transition-all">Update Plan</button>
+                                    <button type="submit" class="px-6 py-2 bg-[#3da9e4] text-white rounded-md font-medium text-xs hover:bg-[#2b8bc2] transition-all" x-text="lang === 'ar' ? 'حفظ التغييرات' : 'Save Changes'"></button>
                                 </div>
                             </form>
                         </div>
@@ -332,7 +332,7 @@
                         </div>
                     </div>
                     <div class="pt-6 border-t border-gray-50 flex justify-end">
-                        <button class="px-6 py-2 bg-gray-900 text-white rounded-md font-medium text-xs hover:bg-black transition-all">Save Changes</button>
+                        <button class="px-6 py-2 bg-gray-900 text-white rounded-md font-medium text-xs hover:bg-black transition-all" x-text="lang === 'ar' ? 'حفظ التغييرات' : 'Save Changes'"></button>
                     </div>
                 </div>
             </div>
@@ -407,54 +407,16 @@
                 profileOpen: false,
                 dict: {
                     en: {
-                        common: {
-                            dashboard: "Dashboard",
-                            explore: "Explore",
-                            projects: "Projects",
-                            clients: "Clients",
-                            team: "Team",
-                            settings: "Settings",
-                            logout: "Logout",
-                            save: "Save Changes",
-                            cancel: "Cancel",
-                            search: "Search...",
-                            back: "Back",
-                            upload: "Upload",
-                            view_users: "View Users",
-                            add_user: "Add User"
-                        },
-                        explore: {
-                            request: "Request Service",
-                            add_to_portfolio: "Add Service"
-                        },
-                        project: {
-                            active: "Active"
-                        }
+                        common: @json(Lang::get('common', [], 'en')),
+                        explore: @json(Lang::get('explore', [], 'en')),
+                        project: @json(Lang::get('project', [], 'en')),
+                        tasks: @json(Lang::get('tasks', [], 'en'))
                     },
                     ar: {
-                        common: {
-                            dashboard: "لوحة التحكم",
-                            explore: "استكشاف",
-                            projects: "المشاريع",
-                            clients: "العملاء",
-                            team: "فريق العمل",
-                            settings: "الإعدادات",
-                            logout: "تسجيل الخروج",
-                            save: "حفظ التغييرات",
-                            cancel: "إلغاء",
-                            search: "بحث...",
-                            back: "رجوع",
-                            upload: "رفع",
-                            view_users: "عرض المستخدمين",
-                            add_user: "إضافة مستخدم"
-                        },
-                        explore: {
-                            request: "طلب خدمة",
-                            add_to_portfolio: "إضافة خدمة"
-                        },
-                        project: {
-                            active: "نشط"
-                        }
+                        common: @json(Lang::get('common', [], 'ar')),
+                        explore: @json(Lang::get('explore', [], 'ar')),
+                        project: @json(Lang::get('project', [], 'ar')),
+                        tasks: @json(Lang::get('tasks', [], 'ar'))
                     }
                 },
                 t(key) {

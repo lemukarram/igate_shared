@@ -209,8 +209,8 @@
                         </div>
                     </div>
                     <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50">
-                        <button type="button" @click="showModal = false" class="px-5 py-2.5 text-gray-600 bg-white border border-gray-200 rounded-lg font-medium text-sm hover:bg-gray-100" x-text="t('common.cancel')"></button>
-                        <button type="submit" class="px-5 py-2.5 bg-[#3da9e4] text-white rounded-lg font-medium text-sm hover:bg-[#2b8bc2]" x-text="editMode ? (lang === 'ar' ? 'تحديث' : 'Update') : (lang === 'ar' ? 'حفظ' : 'Save')"></button>
+                        <button type="button" @click="showModal = false" class="px-5 py-2.5 text-gray-600 bg-white border border-gray-200 rounded-lg font-medium text-sm hover:bg-gray-100" x-text="lang === 'ar' ? 'إلغاء' : 'Cancel'"></button>
+                        <button type="submit" class="px-5 py-2.5 bg-[#3da9e4] text-white rounded-lg font-medium text-sm hover:bg-[#2b8bc2]" x-text="editMode ? (lang === 'ar' ? 'تحديث' : 'Update Task') : (lang === 'ar' ? 'حفظ التغييرات' : 'Save Changes')"></button>
                     </div>
                 </form>
             </div>
@@ -241,31 +241,12 @@
 <script>
     function taskManager() {
         return {
-            lang: localStorage.getItem('igate_lang') || 'en',
             showModal: false,
             editMode: false,
             draggedTaskId: null,
             dragOverColumn: null,
             currentTask: {},
             formData: { title: '', description: '', assigned_to: '', due_date: '', priority: 'normal', status: 'todo' },
-            dict: {
-                en: {
-                    common: { team: "Team Tasks", priority: "Priority", status: "Status", cancel: "Cancel" },
-                    tasks: { todo: "Preparation", in_progress: "Execution", review: "Review", done: "Validation", urgent: "Urgent", high: "High", normal: "Normal", assigned_to: "Assigned To" },
-                    project: { history: "Task History" }
-                },
-                ar: {
-                    common: { team: "مهام الفريق", priority: "الأولوية", status: "الحالة", cancel: "إلغاء" },
-                    tasks: { todo: "تحضير", in_progress: "تنفيذ", review: "مراجعة", done: "اعتماد", urgent: "عاجل", high: "مرتفع", normal: "عادي", assigned_to: "مكلف إلى" },
-                    project: { history: "سجل التحديثات" }
-                }
-            },
-            t(key) {
-                const keys = key.split('.');
-                let result = this.dict[this.lang];
-                for (const k of keys) result = result ? result[k] : null;
-                return result || key;
-            },
             openCreateModal() {
                 this.editMode = false;
                 this.formData = { title: '', description: '', assigned_to: '', due_date: '', priority: 'normal', status: 'todo' };

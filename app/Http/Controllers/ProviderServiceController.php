@@ -78,8 +78,48 @@ class ProviderServiceController extends Controller
             ->where('client_id', $id)
             ->with('service')
             ->get();
+        
+        $activities = \App\Models\ClientActivity::where('client_id', $id)
+            ->where('provider_id', Auth::id())
+            ->latest()
+            ->take(10)
+            ->get();
             
-        return view('provider.clients.show', compact('client', 'projects'));
+        return view('provider.clients.show', compact('client', 'projects', 'activities'));
+    }
+
+    public function storeReleaseRequest(Request $request)
+    {
+        $validated = $request->validate([
+            'project_id' => 'required|exists:projects,id',
+            'amount' => 'required|numeric|min:0.01',
+            'notes' => 'nullable|string',
+        ]);
+
+        $project = \App\Models\Project::findOrFail($validated['project_id']);
+        
+        if ($project->provider_id !== Auth::id()) {
+            abort(403);
+        }
+
+        \App\Models\ReleaseRequest::create([
+            'project_id' => $project->id,
+            'provider_id' => Auth::id(),
+            'amount' => $validated['amount'],
+            'notes' => $validated['notes'],
+            'status' => 'pending',
+        ]);
+
+        // Record activity
+        \App\Models\ClientActivity::create([
+            'client_id' => $project->client_id,
+            'provider_id' => Auth::id(),
+            'project_id' => $project->id,
+            'activity_type' => 'release_requested',
+            'description' => 'Provider requested a payment release of ' . number_format($validated['amount'], 2) . ' SAR.',
+        ]);
+
+        return redirect()->back()->with('success', 'Release request sent successfully.');
     }
 
     public function teamTasks()

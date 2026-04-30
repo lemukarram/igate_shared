@@ -11,10 +11,18 @@ use Illuminate\Support\Facades\Auth;
 
 class MarketplaceController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $categories = Service::select('category')->distinct()->get();
-        $services = Service::all();
+        $categories = \App\Models\ServiceCategory::all();
+        $query = Service::query();
+
+        if ($request->has('category')) {
+            $query->whereHas('serviceCategory', function($q) use ($request) {
+                $q->where('slug', $request->category);
+            });
+        }
+
+        $services = $query->get();
         return view('client.explore.index', compact('categories', 'services'));
     }
 

@@ -41,6 +41,23 @@ class ProjectController extends Controller
         return view('projects.show', compact('project', 'messages'));
     }
 
+    public function updateStatus(Request $request, $id)
+    {
+        $project = Project::findOrFail($id);
+        
+        if (Auth::user()->role !== 'admin' && Auth::id() !== $project->provider_id) {
+            abort(403);
+        }
+
+        $request->validate([
+            'status' => 'required|in:active,inactive',
+        ]);
+
+        $project->update(['status' => $request->status]);
+
+        return redirect()->back()->with('success', 'Project status updated successfully.');
+    }
+
     public function sendMessage(Request $request, $id)
     {
         $request->validate([

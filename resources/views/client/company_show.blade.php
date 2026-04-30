@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-7xl w-full space-y-8 animate-in fade-in duration-700" x-data="{ lang: localStorage.getItem('igate_lang') || 'en' }">
+<div class="max-w-7xl w-full space-y-8 animate-in fade-in duration-700">
     <div class="flex items-center gap-4">
         <a href="{{ route('client.portfolio') }}" class="w-10 h-10 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-900 transition-colors">
             <i data-lucide="arrow-left" class="w-5 h-5 flip-rtl"></i>

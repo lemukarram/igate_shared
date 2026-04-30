@@ -62,6 +62,7 @@ Route::middleware(['auth', 'App\Http\Middleware\EnsureProviderIsOnboarded'])->gr
     // Provider Specifics
     Route::get('/provider/clients', [ProviderServiceController::class, 'clients'])->name('provider.clients');
     Route::get('/provider/clients/{id}', [ProviderServiceController::class, 'clientShow'])->name('provider.clients.show');
+    Route::post('/provider/release-requests', [ProviderServiceController::class, 'storeReleaseRequest'])->name('provider.release-requests.store');
     
     // Team Tasks
     Route::get('/provider/team-tasks', [App\Http\Controllers\TeamTaskController::class, 'index'])->name('provider.team_tasks');
@@ -86,6 +87,7 @@ Route::middleware(['auth', 'App\Http\Middleware\EnsureProviderIsOnboarded'])->gr
 
     // Project Workspace
     Route::get('/projects/{id}', [ProjectController::class, 'show'])->name('projects.show');
+    Route::patch('/projects/{id}/status', [ProjectController::class, 'updateStatus'])->name('projects.update-status');
     Route::post('/projects/{id}/messages', [ProjectController::class, 'sendMessage'])->name('projects.messages.store');
 
     // Settings

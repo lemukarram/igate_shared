@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-7xl w-full space-y-8 animate-in fade-in duration-700" x-data="{ lang: localStorage.getItem('igate_lang') || 'en' }">
+<div class="max-w-7xl w-full space-y-8 animate-in fade-in duration-700">
     <div class="flex items-center justify-between">
         <div>
             <h1 class="text-2xl font-bold text-gray-900" x-text="lang === 'ar' ? 'قائمة العملاء' : 'My Clients'"></h1>

@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-7xl w-full space-y-8 animate-in fade-in duration-700" x-data="{ lang: localStorage.getItem('igate_lang') || 'en' }">
+<div class="max-w-7xl w-full space-y-8 animate-in fade-in duration-700">
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
             <h1 class="text-3xl font-bold text-gray-900" x-text="lang === 'ar' ? 'ملفي المهني وشركاتي' : 'My Portfolio & Companies'"></h1>
@@ -59,7 +59,7 @@
 </div>
 
 <!-- Modal Localization -->
-<div id="add-company-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center hidden" x-data="{ lang: localStorage.getItem('igate_lang') || 'en' }">
+<div id="add-company-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center hidden">
     <div class="bg-white rounded-[2.5rem] p-10 max-w-md w-full mx-4 shadow-2xl animate-in zoom-in duration-300">
         <div class="flex items-center justify-between mb-8">
             <h3 class="text-2xl font-bold text-gray-900" x-text="lang === 'ar' ? 'إضافة شركة جديدة' : 'Add New Company'"></h3>

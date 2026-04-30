@@ -1,15 +1,15 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-7xl w-full space-y-8 animate-in fade-in duration-700" x-data="{ lang: localStorage.getItem('igate_lang') || 'en' }">
+<div class="max-w-7xl w-full space-y-8 animate-in fade-in duration-700">
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900" x-text="lang === 'ar' ? 'خدماتي وعروضي' : 'My Services & Portfolio'"></h1>
+            <h1 class="text-2xl font-bold text-gray-900" x-text="lang === 'ar' ? 'خدماتي' : 'My Services'"></h1>
             <p class="text-gray-500 mt-1" x-text="lang === 'ar' ? 'إدارة الأسعار ونطاق التسليم لكل خدمة تقدمها.' : 'Manage pricing and delivery scope for each standardized service you provide.'"></p>
         </div>
         <button @click="addServiceOpen = true" class="px-6 py-3 bg-primary text-white rounded-xl font-bold hover:bg-primary-dark transition-all flex items-center gap-2 shadow-lg shadow-primary/20">
             <i data-lucide="plus" class="w-5 h-5"></i>
-            <span x-text="lang === 'ar' ? 'إضافة خدمة جديدة' : 'Add New Service'"></span>
+            <span x-text="{{ __(common.active)}}"></span>
         </button>
     </div>
 
@@ -18,7 +18,7 @@
         <div class="lg:col-span-2 space-y-6">
             <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
                 <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-500"></i>
-                <span x-text="lang === 'ar' ? 'الخدمات النشطة' : 'Active Offerings'"></span>
+                <span x-text="lang === 'ar' ? 'خدماتي' : 'My Services'"></span>
             </h2>
             
             <div class="grid grid-cols-2 gap-4">

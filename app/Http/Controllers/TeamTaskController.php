@@ -59,6 +59,7 @@ class TeamTaskController extends Controller
                 \App\Models\Document::create([
                     'task_id' => $task->id,
                     'user_id' => Auth::id(),
+                    'project_id' => $task->project_id ?? null,
                     'name' => $file->getClientOriginalName(),
                     'file_path' => $path,
                     'file_type' => $file->getClientMimeType(),
@@ -121,6 +122,7 @@ class TeamTaskController extends Controller
                 \App\Models\Document::create([
                     'task_id' => $task->id,
                     'user_id' => Auth::id(),
+                    'project_id' => $task->project_id ?? null,
                     'name' => $file->getClientOriginalName(),
                     'file_path' => $path,
                     'file_type' => $file->getClientMimeType(),

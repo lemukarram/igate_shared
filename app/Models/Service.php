@@ -9,11 +9,16 @@ class Service extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'description', 'subtasks', 'category', 'icon'];
+    protected $fillable = ['name', 'description', 'subtasks', 'category', 'service_category_id', 'icon'];
 
     protected $casts = [
         'subtasks' => 'array',
     ];
+
+    public function serviceCategory()
+    {
+        return $this->belongsTo(ServiceCategory::class);
+    }
 
     public function providerServices()
     {

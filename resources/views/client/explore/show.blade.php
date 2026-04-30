@@ -1,10 +1,10 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-6xl w-full space-y-8 p-4" x-data="{ lang: localStorage.getItem('igate_lang') || 'en' }">
+<div class="max-w-6xl w-full space-y-8 p-4">
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div class="flex items-center gap-4">
-            <a href="{{ route('explore.index') }}" class="w-10 h-10 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-900 transition-colors">
+            <a href="{{ auth()->user()->role === 'provider' ? route('provider.services.index') : route('explore.index') }}" class="w-10 h-10 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-900 transition-colors">
                 <i data-lucide="arrow-left" class="w-5 h-5 flip-rtl"></i>
             </a>
             <div>
