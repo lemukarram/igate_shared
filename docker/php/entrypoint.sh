@@ -1,5 +1,13 @@
 #!/bin/sh
 
+
+# If volume is empty (first run), files are already here from image build
+# If public/index.php is missing, something is wrong
+if [ ! -f "/var/www/public/index.php" ]; then
+    echo "ERROR: /var/www/public/index.php not found!"
+    exit 1
+fi
+
 cd /var/www
 
 # Generate key if not set
