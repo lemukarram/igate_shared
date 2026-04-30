@@ -18,7 +18,8 @@ services:
       DB_USERNAME: ${DB_USERNAME:-igate}
       DB_PASSWORD: ${DB_PASSWORD:-root}
     volumes:
-      - app-files:/var/www        # ✅ app writes files here
+      - app-files:/var/www           # app only
+      - public-files:/var/www/public # shared with nginx
     networks:
       - igate_network
     depends_on:
@@ -31,7 +32,7 @@ services:
     ports:
       - "${WEB_PORT:-8001}:80"
     volumes:
-      - app-files:/var/www        # ✅ nginx reads files from same volume
+      - public-files:/var/www/public
       - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - app
@@ -60,4 +61,6 @@ volumes:
   igate_db_data:
     driver: local
   app-files:
+    driver: local
+  public-files:
     driver: local
