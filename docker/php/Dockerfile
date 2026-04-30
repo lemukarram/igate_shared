@@ -1,48 +1,40 @@
 FROM php:8.2-fpm
 
-# Set environment variables
 ENV ASUSER=www-data
 ENV UID=33
 ENV GID=33
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
-    git \
-    curl \
-    libpng-dev \
-    libonig-dev \
-    libxml2-dev \
-    zip \
-    unzip \
-    libzip-dev \
-    libicu-dev \
-    libpq-dev
-
-# Clear cache
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+    git curl libpng-dev libonig-dev libxml2-dev \
+    zip unzip libzip-dev libicu-dev libpq-dev \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions
 RUN docker-php-ext-configure intl \
     && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip intl opcache
 
-# Get latest Composer
+# Get Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Set working directory
 WORKDIR /var/www
 
-# Copy existing application directory contents
+# Copy app files
 COPY . /var/www
+
+# ✅ Run composer install at BUILD TIME as root (before chown)
+RUN composer install --no-interaction --optimize-autoloader --no-dev
+
+# Fix permissions
+RUN chown -R www-data:www-data /var/www
+
+# Copy FPM config
 COPY docker/php/www.conf /usr/local/etc/php-fpm.d/www.conf
 
-# Copy entrypoint script
+# Copy entrypoint
 COPY docker/php/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
-# Fix permissions for Laravel
-RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
-
-# Switch to non-root user
 USER www-data
 
 ENTRYPOINT ["entrypoint.sh"]
