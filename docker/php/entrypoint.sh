@@ -27,6 +27,10 @@ done
 echo "Running migrations..."
 php artisan migrate --force || echo "Migration failed, continuing..."
 
+# Run seeders (only on first run — check if tables are empty)
+echo "Running seeders..."
+php artisan db:seed --force || echo "Seeding failed, continuing..."
+
 # Cache for production
 if [ "$APP_ENV" = "production" ]; then
     php artisan config:cache || echo "Config cache failed, continuing..."
