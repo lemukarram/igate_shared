@@ -16,9 +16,21 @@ class MarketplaceController extends Controller
         $categories = \App\Models\ServiceCategory::all();
         $query = Service::query();
 
-        if ($request->has('category')) {
+        if ($request->filled('category')) {
             $query->whereHas('serviceCategory', function($q) use ($request) {
                 $q->where('slug', $request->category);
+            });
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%$search%")
+                  ->orWhere('description', 'like', "%$search%")
+                  ->orWhere('subtasks', 'like', "%$search%")
+                  ->orWhereHas('serviceCategory', function($sq) use ($search) {
+                      $sq->where('name', 'like', "%$search%");
+                  });
             });
         }
 

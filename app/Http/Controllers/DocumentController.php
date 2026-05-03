@@ -19,7 +19,7 @@ class DocumentController extends Controller
             $file = $request->file('file');
             $path = $file->store('documents', 'public');
 
-            Document::create([
+            $doc = Document::create([
                 'project_id' => $request->project_id,
                 'user_id' => Auth::id(),
                 'name' => $file->getClientOriginalName(),
@@ -27,6 +27,17 @@ class DocumentController extends Controller
                 'file_type' => $file->getClientMimeType(),
                 'file_size' => $file->getSize(),
             ]);
+
+            $project = \App\Models\Project::find($request->project_id);
+            if ($project) {
+                \App\Models\ClientActivity::create([
+                    'client_id' => $project->client_id,
+                    'provider_id' => $project->provider_id,
+                    'project_id' => $project->id,
+                    'activity_type' => 'document_uploaded',
+                    'description' => 'A new document was uploaded: ' . $doc->name,
+                ]);
+            }
         }
 
         return redirect()->back()->with('success', 'Document uploaded to vault.');

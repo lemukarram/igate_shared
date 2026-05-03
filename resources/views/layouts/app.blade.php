@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ config('app.name', 'iGate Shared Services') }}</title>
+    <!-- Use Tailwind via CDN but with production-ready base setup -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -21,13 +22,16 @@
         }
     </script>
     <style>
-        @font-face { font-family: 'Poppins'; src: url('/fonts/Poppins/Poppins-Light.ttf') format('truetype'); font-weight: 300; }
-        @font-face { font-family: 'Poppins'; src: url('/fonts/Poppins/Poppins-Regular.ttf') format('truetype'); font-weight: 400; }
-        @font-face { font-family: 'Poppins'; src: url('/fonts/Poppins/Poppins-Medium.ttf') format('truetype'); font-weight: 500; }
+        @font-face { font-family: 'Poppins'; src: url('/fonts/Poppins/Poppins-Light.woff') format('woff'); font-weight: 300; }
+        @font-face { font-family: 'Poppins'; src: url('/fonts/Poppins/Poppins-Regular.woff') format('woff'); font-weight: 400; }
+        @font-face { font-family: 'Poppins'; src: url('/fonts/Poppins/Poppins-Medium.woff') format('woff'); font-weight: 500; }
         
         /* Restricted Border Radius and Theme Color Overrides */
         * { 
             border-radius: 0.5rem !important; 
+        }
+        svg {
+            border-radius: 0px !important;
         }
         .rounded-full, .rounded-full * { border-radius: 9999px !important; }
         
@@ -50,84 +54,110 @@
         }
 
         [dir="rtl"] .flip-rtl { transform: scaleX(-1); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body class="bg-white text-gray-900 overflow-hidden" x-data="i18nManager()" x-init="init()">
-    <div class="flex h-screen">
+<body class="bg-white text-gray-900 overflow-hidden" x-init="init()">
+    <div class="flex h-screen relative">
         <!-- Sidebar -->
-        <div class="w-64 border-e border-gray-100 flex flex-col h-full bg-white">
-            <div class="p-6">
-                <img src="/images/logo/logo.png" alt="iGate Shared Services" class="h-10 w-auto object-contain">
+        <div :class="sidebarCollapsed ? 'w-20' : 'w-64'" class="border-e border-gray-100 flex flex-col h-full bg-white transition-all duration-300 relative group">
+            <!-- Collapse Toggle Button - Always Visible -->
+            <button @click="sidebarCollapsed = !sidebarCollapsed" 
+                    class="absolute -end-3 top-10 w-6 h-6 bg-white border border-gray-100 rounded-full flex items-center justify-center shadow-sm z-50 hover:bg-gray-50 transition-all">
+                <i data-lucide="chevron-left" class="w-3.5 h-3.5 text-gray-400 transition-transform" :class="sidebarCollapsed ? 'rotate-180' : ''"></i>
+            </button>
+
+            <div class="p-6 overflow-hidden">
+                <img src="/images/logo/logo.png" alt="iGate Shared Services" class="h-10 w-auto object-contain min-w-[40px]" :class="sidebarCollapsed ? 'scale-75' : ''">
             </div>
 
-            <div class="px-6 mb-6">
+            <div class="px-6 mb-6 overflow-hidden">
                 @if(Auth::user()->role === 'client')
-                    <a href="{{ route('explore.index') }}" class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition-all font-medium shadow-sm">
-                        <i data-lucide="plus" class="w-4 h-4"></i>
-                        <span x-text="t('explore.request')"></span>
-                    </a>
+                    <!-- <a href="{{ route('explore.index') }}" class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition-all font-medium shadow-sm">
+                        <i data-lucide="plus" class="w-4 h-4 flex-shrink-0"></i>
+                        <span x-show="!sidebarCollapsed" x-text="t('explore.request')" class="whitespace-nowrap"></span>
+                    </a> -->
                 @elseif(Auth::user()->role === 'provider')
-                    <button @click="addServiceOpen = true" class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-primary text-white rounded-[0.5rem] hover:bg-primary-dark transition-all font-medium shadow-sm">
-                        <i data-lucide="plus" class="w-4 h-4"></i>
-                        <span x-text="t('explore.add_to_portfolio')"></span>
-                    </button>
+                    <!-- <button @click="addServiceOpen = true" class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-primary text-white rounded-[0.5rem] hover:bg-primary-dark transition-all font-medium shadow-sm">
+                        <i data-lucide="plus" class="w-4 h-4 flex-shrink-0"></i>
+                        <span x-show="!sidebarCollapsed" x-text="t('explore.add_to_portfolio')" class="whitespace-nowrap"></span>
+                    </button> -->
                 @endif
             </div>
 
-            <nav class="flex-1 px-3 space-y-1 overflow-y-auto custom-scrollbar">
+            <nav class="flex-1 px-3 space-y-1 overflow-y-auto custom-scrollbar overflow-x-hidden">
                 @if(Auth::user()->role === 'admin')
                     <a href="/" class="sidebar-item {{ request()->is('/') ? 'active' : '' }} flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 transition-all">
-                        <i data-lucide="bar-chart-3" class="w-4 h-4"></i><span class="text-sm font-medium">Analytics</span>
+                        <i data-lucide="bar-chart-3" class="w-4 h-4 flex-shrink-0"></i>
+                        <span x-show="!sidebarCollapsed" class="text-sm font-medium whitespace-nowrap" x-text="t('common.analytics')"></span>
                     </a>
                 @elseif(Auth::user()->role === 'provider')
+                    <a href="#" @click="addServiceOpen = true" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 transition-all">
+                        <i data-lucide="plus" class="w-4 h-4 flex-shrink-0"></i>
+                        <span x-show="!sidebarCollapsed" class="text-sm font-medium whitespace-nowrap" x-text="t('explore.add_to_portfolio')"></span>
+                    </a>
                     <a href="/provider/dashboard" class="sidebar-item {{ request()->routeIs('provider.dashboard') ? 'active' : '' }} flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 transition-all">
-                        <i data-lucide="layout-dashboard" class="w-4 h-4"></i><span class="text-sm font-medium" x-text="t('common.dashboard')"></span>
+                        <i data-lucide="layout-dashboard" class="w-4 h-4 flex-shrink-0"></i>
+                        <span x-show="!sidebarCollapsed" class="text-sm font-medium whitespace-nowrap" x-text="t('common.dashboard')"></span>
                     </a>
                     <a href="{{ route('provider.services.index') }}" class="sidebar-item {{ request()->routeIs('provider.services.*') ? 'active' : '' }} flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 transition-all">
-                        <i data-lucide="briefcase" class="w-4 h-4"></i><span class="text-sm font-medium" x-text="lang === 'ar' ? 'خدماتي' : 'My Services'"></span>
+                        <i data-lucide="briefcase" class="w-4 h-4 flex-shrink-0"></i>
+                        <span x-show="!sidebarCollapsed" class="text-sm font-medium whitespace-nowrap" x-text="t('common.my_services')"></span>
                     </a>
                     <a href="{{ route('explore.index') }}" class="sidebar-item {{ request()->routeIs('explore.*') ? 'active' : '' }} flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 transition-all">
-                        <i data-lucide="compass" class="w-4 h-4"></i><span class="text-sm font-medium" x-text="t('common.explore')"></span>
+                        <i data-lucide="compass" class="w-4 h-4 flex-shrink-0"></i>
+                        <span x-show="!sidebarCollapsed" class="text-sm font-medium whitespace-nowrap" x-text="t('common.explore')"></span>
                     </a>
                     <a href="{{ route('provider.clients') }}" class="sidebar-item {{ request()->routeIs('provider.clients*') ? 'active' : '' }} flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 transition-all">
-                        <i data-lucide="users" class="w-4 h-4"></i><span class="text-sm font-medium" x-text="t('common.clients')"></span>
+                        <i data-lucide="users" class="w-4 h-4 flex-shrink-0"></i>
+                        <span x-show="!sidebarCollapsed" class="text-sm font-medium whitespace-nowrap" x-text="t('common.clients')"></span>
                     </a>
                     <a href="{{ route('provider.team_tasks') }}" class="sidebar-item {{ request()->routeIs('provider.team_tasks*') ? 'active' : '' }} flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 transition-all">
-                        <i data-lucide="check-square" class="w-4 h-4"></i><span class="text-sm font-medium" x-text="t('common.team')"></span>
+                        <i data-lucide="check-square" class="w-4 h-4 flex-shrink-0"></i>
+                        <span x-show="!sidebarCollapsed" class="text-sm font-medium whitespace-nowrap" x-text="t('common.team')"></span>
                     </a>
                 @elseif(Auth::user()->role === 'client')
+                    <a href="{{ route('explore.index') }}" @click="addServiceOpen = true" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 transition-all">
+                        <i data-lucide="plus" class="w-4 h-4 flex-shrink-0"></i>
+                        <span x-show="!sidebarCollapsed" class="text-sm font-medium whitespace-nowrap" x-text="t('explore.request')"></span>
+                    </a>
                     <a href="/" class="sidebar-item {{ request()->is('/') ? 'active' : '' }} flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 transition-all">
-                        <i data-lucide="home" class="w-4 h-4"></i><span class="text-sm font-medium" x-text="t('common.dashboard')"></span>
+                        <i data-lucide="home" class="w-4 h-4 flex-shrink-0"></i>
+                        <span x-show="!sidebarCollapsed" class="text-sm font-medium whitespace-nowrap" x-text="t('common.dashboard')"></span>
                     </a>
                     <a href="{{ route('client.portfolio') }}" class="sidebar-item {{ request()->routeIs('client.portfolio') ? 'active' : '' }} flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 transition-all">
-                        <i data-lucide="briefcase" class="w-4 h-4"></i><span class="text-sm font-medium">Portfolio</span>
+                        <i data-lucide="briefcase" class="w-4 h-4 flex-shrink-0"></i>
+                        <span x-show="!sidebarCollapsed" class="text-sm font-medium whitespace-nowrap" x-text="t('common.portfolio')"></span>
                     </a>
                     <a href="{{ route('explore.index') }}" class="sidebar-item {{ request()->routeIs('explore.*') ? 'active' : '' }} flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 transition-all">
-                        <i data-lucide="search" class="w-4 h-4"></i><span class="text-sm font-medium" x-text="t('common.explore')"></span>
+                        <i data-lucide="search" class="w-4 h-4 flex-shrink-0"></i>
+                        <span x-show="!sidebarCollapsed" class="text-sm font-medium whitespace-nowrap" x-text="t('common.explore')"></span>
                     </a>
                     <a href="#" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 transition-all">
-                        <i data-lucide="message-square" class="w-4 h-4"></i><span class="text-sm font-medium">Messages</span>
+                        <i data-lucide="message-square" class="w-4 h-4 flex-shrink-0"></i>
+                        <span x-show="!sidebarCollapsed" class="text-sm font-medium whitespace-nowrap" x-text="t('common.messages')"></span>
                     </a>
                 @endif
 
                 <!-- Language Toggle Section -->
                 <div class="pt-4 px-3">
                     <button @click="toggleLang()" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-primary bg-primary-light transition-all border border-primary/10">
-                        <i data-lucide="languages" class="w-4 h-4"></i>
-                        <span class="text-xs font-bold" x-text="lang === 'en' ? 'العربية' : 'English'"></span>
+                        <i data-lucide="languages" class="w-4 h-4 flex-shrink-0"></i>
+                        <span x-show="!sidebarCollapsed" class="text-xs font-bold whitespace-nowrap" x-text="lang === 'en' ? 'العربية' : 'English'"></span>
                     </button>
                 </div>
 
-                <div class="pt-8 px-3">
+                <div class="pt-8 px-3 overflow-hidden">
                     <div class="flex items-center justify-between text-[10px] font-medium uppercase tracking-widest text-gray-400 mb-4">
-                        <span x-text="t('common.projects')"></span>
+                        <span x-show="!sidebarCollapsed" x-text="t('common.projects')" class="whitespace-nowrap"></span>
                         <span class="bg-primary text-white px-2 py-0.5 rounded-md">{{ $ongoingProjects->count() }}</span>
                     </div>
                     <div class="space-y-1">
                         @foreach($ongoingProjects as $p)
                         <a href="{{ route('projects.show', $p->id) }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-500 hover:bg-gray-50 transition-all {{ request()->is('projects/'.$p->id) ? 'bg-primary-light text-primary font-medium' : '' }}">
-                            <div class="w-1.5 h-1.5 rounded-full bg-green-500"></div>
-                            <span class="truncate text-xs font-medium">{{ $p->service->name }}</span>
+                            <div class="w-1.5 h-1.5 rounded-full bg-green-500 flex-shrink-0"></div>
+                            <span x-show="!sidebarCollapsed" class="truncate text-xs font-medium whitespace-nowrap">{{ $p->service->name }}</span>
                         </a>
                         @endforeach
                     </div>
@@ -135,28 +165,23 @@
             </nav>
 
             <!-- Bottom Profile -->
-            <div class="p-4 border-t border-gray-100 relative">
+            <div class="p-4 border-t border-gray-100 relative ">
                 <div @click="profileOpen = !profileOpen" class="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-all">
-                    <div class="w-8 h-8 bg-gradient-to-br from-primary to-primary-dark rounded-lg flex items-center justify-center text-white font-medium text-xs shadow-sm">
+                    <div class="w-8 h-8 bg-gradient-to-br from-primary to-primary-dark rounded-lg flex items-center justify-center text-white font-medium text-xs shadow-sm flex-shrink-0">
                         {{ substr(Auth::user()->name, 0, 2) }}
                     </div>
-                    <div class="flex-1 min-w-0">
+                    <div class="flex-1 min-w-0" x-show="!sidebarCollapsed">
                         <p class="text-xs font-medium text-gray-900 truncate">{{ Auth::user()->name }}</p>
                     </div>
-                    <i data-lucide="chevron-up" class="w-4 h-4 text-gray-400 transition-transform" :class="profileOpen ? 'rotate-180' : ''"></i>
+                    <i data-lucide="chevron-up" x-show="!sidebarCollapsed" class="w-4 h-4 text-gray-400 transition-transform" :class="profileOpen ? 'rotate-180' : ''"></i>
                 </div>
 
                 <!-- Submenu -->
                 <div x-show="profileOpen" @click.away="profileOpen = false" 
-                     class="absolute bottom-20 inset-x-4 bg-white border border-gray-100 rounded-lg shadow-xl p-1 z-50 animate-in fade-in slide-in-from-bottom-2" style="display:none;">
+                     :class="sidebarCollapsed ? 'bottom-20 start-16 w-48' : 'bottom-20 inset-x-4'"
+                     class="absolute bg-white border border-gray-100 rounded-lg shadow-xl p-1 z-50 animate-in fade-in slide-in-from-bottom-2" style="display:none;">
                     <button @click="settingsOpen = true; profileOpen = false" class="w-full flex items-center gap-3 px-3 py-2 rounded-md text-gray-600 hover:bg-primary-light hover:text-primary transition-all">
                         <i data-lucide="settings" class="w-4 h-4"></i><span class="text-xs font-medium" x-text="t('common.settings')"></span>
-                    </button>
-                    <button @click="viewUsersOpen = true; profileOpen = false" class="w-full flex items-center gap-3 px-3 py-2 rounded-md text-gray-600 hover:bg-primary-light hover:text-primary transition-all">
-                        <i data-lucide="users-2" class="w-4 h-4"></i><span class="text-xs font-medium">View Users</span>
-                    </button>
-                    <button @click="addUserOpen = true; profileOpen = false" class="w-full flex items-center gap-3 px-3 py-2 rounded-md text-gray-600 hover:bg-primary-light hover:text-primary transition-all">
-                        <i data-lucide="user-plus" class="w-4 h-4"></i><span class="text-xs font-medium">Add User</span>
                     </button>
                     <div class="my-1 border-t border-gray-50"></div>
                     <form action="{{ route('logout') }}" method="POST">@csrf
@@ -183,11 +208,11 @@
                 <div class="w-56 bg-gray-50 border-r border-gray-100 p-8 flex flex-col">
                     <h3 class="text-[10px] font-medium uppercase tracking-widest text-gray-400 mb-8 px-2">Settings</h3>
                     <div class="space-y-1 flex-1">
-                        <template x-for="t in ['account', 'company', 'settings', 'permissions', 'plans', 'notifications', 'security']">
-                            <button @click="settingsTab = t" 
-                                    :class="settingsTab === t ? 'bg-primary text-white font-medium' : 'text-gray-500 hover:bg-gray-100'" 
+                        <template x-for="t_tab in ['account', 'company', 'settings', 'permissions', 'plans', 'notifications', 'security']">
+                            <button @click="settingsTab = t_tab" 
+                                    :class="settingsTab === t_tab ? 'bg-primary text-white font-medium' : 'text-gray-500 hover:bg-gray-100'" 
                                     class="w-full text-left px-4 py-2 rounded-md text-xs transition-all capitalize" 
-                                    x-text="t"></button>
+                                    x-text="t_tab"></button>
                         </template>
                     </div>
                 </div>
@@ -218,7 +243,7 @@
                                 <div class="space-y-1"><label class="text-[10px] font-black uppercase tracking-widest text-gray-400">Email Address</label><input type="email" name="email" value="{{ Auth::user()->email }}" class="w-full px-4 py-2.5 border border-gray-100 bg-gray-50 rounded-lg outline-none focus:ring-4 focus:ring-primary/10 text-sm font-medium"></div>
                                 <div class="space-y-1"><label class="text-[10px] font-black uppercase tracking-widest text-gray-400">Phone Number</label><input type="text" name="phone" value="{{ Auth::user()->phone ?? '+966 50 000 0000' }}" class="w-full px-4 py-2.5 border border-gray-100 bg-gray-50 rounded-lg outline-none focus:ring-4 focus:ring-primary/10 text-sm font-medium"></div>
                                 <div class="pt-2 flex justify-end">
-                                    <button type="submit" class="px-6 py-2 bg-[#3da9e4] text-white rounded-md font-medium text-xs hover:bg-[#2b8bc2] transition-all" x-text="lang === 'ar' ? 'حفظ التغييرات' : 'Save Changes'"></button>
+                                    <button type="submit" class="px-6 py-2 bg-[#3da9e4] text-white rounded-md font-medium text-xs hover:bg-[#2b8bc2] transition-all" x-text="t('common.save')"></button>
                                 </div>
                             </form>
                         </div>
@@ -262,11 +287,73 @@
                         </div>
 
                         <!-- Permissions Tab -->
-                        <div x-show="settingsTab === 'permissions'" class="space-y-4 animate-in fade-in duration-300">
-                            <div class="p-4 border border-gray-100 rounded-lg flex items-center space-x-4">
-                                <div class="w-10 h-10 bg-primary-light text-primary rounded-lg flex items-center justify-center"><i data-lucide="shield" class="w-5 h-5"></i></div>
-                                <div><p class="text-sm font-bold">Role: {{ ucfirst(Auth::user()->role) }}</p><p class="text-xs text-gray-400">Full access to dashboard and services</p></div>
+                        <div x-show="settingsTab === 'permissions'" class="space-y-6 animate-in fade-in duration-300">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-10 h-10 bg-primary-light text-primary rounded-lg flex items-center justify-center"><i data-lucide="shield" class="w-5 h-5"></i></div>
+                                    <div><p class="text-sm font-bold">Role: {{ ucfirst(Auth::user()->role) }}</p><p class="text-xs text-gray-400">Full access to dashboard and services</p></div>
+                                </div>
+                                <button @click="showAddUserForm = !showAddUserForm" class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-md text-xs font-medium hover:bg-primary-dark transition-all">
+                                    <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
+                                    <span x-text="t('common.add_user')"></span>
+                                </button>
                             </div>
+
+                            <!-- Add User Form Section -->
+                            <div x-show="showAddUserForm" x-collapse class="p-6 bg-gray-50 border border-gray-100 rounded-lg space-y-4 animate-in slide-in-from-top-2">
+                                <h3 class="text-sm font-bold text-gray-900" x-text="t('common.add_user')"></h3>
+                                <form class="grid grid-cols-2 gap-4">
+                                    <div class="space-y-1">
+                                        <label class="text-[10px] font-black uppercase tracking-widest text-gray-400">Full Name</label>
+                                        <input type="text" class="w-full px-4 py-2 border border-gray-200 rounded-md outline-none text-sm bg-white">
+                                    </div>
+                                    <div class="space-y-1">
+                                        <label class="text-[10px] font-black uppercase tracking-widest text-gray-400">Email Address</label>
+                                        <input type="email" class="w-full px-4 py-2 border border-gray-200 rounded-md outline-none text-sm bg-white">
+                                    </div>
+                                    <div class="col-span-2 pt-2 flex justify-end gap-2">
+                                        <button type="button" @click="showAddUserForm = false" class="px-4 py-2 text-gray-500 text-xs font-medium">Cancel</button>
+                                        <button type="button" @click="showAddUserForm = false" class="px-6 py-2 bg-primary text-white rounded-md font-medium text-xs">Send Invitation</button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between">
+                                    <p class="text-[10px] font-black uppercase tracking-widest text-gray-400">Team Members</p>
+                                </div>
+                                <div class="overflow-hidden border border-gray-100 rounded-lg">
+                                    <table class="w-full text-left text-sm">
+                                        <thead class="bg-gray-50 text-[10px] uppercase tracking-widest text-gray-400">
+                                            <tr class="divide-x divide-gray-100">
+                                                <th class="px-4 py-2 font-medium">Name</th>
+                                                <th class="px-4 py-2 font-medium">Role</th>
+                                                <th class="px-4 py-2 font-medium">Status</th>
+                                                <th class="px-4 py-2 font-medium text-right">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-gray-50">
+                                            <tr class="hover:bg-gray-50 transition-all">
+                                                <td class="px-4 py-3 font-medium text-xs">{{ Auth::user()->name }}</td>
+                                                <td class="px-4 py-3 capitalize text-xs">{{ Auth::user()->role }} (Owner)</td>
+                                                <td class="px-4 py-3"><span class="px-2 py-0.5 bg-green-50 text-green-600 rounded-full text-[10px] font-bold">Active</span></td>
+                                                <td class="px-4 py-3 text-right"><button class="text-primary font-medium text-xs">Edit</button></td>
+                                            </tr>
+                                            @if(isset($teamMembers))
+                                                @foreach($teamMembers as $member)
+                                                <tr class="hover:bg-gray-50 transition-all">
+                                                    <td class="px-4 py-3 font-medium text-xs">{{ $member->user->name ?? 'Invited' }}</td>
+                                                    <td class="px-4 py-3 capitalize text-xs">{{ $member->role }}</td>
+                                                    <td class="px-4 py-3"><span class="px-2 py-0.5 bg-green-50 text-green-600 rounded-full text-[10px] font-bold">Active</span></td>
+                                                    <td class="px-4 py-3 text-right"><button class="text-primary font-medium text-xs">Edit</button></td>
+                                                </tr>
+                                                @endforeach
+                                            @endif
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
                             <div class="space-y-2">
                                 <p class="text-[10px] font-black uppercase tracking-widest text-gray-400">Enabled Features</p>
                                 <div class="flex flex-wrap gap-2">
@@ -306,7 +393,7 @@
                                     @endforeach
                                 </div>
                                 <div class="pt-2 flex justify-end">
-                                    <button type="submit" class="px-6 py-2 bg-[#3da9e4] text-white rounded-md font-medium text-xs hover:bg-[#2b8bc2] transition-all" x-text="lang === 'ar' ? 'حفظ التغييرات' : 'Save Changes'"></button>
+                                    <button type="submit" class="px-6 py-2 bg-[#3da9e4] text-white rounded-md font-medium text-xs hover:bg-[#2b8bc2] transition-all" x-text="t('common.save')"></button>
                                 </div>
                             </form>
                         </div>
@@ -332,47 +419,10 @@
                         </div>
                     </div>
                     <div class="pt-6 border-t border-gray-50 flex justify-end">
-                        <button class="px-6 py-2 bg-gray-900 text-white rounded-md font-medium text-xs hover:bg-black transition-all" x-text="lang === 'ar' ? 'حفظ التغييرات' : 'Save Changes'"></button>
+                        <button class="px-6 py-2 bg-gray-900 text-white rounded-md font-medium text-xs hover:bg-black transition-all" x-text="t('common.save')"></button>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <!-- VIEW USERS MODAL -->
-    <div x-show="viewUsersOpen" class="fixed inset-0 z-[100] flex items-center justify-center" style="display: none;">
-        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="viewUsersOpen = false"></div>
-        <div class="bg-white w-full max-w-2xl rounded-lg shadow-2xl relative z-10 p-8 border border-gray-100 animate-in zoom-in duration-300">
-            <div class="flex items-center justify-between mb-8">
-                <h2 class="text-2xl font-medium">Team Members</h2>
-                <button @click="viewUsersOpen = false" class="text-gray-400 hover:text-gray-900"><i data-lucide="x" class="w-5 h-5"></i></button>
-            </div>
-            <div class="overflow-hidden border border-gray-100 rounded-lg">
-                <table class="w-full text-left text-sm">
-                    <thead class="bg-gray-50 text-[10px] uppercase tracking-widest text-gray-400"><tr class="divide-x divide-gray-100"><th class="px-6 py-3 font-medium">Name</th><th class="px-6 py-3 font-medium">Role</th><th class="px-6 py-3 font-medium">Status</th><th class="px-6 py-3 font-medium text-right">Actions</th></tr></thead>
-                    <tbody class="divide-y divide-gray-50">
-                        <tr class="hover:bg-gray-50 transition-all"><td class="px-6 py-4 font-medium">{{ Auth::user()->name }}</td><td class="px-6 py-4 capitalize">{{ Auth::user()->role }} (Owner)</td><td class="px-6 py-4"><span class="px-2 py-0.5 bg-green-50 text-green-600 rounded-full text-[10px] font-bold">Active</span></td><td class="px-6 py-4 text-right"><button class="text-primary font-medium">Edit</button></td></tr>
-                        @if(isset($teamMembers))
-                            @foreach($teamMembers as $member)
-                            <tr class="hover:bg-gray-50 transition-all"><td class="px-6 py-4 font-medium">{{ $member->user->name ?? 'Invited' }}</td><td class="px-6 py-4 capitalize">{{ $member->role }}</td><td class="px-6 py-4"><span class="px-2 py-0.5 bg-green-50 text-green-600 rounded-full text-[10px] font-bold">Active</span></td><td class="px-6 py-4 text-right"><button class="text-primary font-medium">Edit</button></td></tr>
-                            @endforeach
-                        @endif
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <!-- ADD USER MODAL -->
-    <div x-show="addUserOpen" class="fixed inset-0 z-[100] flex items-center justify-center" style="display: none;">
-        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="addUserOpen = false"></div>
-        <div class="bg-white w-full max-w-md rounded-lg shadow-2xl relative z-10 p-8 border border-gray-100 animate-in zoom-in duration-300">
-            <h2 class="text-2xl font-medium mb-6">Invite Team Member</h2>
-            <form class="space-y-4">
-                <div><label class="text-xs font-medium text-gray-400">Full Name</label><input type="text" class="w-full px-4 py-2 border border-gray-200 rounded-md outline-none text-sm"></div>
-                <div><label class="text-xs font-medium text-gray-400">Email</label><input type="email" class="w-full px-4 py-2 border border-gray-200 rounded-md outline-none text-sm"></div>
-                <button type="button" @click="addUserOpen = false" class="w-full py-3 bg-primary text-white rounded-md font-medium text-sm">Send Invitation</button>
-            </form>
         </div>
     </div>
 
@@ -381,15 +431,15 @@
     <div x-show="addServiceOpen" class="fixed inset-0 z-[100] flex items-center justify-center" style="display: none;">
         <div class="absolute inset-0 bg-black/40 backdrop-blur-md" @click="addServiceOpen = false"></div>
         <div class="bg-white w-full max-w-lg rounded-lg shadow-2xl relative z-10 p-10 border border-gray-100 animate-in zoom-in duration-300">
-            <div class="flex items-center justify-between mb-8"><h2 class="text-2xl font-medium">Add Service</h2><button @click="addServiceOpen = false" class="text-gray-400 hover:text-gray-600"><i data-lucide="x" class="w-6 h-6"></i></button></div>
+            <div class="flex items-center justify-between mb-8"><h2 class="text-2xl font-medium" x-text="t('explore.add_service')"></h2><button @click="addServiceOpen = false" class="text-gray-400 hover:text-gray-600"><i data-lucide="x" class="w-6 h-6"></i></button></div>
             <form action="{{ route('provider.services.store') }}" method="POST" class="space-y-6">
                 @csrf
-                <div class="space-y-1"><label class="text-[10px] font-medium uppercase tracking-widest text-gray-400">Service Catalog</label><select name="service_id" class="w-full px-4 py-2.5 border border-gray-100 bg-gray-50 rounded-md text-sm font-medium">@foreach(\App\Models\Service::all() as $s)<option value="{{ $s->id }}">{{ $s->name }}</option>@endforeach</select></div>
+                <div class="space-y-1"><label class="text-[10px] font-medium uppercase tracking-widest text-gray-400" x-text="t('explore.service_catalog')"></label><select name="service_id" class="w-full px-4 py-2.5 border border-gray-100 bg-gray-50 rounded-md text-sm font-medium">@foreach(\App\Models\Service::all() as $s)<option value="{{ $s->id }}">{{ $s->name }}</option>@endforeach</select></div>
                 <div class="grid grid-cols-2 gap-4">
-                    <div class="space-y-1"><label class="text-[10px] font-medium uppercase tracking-widest text-gray-400">Price (SAR)</label><input type="number" name="price" step="0.01" class="w-full px-4 py-2.5 border border-gray-100 rounded-md text-sm"></div>
-                    <div class="space-y-1"><label class="text-[10px] font-medium uppercase tracking-widest text-gray-400">Days</label><input type="number" name="delivery_time_days" class="w-full px-4 py-2.5 border border-gray-100 rounded-md text-sm"></div>
+                    <div class="space-y-1"><label class="text-[10px] font-medium uppercase tracking-widest text-gray-400" x-text="t('explore.price')"></label><input type="number" name="price" step="0.01" class="w-full px-4 py-2.5 border border-gray-100 rounded-md text-sm"></div>
+                    <div class="space-y-1"><label class="text-[10px] font-medium uppercase tracking-widest text-gray-400" x-text="t('explore.days')"></label><input type="number" name="delivery_time_days" class="w-full px-4 py-2.5 border border-gray-100 rounded-md text-sm"></div>
                 </div>
-                <button type="submit" class="w-full py-4 bg-primary text-white rounded-md font-medium">Add to Portfolio</button>
+                <button type="submit" class="w-full py-4 bg-primary text-white rounded-md font-medium" x-text="t('explore.add_to_portfolio_btn')"></button>
             </form>
         </div>
     </div>
@@ -401,10 +451,10 @@
                 lang: localStorage.getItem('igate_lang') || 'en',
                 settingsOpen: false,
                 addServiceOpen: false,
-                viewUsersOpen: false,
-                addUserOpen: false,
+                showAddUserForm: false,
                 settingsTab: 'account',
                 profileOpen: false,
+                sidebarCollapsed: localStorage.getItem('sidebar_collapsed') === 'true',
                 dict: {
                     en: {
                         common: @json(Lang::get('common', [], 'en')),
@@ -434,6 +484,10 @@
                 },
                 init() {
                     lucide.createIcons();
+                    this.$watch('sidebarCollapsed', value => {
+                        localStorage.setItem('sidebar_collapsed', value);
+                        setTimeout(() => lucide.createIcons(), 300);
+                    });
                 }
             }
         }

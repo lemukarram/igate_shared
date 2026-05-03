@@ -92,6 +92,7 @@ Route::middleware(['auth', 'App\Http\Middleware\EnsureProviderIsOnboarded'])->gr
 
     // Settings
     Route::post('/settings/profile', [App\Http\Controllers\SettingsController::class, 'updateProfile'])->name('settings.profile');
+    Route::post('/settings/status', [App\Http\Controllers\SettingsController::class, 'updateStatus'])->name('settings.status');
     Route::post('/settings/company', [App\Http\Controllers\SettingsController::class, 'updateCompany'])->name('settings.company');
     Route::post('/settings/security', [App\Http\Controllers\SettingsController::class, 'updateSecurity'])->name('settings.security');
     Route::post('/settings/plan', [App\Http\Controllers\SettingsController::class, 'updatePlan'])->name('settings.plan');

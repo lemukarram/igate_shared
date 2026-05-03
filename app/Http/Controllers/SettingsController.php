@@ -97,4 +97,24 @@ class SettingsController extends Controller
 
         return redirect()->back()->with('success', 'Team member role updated.');
     }
+
+    public function updateStatus(Request $request)
+    {
+        $user = Auth::user();
+        if ($user->role !== 'provider' || !$user->providerProfile) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $validated = $request->validate([
+            'status' => 'required|string|in:active,inactive',
+        ]);
+
+        $user->providerProfile->update(['status' => $validated['status']]);
+
+        return response()->json([
+            'success' => true,
+            'status' => $validated['status'],
+            'label' => $validated['status'] === 'active' ? __('common.active') : __('common.inactive')
+        ]);
+    }
 }

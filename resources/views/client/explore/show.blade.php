@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-6xl w-full space-y-8 p-4">
+<div class="max-w-6xl w-full space-y-8 p-4" x-data="{ addServiceModalOpen: false, editServiceModalOpen: false }">
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div class="flex items-center gap-4">
             <a href="{{ auth()->user()->role === 'provider' ? route('provider.services.index') : route('explore.index') }}" class="w-10 h-10 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-900 transition-colors">
@@ -18,7 +18,7 @@
                 @if($providerService)
                     <div class="bg-blue-50 px-4 py-2 rounded-xl border border-blue-100 flex items-center gap-3 me-2">
                         <div class="text-blue-600 font-bold text-xl">{{ $clientCount }}</div>
-                        <div class="text-blue-500 text-xs uppercase font-bold leading-tight" x-text="lang === 'ar' ? 'العملاء<br>النشطون' : 'Active<br>Clients'"></div>
+                        <div class="text-blue-500 text-xs uppercase font-bold leading-tight" x-html="t('common.active_clients_br') || (lang === 'ar' ? 'العملاء<br>النشطون' : 'Active<br>Clients')"></div>
                     </div>
                     <form action="{{ route('provider.services.destroy', $providerService->id) }}" method="POST" onsubmit="return confirm('Are you sure?')">
                         @csrf @method('DELETE')
@@ -27,7 +27,7 @@
                         </button>
                     </form>
                 @else
-                    <button onclick="document.getElementById('add-service-modal').classList.remove('hidden')" class="px-6 py-3 bg-primary text-white rounded-xl font-bold hover:bg-primary-dark transition-all shadow-sm">
+                    <button @click="addServiceModalOpen = true" class="px-6 py-3 bg-primary text-white rounded-xl font-bold hover:bg-primary-dark transition-all shadow-sm">
                         <span x-text="lang === 'ar' ? 'إضافة إلى خدماتي' : 'Add to My Services'"></span>
                     </button>
                 @endif
@@ -82,11 +82,11 @@
 
                         <div class="flex items-center gap-12 px-8 border-x border-gray-50 hidden lg:flex">
                             <div class="text-center">
-                                <span class="block text-xs text-gray-400 uppercase font-semibold" x-text="lang === 'ar' ? 'التسليم' : 'Delivery'"></span>
-                                <span class="text-sm font-bold text-gray-900">{{ $ps->delivery_time_days }} <span x-text="lang === 'ar' ? 'أيام' : 'Days'"></span></span>
+                                <span class="block text-xs text-gray-400 uppercase font-semibold" x-text="t('common.delivery')"></span>
+                                <span class="text-sm font-bold text-gray-900" x-text="t('common.days_count').replace(':count', '{{ $ps->delivery_time_days }}')"></span>
                             </div>
                             <div class="text-center">
-                                <span class="block text-xs text-gray-400 uppercase font-semibold" x-text="lang === 'ar' ? 'السعر' : 'Price'"></span>
+                                <span class="block text-xs text-gray-400 uppercase font-semibold" x-text="t('explore.price')"></span>
                                 <span class="text-xl font-black text-blue-600">{{ number_format($ps->price, 0) }} <span x-text="lang === 'ar' ? 'ر.س' : 'SAR'"></span></span>
                             </div>
                         </div>
@@ -116,7 +116,7 @@
             <div class="bg-white border border-gray-100 rounded-3xl p-8 shadow-sm">
                 <div class="flex items-center justify-between mb-6">
                     <h2 class="text-xl font-bold text-gray-900" x-text="lang === 'ar' ? 'تفاصيل عرضي' : 'My Offering Details'"></h2>
-                    <button onclick="document.getElementById('edit-service-modal').classList.remove('hidden')" class="px-4 py-2 bg-gray-900 text-white rounded-xl text-sm font-bold hover:bg-gray-800 transition-all flex items-center gap-2">
+                    <button @click="editServiceModalOpen = true" class="px-4 py-2 bg-gray-900 text-white rounded-xl text-sm font-bold hover:bg-gray-800 transition-all flex items-center gap-2">
                         <i data-lucide="edit-3" class="w-4 h-4"></i> <span x-text="lang === 'ar' ? 'تعديل التفاصيل' : 'Edit Details'"></span>
                     </button>
                 </div>
@@ -127,8 +127,8 @@
                         <span class="text-3xl font-black text-blue-700">{{ number_format($providerService->price, 0) }} <span class="text-sm" x-text="lang === 'ar' ? 'ر.س' : 'SAR'"></span></span>
                     </div>
                     <div class="p-6 bg-indigo-50 rounded-2xl border border-indigo-100">
-                        <span class="block text-xs text-indigo-500 uppercase font-black tracking-widest mb-1" x-text="lang === 'ar' ? 'مدة التسليم' : 'Delivery Time'"></span>
-                        <span class="text-3xl font-black text-indigo-700">{{ $providerService->delivery_time_days }} <span class="text-sm" x-text="lang === 'ar' ? 'أيام' : 'Days'"></span></span>
+                        <span class="block text-xs text-indigo-500 uppercase font-black tracking-widest mb-1" x-text="t('common.delivery')"></span>
+                        <span class="text-3xl font-black text-indigo-700" x-text="t('common.days_count').replace(':count', '{{ $providerService->delivery_time_days }}')"></span>
                     </div>
                 </div>
 
@@ -142,23 +142,67 @@
             @endif
         </div>
 
+        <!-- Standardized Sidebar -->
         <div class="space-y-6">
-            <div class="bg-blue-600 rounded-3xl p-8 text-white">
-                <h3 class="text-xl font-bold mb-4" x-text="lang === 'ar' ? 'معايير آي غيت' : 'iGate Standard'"></h3>
-                <p class="text-blue-100 mb-6 text-sm leading-relaxed" x-text="lang === 'ar' ? 'تتبع جميع الخدمات في آي غيت إرشادات جودة صارمة ونطاقات تسليم موحدة.' : 'All services on iGate follow strict quality guidelines and standardized delivery scopes.'"></p>
+            <h2 class="text-lg font-bold text-gray-900" x-text="t('common.standard_catalog')"></h2>
+            <div class="bg-gray-900 rounded-3xl p-6 text-white shadow-xl shadow-gray-200">
+                <p class="text-xs text-gray-400 font-bold uppercase tracking-widest mb-4" x-text="t('common.why_standardized')"></p>
+                <p class="text-sm text-gray-300 leading-relaxed mb-6" x-text="t('common.standardized_explanation')"></p>
                 <ul class="space-y-4">
-                    <li class="flex items-center gap-3 text-sm font-bold">
-                        <i data-lucide="shield-check" class="w-5 h-5 text-blue-300"></i>
-                        <span x-text="lang === 'ar' ? 'مدفوعات آمنة عبر الحساب الوسيط' : 'Secure Escrow Payments'"></span>
+                    <li class="flex items-center gap-3 text-xs font-bold">
+                        <i data-lucide="shield-check" class="w-4 h-4 text-primary"></i>
+                        <span x-text="t('common.guaranteed_payments')"></span>
                     </li>
-                    <li class="flex items-center gap-3 text-sm font-bold">
-                        <i data-lucide="clock" class="w-5 h-5 text-blue-300"></i>
-                        <span x-text="lang === 'ar' ? 'تسليم مضمون حسب اتفاقية الخدمة' : 'SLA Guaranteed Delivery'"></span>
+                    <li class="flex items-center gap-3 text-xs font-bold">
+                        <i data-lucide="clock" class="w-4 h-4 text-primary"></i>
+                        <span x-text="t('common.sla_protection')"></span>
                     </li>
                 </ul>
             </div>
         </div>
     </div>
+
+    <!-- MODALS -->
+    @if(auth()->user()->role === 'provider')
+    <!-- Add Service Modal -->
+    <div x-show="addServiceModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center" style="display: none;">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="addServiceModalOpen = false"></div>
+        <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl relative z-10 p-10 border border-gray-100 animate-in zoom-in duration-300">
+            <div class="flex items-center justify-between mb-8"><h2 class="text-2xl font-bold" x-text="t('explore.add_service')"></h2><button @click="addServiceModalOpen = false" class="text-gray-400 hover:text-gray-600"><i data-lucide="x" class="w-6 h-6"></i></button></div>
+            <form action="{{ route('provider.services.store') }}" method="POST" class="space-y-6">
+                @csrf
+                <input type="hidden" name="service_id" value="{{ $service->id }}">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-1"><label class="text-[10px] font-black uppercase tracking-widest text-gray-400" x-text="t('explore.price')"></label><input type="number" name="price" step="0.01" required class="w-full px-4 py-3 border border-gray-100 bg-gray-50 rounded-xl text-sm font-bold"></div>
+                    <div class="space-y-1"><label class="text-[10px] font-black uppercase tracking-widest text-gray-400" x-text="t('explore.days')"></label><input type="number" name="delivery_time_days" required class="w-full px-4 py-3 border border-gray-100 bg-gray-50 rounded-xl text-sm font-bold"></div>
+                </div>
+                <button type="submit" class="w-full py-4 bg-primary text-white rounded-xl font-bold" x-text="t('explore.add_to_portfolio_btn')"></button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Service Modal -->
+    @if($providerService)
+    <div x-show="editServiceModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center" style="display: none;">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="editServiceModalOpen = false"></div>
+        <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl relative z-10 p-10 border border-gray-100 animate-in zoom-in duration-300">
+            <div class="flex items-center justify-between mb-8"><h2 class="text-2xl font-bold" x-text="lang === 'ar' ? 'تعديل الخدمة' : 'Edit Service'"></h2><button @click="editServiceModalOpen = false" class="text-gray-400 hover:text-gray-600"><i data-lucide="x" class="w-6 h-6"></i></button></div>
+            <form action="{{ route('provider.services.update', $providerService->id) }}" method="POST" class="space-y-6">
+                @csrf @method('PATCH')
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-1"><label class="text-[10px] font-black uppercase tracking-widest text-gray-400" x-text="t('explore.price')"></label><input type="number" name="price" step="0.01" value="{{ $providerService->price }}" required class="w-full px-4 py-3 border border-gray-100 bg-gray-50 rounded-xl text-sm font-bold"></div>
+                    <div class="space-y-1"><label class="text-[10px] font-black uppercase tracking-widest text-gray-400" x-text="t('explore.days')"></label><input type="number" name="delivery_time_days" value="{{ $providerService->delivery_time_days }}" required class="w-full px-4 py-3 border border-gray-100 bg-gray-50 rounded-xl text-sm font-bold"></div>
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-gray-400" x-text="lang === 'ar' ? 'ملاحظات إضافية' : 'Additional Notes'"></label>
+                    <textarea name="provider_notes" rows="4" class="w-full px-4 py-3 border border-gray-100 bg-gray-50 rounded-xl text-sm font-medium resize-none">{{ $providerService->provider_notes }}</textarea>
+                </div>
+                <button type="submit" class="w-full py-4 bg-gray-900 text-white rounded-xl font-bold" x-text="t('common.save')"></button>
+            </form>
+        </div>
+    </div>
+    @endif
+    @endif
 </div>
 
 <style>

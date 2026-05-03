@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('iban')->nullable();
             $table->text('bio')->nullable();
             $table->string('logo')->nullable();
-            $table->enum('status', ['pending', 'verified', 'rejected'])->default('pending');
+            $table->enum('status', ['pending', 'verified', 'rejected', 'active', 'inactive'])->default('pending');
             $table->boolean('onboarding_completed')->default(false);
             $table->timestamps();
         });

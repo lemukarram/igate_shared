@@ -48,7 +48,7 @@ class TaskController extends Controller
 
     public function updateStatus(Request $request, $id)
     {
-        $task = Task::findOrFail($id);
+        $task = Task::with('project')->findOrFail($id);
         $oldStatus = $task->status;
         $task->update(['status' => $request->status]);
 
@@ -59,6 +59,14 @@ class TaskController extends Controller
             'old_value' => $oldStatus,
             'new_value' => $request->status,
             'action' => 'status_changed',
+        ]);
+
+        \App\Models\ClientActivity::create([
+            'client_id' => $task->project->client_id,
+            'provider_id' => $task->project->provider_id,
+            'project_id' => $task->project->id,
+            'activity_type' => 'task_status_changed',
+            'description' => 'Task "' . $task->title . '" status changed from ' . $oldStatus . ' to ' . $request->status . '.',
         ]);
 
         return redirect()->back()->with('success', 'Task status updated.');

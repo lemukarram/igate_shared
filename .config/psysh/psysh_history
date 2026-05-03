@@ -1,0 +1,2 @@
+\App\Models\User::all()
+exit
