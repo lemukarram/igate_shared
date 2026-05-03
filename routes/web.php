@@ -94,9 +94,13 @@ Route::middleware(['auth', 'App\Http\Middleware\EnsureProviderIsOnboarded'])->gr
     Route::post('/settings/profile', [App\Http\Controllers\SettingsController::class, 'updateProfile'])->name('settings.profile');
     Route::post('/settings/status', [App\Http\Controllers\SettingsController::class, 'updateStatus'])->name('settings.status');
     Route::post('/settings/company', [App\Http\Controllers\SettingsController::class, 'updateCompany'])->name('settings.company');
+    Route::post('/settings/general', [App\Http\Controllers\SettingsController::class, 'updateGeneral'])->name('settings.general');
+    Route::post('/settings/notifications', [App\Http\Controllers\SettingsController::class, 'updateNotifications'])->name('settings.notifications');
     Route::post('/settings/security', [App\Http\Controllers\SettingsController::class, 'updateSecurity'])->name('settings.security');
     Route::post('/settings/plan', [App\Http\Controllers\SettingsController::class, 'updatePlan'])->name('settings.plan');
     Route::patch('/settings/team-members/{id}', [App\Http\Controllers\SettingsController::class, 'updateTeamMember'])->name('settings.team_members.update');
+    Route::post('/settings/team-members', [App\Http\Controllers\SettingsController::class, 'addTeamMember'])->name('settings.team_members.store');
+    Route::delete('/settings/team-members/{id}', [App\Http\Controllers\SettingsController::class, 'removeTeamMember'])->name('settings.team_members.destroy');
 
     // Tasks
     Route::post('/tasks', [TaskController::class, 'store'])->name('tasks.store');

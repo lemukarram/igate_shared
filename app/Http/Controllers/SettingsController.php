@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Plan;
 use App\Models\TeamMember;
+use App\Models\Team;
+use App\Models\Company;
 use App\Models\User;
 
 class SettingsController extends Controller
@@ -19,15 +21,23 @@ class SettingsController extends Controller
             'last_name' => 'nullable|string|max:100',
             'email' => 'required|email|unique:users,email,'.$user->id,
             'phone' => 'nullable|string|max:20',
+            'profile_picture' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
         $name = trim($validated['first_name'] . ' ' . ($validated['last_name'] ?? ''));
         
-        $user->update([
+        $data = [
             'name' => $name,
             'email' => $validated['email'],
             'phone' => $validated['phone'],
-        ]);
+        ];
+
+        if ($request->hasFile('profile_picture')) {
+            $path = $request->file('profile_picture')->store('profiles', 'public');
+            $data['profile_picture'] = $path;
+        }
+
+        $user->update($data);
 
         return redirect()->back()->with('success', 'Profile updated successfully.');
     }
@@ -36,14 +46,129 @@ class SettingsController extends Controller
     {
         $user = Auth::user();
         
+        $validated = $request->validate([
+            'about' => 'nullable|string',
+            'name' => 'nullable|string|max:255',
+            'industry' => 'nullable|string|max:255',
+            'logo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+        ]);
+
         if ($user->role === 'provider' && $user->providerProfile) {
-            $validated = $request->validate([
-                'about' => 'nullable|string',
-            ]);
             $user->providerProfile->update(['bio' => $validated['about']]);
+        } elseif ($user->role === 'client') {
+            $company = $user->companies()->first();
+            if ($company) {
+                $data = [
+                    'about' => $validated['about'],
+                    'name' => $validated['name'] ?? $company->name,
+                    'industry' => $validated['industry'] ?? $company->industry,
+                ];
+                if ($request->hasFile('logo')) {
+                    $path = $request->file('logo')->store('logos', 'public');
+                    $data['logo'] = $path;
+                }
+                $company->update($data);
+            }
         }
         
         return redirect()->back()->with('success', 'Company details updated.');
+    }
+
+    public function updateGeneral(Request $request)
+    {
+        // For now, this might just be placeholders or session-based settings
+        // as language is handled via AlpineJS and localStorage in this template.
+        return redirect()->back()->with('success', 'General settings updated.');
+    }
+
+    public function updateNotifications(Request $request)
+    {
+        $user = Auth::user();
+        $user->update([
+            'notification_settings' => $request->notifications ?? []
+        ]);
+
+        return redirect()->back()->with('success', 'Notification preferences updated.');
+    }
+
+    public function addTeamMember(Request $request)
+    {
+        $user = Auth::user();
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'role' => 'required|in:manager,staff',
+        ]);
+
+        // In a real app, you'd send an invite. For this prototype, we'll create a user.
+        $new_user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make('password'), // default password
+            'role' => $user->role, // same role as owner (provider or client)
+        ]);
+
+        $team = $user->ownedTeam; // Assuming a relationship exists or we find it
+        if (!$team) {
+            $team = \App\Models\Team::create([
+                'owner_id' => $user->id,
+                'name' => $user->name . "'s Team",
+            ]);
+        }
+
+        TeamMember::create([
+            'team_id' => $team->id,
+            'user_id' => $new_user->id,
+            'role' => $validated['role'],
+            'permissions' => $request->permissions ?? [],
+        ]);
+
+        return redirect()->back()->with('success', 'Team member added successfully.');
+    }
+
+    public function updateTeamMember(Request $request, $id)
+    {
+        if ($id === 'multiple') {
+            foreach ($request->members as $memberId => $data) {
+                $member = TeamMember::whereHas('team', function($q) {
+                    $q->where('owner_id', Auth::id());
+                })->find($memberId);
+                
+                if ($member) {
+                    $member->update([
+                        'role' => $data['role'],
+                        'permissions' => $data['permissions'] ?? [],
+                    ]);
+                }
+            }
+            return redirect()->back()->with('success', 'Team permissions updated.');
+        }
+
+        $member = TeamMember::whereHas('team', function($q) {
+            $q->where('owner_id', Auth::id());
+        })->findOrFail($id);
+
+        $validated = $request->validate([
+            'role' => 'required|in:manager,staff',
+        ]);
+
+        $member->update([
+            'role' => $validated['role'],
+            'permissions' => $request->permissions ?? [],
+        ]);
+
+        return redirect()->back()->with('success', 'Team member updated.');
+    }
+
+    public function removeTeamMember($id)
+    {
+        $member = TeamMember::whereHas('team', function($q) {
+            $q->where('owner_id', Auth::id());
+        })->findOrFail($id);
+
+        $member->delete();
+
+        return redirect()->back()->with('success', 'Team member removed.');
     }
 
     public function updateSecurity(Request $request)
@@ -81,21 +206,6 @@ class SettingsController extends Controller
         Auth::user()->update(['plan_id' => $plan->id]);
 
         return redirect()->back()->with('success', 'Subscription plan updated successfully.');
-    }
-
-    public function updateTeamMember(Request $request, $id)
-    {
-        $member = TeamMember::whereHas('team', function($q) {
-            $q->where('owner_id', Auth::id());
-        })->findOrFail($id);
-
-        $validated = $request->validate([
-            'role' => 'required|in:owner,manager,staff',
-        ]);
-
-        $member->update(['role' => $validated['role']]);
-
-        return redirect()->back()->with('success', 'Team member role updated.');
     }
 
     public function updateStatus(Request $request)

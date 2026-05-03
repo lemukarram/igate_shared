@@ -8,6 +8,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -140,14 +142,6 @@
                     </a>
                 @endif
 
-                <!-- Language Toggle Section -->
-                <div class="pt-4 px-3">
-                    <button @click="toggleLang()" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-primary bg-primary-light transition-all border border-primary/10">
-                        <i data-lucide="languages" class="w-4 h-4 flex-shrink-0"></i>
-                        <span x-show="!sidebarCollapsed" class="text-xs font-bold whitespace-nowrap" x-text="lang === 'en' ? 'العربية' : 'English'"></span>
-                    </button>
-                </div>
-
                 <div class="pt-8 px-3 overflow-hidden">
                     <div class="flex items-center justify-between text-[10px] font-medium uppercase tracking-widest text-gray-400 mb-4">
                         <span x-show="!sidebarCollapsed" x-text="t('common.projects')" class="whitespace-nowrap"></span>
@@ -224,12 +218,13 @@
                     <div class="space-y-6 flex-1 overflow-y-auto pr-4 custom-scrollbar">
                         <!-- Account Tab -->
                         <div x-show="settingsTab === 'account'" class="space-y-4 animate-in fade-in duration-300">
-                            <form action="{{ route('settings.profile') }}" method="POST" class="space-y-4">
+                            <form id="settings-account-form" action="{{ route('settings.profile') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
                                 @csrf
                                 <div class="flex items-center space-x-4 mb-4">
                                     <div class="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 border-2 border-dashed border-gray-300 cursor-pointer hover:bg-gray-50 transition-colors relative overflow-hidden group">
-                                        <i data-lucide="upload" class="w-6 h-6 group-hover:text-[#3da9e4] transition-colors"></i>
-                                        <input type="file" name="profile_picture" class="absolute inset-0 opacity-0 cursor-pointer">
+                                        <img id="profile-preview" src="{{ Auth::user()->profile_picture ? asset('storage/' . Auth::user()->profile_picture) : '' }}" class="{{ Auth::user()->profile_picture ? '' : 'hidden' }} absolute inset-0 w-full h-full object-cover">
+                                        <i data-lucide="upload" id="profile-upload-icon" class="{{ Auth::user()->profile_picture ? 'hidden' : '' }} w-6 h-6 group-hover:text-[#3da9e4] transition-colors"></i>
+                                        <input type="file" name="profile_picture" class="absolute inset-0 opacity-0 cursor-pointer" onchange="previewImage(this, 'profile-preview', 'profile-upload-icon')">
                                     </div>
                                     <div>
                                         <p class="text-sm font-semibold text-gray-900">Profile Picture</p>
@@ -242,48 +237,76 @@
                                 </div>
                                 <div class="space-y-1"><label class="text-[10px] font-black uppercase tracking-widest text-gray-400">Email Address</label><input type="email" name="email" value="{{ Auth::user()->email }}" class="w-full px-4 py-2.5 border border-gray-100 bg-gray-50 rounded-lg outline-none focus:ring-4 focus:ring-primary/10 text-sm font-medium"></div>
                                 <div class="space-y-1"><label class="text-[10px] font-black uppercase tracking-widest text-gray-400">Phone Number</label><input type="text" name="phone" value="{{ Auth::user()->phone ?? '+966 50 000 0000' }}" class="w-full px-4 py-2.5 border border-gray-100 bg-gray-50 rounded-lg outline-none focus:ring-4 focus:ring-primary/10 text-sm font-medium"></div>
-                                <div class="pt-2 flex justify-end">
-                                    <button type="submit" class="px-6 py-2 bg-[#3da9e4] text-white rounded-md font-medium text-xs hover:bg-[#2b8bc2] transition-all" x-text="t('common.save')"></button>
-                                </div>
                             </form>
                         </div>
 
                         <!-- Company Profile Tab -->
                         <div x-show="settingsTab === 'company'" class="space-y-6 animate-in fade-in duration-300">
-                            <div class="flex items-center space-x-4 mb-2">
-                                <div class="w-20 h-20 bg-gray-50 rounded-lg flex items-center justify-center text-[#3da9e4] border border-gray-200 cursor-pointer hover:border-[#3da9e4] transition-all relative group overflow-hidden">
-                                    <i data-lucide="image" class="w-6 h-6 group-hover:scale-110 transition-transform"></i>
-                                    <input type="file" class="absolute inset-0 opacity-0 cursor-pointer">
+                            <form id="settings-company-form" action="{{ route('settings.company') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+                                @csrf
+                                <div class="flex items-center space-x-4 mb-2">
+                                    <div class="w-20 h-20 bg-gray-50 rounded-lg flex items-center justify-center text-[#3da9e4] border border-gray-200 cursor-pointer hover:border-[#3da9e4] transition-all relative group overflow-hidden">
+                                        @php
+                                            $logo = Auth::user()->role === 'client' ? (Auth::user()->companies()->first()->logo ?? null) : null;
+                                        @endphp
+                                        <img id="logo-preview" src="{{ $logo ? asset('storage/' . $logo) : '' }}" class="{{ $logo ? '' : 'hidden' }} absolute inset-0 w-full h-full object-contain p-2">
+                                        <i data-lucide="image" id="logo-upload-icon" class="{{ $logo ? 'hidden' : '' }} w-6 h-6 group-hover:scale-110 transition-transform"></i>
+                                        <input type="file" name="logo" class="absolute inset-0 opacity-0 cursor-pointer" onchange="previewImage(this, 'logo-preview', 'logo-upload-icon')">
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-semibold text-gray-900">Company Logo</p>
+                                        <p class="text-xs text-gray-500">Used on invoices and marketplace</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p class="text-sm font-semibold text-gray-900">Company Logo</p>
-                                    <p class="text-xs text-gray-500">Used on invoices and marketplace</p>
+                                @if(Auth::user()->role === 'client')
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div class="space-y-1">
+                                        <label class="text-[10px] font-black uppercase tracking-widest text-gray-400">Company Name</label>
+                                        <input type="text" name="name" value="{{ Auth::user()->companies()->first()->name ?? '' }}" class="w-full px-4 py-2.5 border border-gray-100 bg-gray-50 rounded-lg outline-none text-sm font-medium">
+                                    </div>
+                                    <div class="space-y-1">
+                                        <label class="text-[10px] font-black uppercase tracking-widest text-gray-400">Industry</label>
+                                        <select name="industry" class="tom-select w-full">
+                                            @foreach(['Technology', 'Legal', 'Healthcare', 'Finance', 'Education', 'Construction', 'Retail'] as $ind)
+                                                <option value="{{ $ind }}" {{ (Auth::user()->companies()->first()->industry ?? '') == $ind ? 'selected' : '' }}>{{ $ind }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="space-y-1">
-                                <label class="text-[10px] font-black uppercase tracking-widest text-gray-400">About Company</label>
-                                <textarea rows="4" placeholder="Briefly describe your company, services, and industry..." class="w-full px-4 py-3 border border-gray-100 bg-gray-50 rounded-lg outline-none focus:ring-2 focus:ring-[#3da9e4]/50 focus:border-[#3da9e4] text-sm resize-none"></textarea>
-                            </div>
-                            <div class="space-y-1">
-                                <label class="text-[10px] font-black uppercase tracking-widest text-gray-400">Company Documents</label>
-                                <div class="w-full h-24 border-2 border-dashed border-gray-200 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors relative">
-                                    <i data-lucide="upload-cloud" class="w-5 h-5 text-gray-400 mb-1"></i>
-                                    <span class="text-xs font-medium text-gray-500">Upload Registration / Tax Certificates</span>
-                                    <input type="file" multiple class="absolute inset-0 opacity-0 cursor-pointer">
+                                @endif
+                                <div class="space-y-1">
+                                    <label class="text-[10px] font-black uppercase tracking-widest text-gray-400">About Company</label>
+                                    <textarea name="about" rows="4" placeholder="Briefly describe your company, services, and industry..." class="w-full px-4 py-3 border border-gray-100 bg-gray-50 rounded-lg outline-none focus:ring-2 focus:ring-[#3da9e4]/50 focus:border-[#3da9e4] text-sm resize-none">{{ Auth::user()->role === 'client' ? (Auth::user()->companies()->first()->about ?? '') : (Auth::user()->providerProfile->bio ?? '') }}</textarea>
                                 </div>
-                            </div>
+                                <div class="space-y-1">
+                                    <label class="text-[10px] font-black uppercase tracking-widest text-gray-400">Company Documents</label>
+                                    <div class="w-full h-24 border-2 border-dashed border-gray-200 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors relative">
+                                        <i data-lucide="upload-cloud" class="w-5 h-5 text-gray-400 mb-1"></i>
+                                        <span class="text-xs font-medium text-gray-500">Upload Registration / Tax Certificates</span>
+                                        <input type="file" name="documents[]" multiple class="absolute inset-0 opacity-0 cursor-pointer">
+                                    </div>
+                                </div>
+                            </form>
                         </div>
 
                         <!-- Settings Tab -->
                         <div x-show="settingsTab === 'settings'" class="space-y-6 animate-in fade-in duration-300">
-                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                                <div><p class="text-sm font-bold text-gray-900">Dark Mode</p><p class="text-xs text-gray-400">Adjust the visual appearance</p></div>
-                                <div class="w-12 h-6 bg-gray-200 rounded-full relative"><div class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full shadow-sm"></div></div>
-                            </div>
-                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                                <div><p class="text-sm font-bold text-gray-900">Language</p><p class="text-xs text-gray-400">System display language</p></div>
-                                <select class="bg-transparent text-sm font-bold text-primary outline-none"><option>English</option><option>Arabic</option></select>
-                            </div>
+                            <form id="settings-settings-form" action="{{ route('settings.general') }}" method="POST" class="space-y-6">
+                                @csrf
+                                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                    <div><p class="text-sm font-bold text-gray-900">Dark Mode</p><p class="text-xs text-gray-400">Adjust the visual appearance</p></div>
+                                    <div class="w-12 h-6 bg-gray-200 rounded-full relative"><div class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full shadow-sm"></div></div>
+                                </div>
+                                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                    <div><p class="text-sm font-bold text-gray-900">Language</p><p class="text-xs text-gray-400">System display language</p></div>
+                                    <div class="flex items-center gap-2">
+                                        <button type="button" @click="toggleLang()" class="flex items-center gap-2 px-4 py-2 rounded-lg text-primary bg-primary-light transition-all border border-primary/10 text-xs font-bold">
+                                            <i data-lucide="languages" class="w-4 h-4"></i>
+                                            <span x-text="lang === 'en' ? 'العربية' : 'English'"></span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
                         </div>
 
                         <!-- Permissions Tab -->
@@ -302,59 +325,111 @@
                             <!-- Add User Form Section -->
                             <div x-show="showAddUserForm" x-collapse class="p-6 bg-gray-50 border border-gray-100 rounded-lg space-y-4 animate-in slide-in-from-top-2">
                                 <h3 class="text-sm font-bold text-gray-900" x-text="t('common.add_user')"></h3>
-                                <form class="grid grid-cols-2 gap-4">
-                                    <div class="space-y-1">
-                                        <label class="text-[10px] font-black uppercase tracking-widest text-gray-400">Full Name</label>
-                                        <input type="text" class="w-full px-4 py-2 border border-gray-200 rounded-md outline-none text-sm bg-white">
+                                <form action="{{ route('settings.team_members.store') }}" method="POST" class="space-y-4">
+                                    @csrf
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div class="space-y-1">
+                                            <label class="text-[10px] font-black uppercase tracking-widest text-gray-400">Full Name</label>
+                                            <input type="text" name="name" class="w-full px-4 py-2 border border-gray-200 rounded-md outline-none text-sm bg-white">
+                                        </div>
+                                        <div class="space-y-1">
+                                            <label class="text-[10px] font-black uppercase tracking-widest text-gray-400">Email Address</label>
+                                            <input type="email" name="email" class="w-full px-4 py-2 border border-gray-200 rounded-md outline-none text-sm bg-white">
+                                        </div>
                                     </div>
-                                    <div class="space-y-1">
-                                        <label class="text-[10px] font-black uppercase tracking-widest text-gray-400">Email Address</label>
-                                        <input type="email" class="w-full px-4 py-2 border border-gray-200 rounded-md outline-none text-sm bg-white">
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div class="space-y-1">
+                                            <label class="text-[10px] font-black uppercase tracking-widest text-gray-400">Role</label>
+                                            <select name="role" class="tom-select w-full">
+                                                <option value="manager">Manager</option>
+                                                <option value="staff">Staff</option>
+                                            </select>
+                                        </div>
+                                        <div class="space-y-1">
+                                            <label class="text-[10px] font-black uppercase tracking-widest text-gray-400">Initial Permissions</label>
+                                            <div class="flex flex-wrap gap-2 py-2">
+                                                @foreach(['service', 'project', 'company', 'read', 'write'] as $p)
+                                                    <label class="flex items-center gap-1.5 cursor-pointer">
+                                                        <input type="checkbox" name="permissions[]" value="{{ $p }}" checked class="w-3.5 h-3.5 text-primary rounded">
+                                                        <span class="text-[10px] font-bold uppercase text-gray-500">{{ $p }}</span>
+                                                    </label>
+                                                @endforeach
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="col-span-2 pt-2 flex justify-end gap-2">
+                                    <div class="pt-2 flex justify-end gap-2">
                                         <button type="button" @click="showAddUserForm = false" class="px-4 py-2 text-gray-500 text-xs font-medium">Cancel</button>
-                                        <button type="button" @click="showAddUserForm = false" class="px-6 py-2 bg-primary text-white rounded-md font-medium text-xs">Send Invitation</button>
+                                        <button type="submit" class="px-6 py-2 bg-primary text-white rounded-md font-medium text-xs">Send Invitation</button>
                                     </div>
                                 </form>
                             </div>
 
-                            <div class="space-y-4">
-                                <div class="flex items-center justify-between">
-                                    <p class="text-[10px] font-black uppercase tracking-widest text-gray-400">Team Members</p>
-                                </div>
-                                <div class="overflow-hidden border border-gray-100 rounded-lg">
-                                    <table class="w-full text-left text-sm">
-                                        <thead class="bg-gray-50 text-[10px] uppercase tracking-widest text-gray-400">
-                                            <tr class="divide-x divide-gray-100">
-                                                <th class="px-4 py-2 font-medium">Name</th>
-                                                <th class="px-4 py-2 font-medium">Role</th>
-                                                <th class="px-4 py-2 font-medium">Status</th>
-                                                <th class="px-4 py-2 font-medium text-right">Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody class="divide-y divide-gray-50">
-                                            <tr class="hover:bg-gray-50 transition-all">
-                                                <td class="px-4 py-3 font-medium text-xs">{{ Auth::user()->name }}</td>
-                                                <td class="px-4 py-3 capitalize text-xs">{{ Auth::user()->role }} (Owner)</td>
-                                                <td class="px-4 py-3"><span class="px-2 py-0.5 bg-green-50 text-green-600 rounded-full text-[10px] font-bold">Active</span></td>
-                                                <td class="px-4 py-3 text-right"><button class="text-primary font-medium text-xs">Edit</button></td>
-                                            </tr>
-                                            @if(isset($teamMembers))
-                                                @foreach($teamMembers as $member)
-                                                <tr class="hover:bg-gray-50 transition-all">
-                                                    <td class="px-4 py-3 font-medium text-xs">{{ $member->user->name ?? 'Invited' }}</td>
-                                                    <td class="px-4 py-3 capitalize text-xs">{{ $member->role }}</td>
-                                                    <td class="px-4 py-3"><span class="px-2 py-0.5 bg-green-50 text-green-600 rounded-full text-[10px] font-bold">Active</span></td>
-                                                    <td class="px-4 py-3 text-right"><button class="text-primary font-medium text-xs">Edit</button></td>
+                            <form id="settings-permissions-form" action="{{ route('settings.team_members.update', 'multiple') }}" method="POST" class="space-y-4">
+                                @csrf
+                                @method('PATCH')
+                                <div class="space-y-4">
+                                    <div class="flex items-center justify-between">
+                                        <p class="text-[10px] font-black uppercase tracking-widest text-gray-400">Team Members</p>
+                                    </div>
+                                    <div class="overflow-hidden border border-gray-100 rounded-lg">
+                                        <table class="w-full text-left text-sm">
+                                            <thead class="bg-gray-50 text-[10px] uppercase tracking-widest text-gray-400">
+                                                <tr class="divide-x divide-gray-100">
+                                                    <th class="px-4 py-2 font-medium">Name</th>
+                                                    <th class="px-4 py-2 font-medium">Role</th>
+                                                    <th class="px-4 py-2 font-medium">Permissions</th>
+                                                    <th class="px-4 py-2 font-medium text-right">Actions</th>
                                                 </tr>
-                                                @endforeach
-                                            @endif
-                                        </tbody>
-                                    </table>
+                                            </thead>
+                                            <tbody class="divide-y divide-gray-50">
+                                                <tr class="hover:bg-gray-50 transition-all">
+                                                    <td class="px-4 py-3 font-medium text-xs">{{ Auth::user()->name }}</td>
+                                                    <td class="px-4 py-3 capitalize text-xs">{{ Auth::user()->role }} (Owner)</td>
+                                                    <td class="px-4 py-3"><span class="px-2 py-0.5 bg-primary-light text-primary rounded-full text-[10px] font-bold">Full Access</span></td>
+                                                    <td class="px-4 py-3 text-right"></td>
+                                                </tr>
+                                                @if(isset($teamMembers))
+                                                    @foreach($teamMembers as $member)
+                                                    <tr class="hover:bg-gray-50 transition-all">
+                                                        <td class="px-4 py-3 font-medium text-xs">{{ $member->user->name ?? 'Invited' }}</td>
+                                                        <td class="px-4 py-3">
+                                                            <select name="members[{{ $member->id }}][role]" class="bg-transparent text-xs font-medium outline-none">
+                                                                <option value="manager" {{ $member->role === 'manager' ? 'selected' : '' }}>Manager</option>
+                                                                <option value="staff" {{ $member->role === 'staff' ? 'selected' : '' }}>Staff</option>
+                                                            </select>
+                                                        </td>
+                                                        <td class="px-4 py-3">
+                                                            <div class="flex flex-wrap gap-2">
+                                                                @foreach(['service', 'project', 'company', 'read', 'write'] as $p)
+                                                                    <label class="flex items-center gap-1 cursor-pointer">
+                                                                        <input type="checkbox" name="members[{{ $member->id }}][permissions][]" value="{{ $p }}" {{ in_array($p, $member->permissions ?? []) ? 'checked' : '' }} class="w-3 h-3 text-primary rounded">
+                                                                        <span class="text-[9px] font-bold uppercase text-gray-400">{{ $p }}</span>
+                                                                    </label>
+                                                                @endforeach
+                                                            </div>
+                                                        </td>
+                                                        <td class="px-4 py-3 text-right">
+                                                            <button type="button" @click="if(confirm('Are you sure?')) { $refs['delete_member_' + {{ $member->id }}].submit() }" class="text-red-500 hover:text-red-700 transition-colors">
+                                                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                    @endforeach
+                                                @endif
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
-                            </div>
+                            </form>
+                            @if(isset($teamMembers))
+                                @foreach($teamMembers as $member)
+                                    <form x-ref="delete_member_{{ $member->id }}" action="{{ route('settings.team_members.destroy', $member->id) }}" method="POST" class="hidden">
+                                        @csrf @method('DELETE')
+                                    </form>
+                                @endforeach
+                            @endif
 
-                            <div class="space-y-2">
+                            <div class="space-y-2 pt-4">
                                 <p class="text-[10px] font-black uppercase tracking-widest text-gray-400">Enabled Features</p>
                                 <div class="flex flex-wrap gap-2">
                                     <span class="px-3 py-1 bg-green-50 text-green-600 rounded-full text-[10px] font-black uppercase">Payments</span>
@@ -373,10 +448,10 @@
                                 </div>
                                 <div class="flex items-center justify-between text-sm">
                                     <span class="text-gray-500 font-medium">Limits: {{ Auth::user()->plan->max_services ?? 1 }} Services, {{ Auth::user()->plan->max_projects ?? 1 }} Projects</span>
-                                    <button class="text-primary font-black uppercase tracking-widest text-xs">View Invoices</button>
+                                    <button type="button" class="text-primary font-black uppercase tracking-widest text-xs">View Invoices</button>
                                 </div>
                             </div>
-                            <form action="{{ route('settings.plan') }}" method="POST" class="space-y-4 mt-6">
+                            <form id="settings-plans-form" action="{{ route('settings.plan') }}" method="POST" class="space-y-4 mt-6">
                                 @csrf
                                 <h4 class="text-sm font-bold">Upgrade Plan</h4>
                                 <div class="grid grid-cols-1 gap-3">
@@ -392,34 +467,50 @@
                                     </label>
                                     @endforeach
                                 </div>
-                                <div class="pt-2 flex justify-end">
-                                    <button type="submit" class="px-6 py-2 bg-[#3da9e4] text-white rounded-md font-medium text-xs hover:bg-[#2b8bc2] transition-all" x-text="t('common.save')"></button>
-                                </div>
                             </form>
                         </div>
 
                         <!-- Notifications Tab -->
                         <div x-show="settingsTab === 'notifications'" class="space-y-4 animate-in fade-in duration-300">
-                            @foreach(['Email Notifications', 'Browser Push', 'SMS Alerts', 'Marketing Inquiries'] as $n)
-                            <div class="flex items-center justify-between p-4 border-b border-gray-50">
-                                <span class="text-sm font-bold text-gray-700">{{ $n }}</span>
-                                <div class="w-10 h-5 bg-primary rounded-full relative"><div class="absolute right-1 top-1 w-3 h-3 bg-white rounded-full"></div></div>
-                            </div>
-                            @endforeach
+                            <form id="settings-notifications-form" action="{{ route('settings.notifications') }}" method="POST" class="space-y-4">
+                                @csrf
+                                @foreach(['Email Notifications' => 'email', 'Browser Push' => 'push', 'SMS Alerts' => 'sms', 'Marketing Inquiries' => 'marketing'] as $label => $key)
+                                <div class="flex items-center justify-between p-4 border-b border-gray-50">
+                                    <span class="text-sm font-bold text-gray-700">{{ $label }}</span>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" name="notifications[{{ $key }}]" value="1" {{ (Auth::user()->notification_settings[$key] ?? false) ? 'checked' : '' }} class="sr-only peer">
+                                        <div class="w-10 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+                                    </label>
+                                </div>
+                                @endforeach
+                            </form>
                         </div>
 
                         <!-- Security Tab -->
                         <div x-show="settingsTab === 'security'" class="space-y-4 animate-in fade-in duration-300">
-                            <div class="space-y-1"><label class="text-[10px] font-black uppercase tracking-widest text-gray-400">Current Password</label><input type="password" class="w-full px-4 py-2.5 border border-gray-100 bg-gray-50 rounded-lg outline-none text-sm font-medium"></div>
-                            <div class="space-y-1"><label class="text-[10px] font-black uppercase tracking-widest text-gray-400">New Password</label><input type="password" class="w-full px-4 py-2.5 border border-gray-100 bg-gray-50 rounded-lg outline-none text-sm font-medium"></div>
-                            <div class="flex items-center space-x-3 p-4 bg-amber-50 rounded-lg text-amber-700 border border-amber-100">
-                                <i data-lucide="alert-triangle" class="w-5 h-5"></i>
-                                <p class="text-xs font-bold">Two-factor authentication is currently disabled.</p>
-                            </div>
+                            <form id="settings-security-form" action="{{ route('settings.security') }}" method="POST" class="space-y-4">
+                                @csrf
+                                <div class="space-y-1">
+                                    <label class="text-[10px] font-black uppercase tracking-widest text-gray-400">Current Password</label>
+                                    <input type="password" name="current_password" class="w-full px-4 py-2.5 border border-gray-100 bg-gray-50 rounded-lg outline-none text-sm font-medium">
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="text-[10px] font-black uppercase tracking-widest text-gray-400">New Password</label>
+                                    <input type="password" name="password" class="w-full px-4 py-2.5 border border-gray-100 bg-gray-50 rounded-lg outline-none text-sm font-medium">
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="text-[10px] font-black uppercase tracking-widest text-gray-400">Confirm New Password</label>
+                                    <input type="password" name="password_confirmation" class="w-full px-4 py-2.5 border border-gray-100 bg-gray-50 rounded-lg outline-none text-sm font-medium">
+                                </div>
+                                <div class="flex items-center space-x-3 p-4 bg-amber-50 rounded-lg text-amber-700 border border-amber-100">
+                                    <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+                                    <p class="text-xs font-bold">Two-factor authentication is currently disabled.</p>
+                                </div>
+                            </form>
                         </div>
                     </div>
                     <div class="pt-6 border-t border-gray-50 flex justify-end">
-                        <button class="px-6 py-2 bg-gray-900 text-white rounded-md font-medium text-xs hover:bg-black transition-all" x-text="t('common.save')"></button>
+                        <button @click="submitSettingsForm()" class="px-6 py-2 bg-gray-900 text-white rounded-md font-medium text-xs hover:bg-black transition-all" x-text="t('common.save')"></button>
                     </div>
                 </div>
             </div>
@@ -434,7 +525,7 @@
             <div class="flex items-center justify-between mb-8"><h2 class="text-2xl font-medium" x-text="t('explore.add_service')"></h2><button @click="addServiceOpen = false" class="text-gray-400 hover:text-gray-600"><i data-lucide="x" class="w-6 h-6"></i></button></div>
             <form action="{{ route('provider.services.store') }}" method="POST" class="space-y-6">
                 @csrf
-                <div class="space-y-1"><label class="text-[10px] font-medium uppercase tracking-widest text-gray-400" x-text="t('explore.service_catalog')"></label><select name="service_id" class="w-full px-4 py-2.5 border border-gray-100 bg-gray-50 rounded-md text-sm font-medium">@foreach(\App\Models\Service::all() as $s)<option value="{{ $s->id }}">{{ $s->name }}</option>@endforeach</select></div>
+                <div class="space-y-1"><label class="text-[10px] font-medium uppercase tracking-widest text-gray-400" x-text="t('explore.service_catalog')"></label><select name="service_id" class="tom-select w-full px-4 py-2.5 border border-gray-100 bg-gray-50 rounded-md text-sm font-medium">@foreach(\App\Models\Service::all() as $s)<option value="{{ $s->id }}">{{ $s->name }}</option>@endforeach</select></div>
                 <div class="grid grid-cols-2 gap-4">
                     <div class="space-y-1"><label class="text-[10px] font-medium uppercase tracking-widest text-gray-400" x-text="t('explore.price')"></label><input type="number" name="price" step="0.01" class="w-full px-4 py-2.5 border border-gray-100 rounded-md text-sm"></div>
                     <div class="space-y-1"><label class="text-[10px] font-medium uppercase tracking-widest text-gray-400" x-text="t('explore.days')"></label><input type="number" name="delivery_time_days" class="w-full px-4 py-2.5 border border-gray-100 rounded-md text-sm"></div>
@@ -488,7 +579,54 @@
                         localStorage.setItem('sidebar_collapsed', value);
                         setTimeout(() => lucide.createIcons(), 300);
                     });
+
+                    this.$watch('settingsOpen', value => {
+                        if (value) {
+                            setTimeout(() => {
+                                document.querySelectorAll('.tom-select').forEach(el => {
+                                    if (!el.tomselect) {
+                                        new TomSelect(el, {
+                                            create: false,
+                                            sortField: {
+                                                field: "text",
+                                                direction: "asc"
+                                            }
+                                        });
+                                    }
+                                });
+                            }, 100);
+                        }
+                    });
+                },
+                submitSettingsForm() {
+                    const activeTab = this.settingsTab;
+                    const form = document.querySelector(`#settings-${activeTab}-form`);
+                    if (form) {
+                        form.submit();
+                    } else {
+                        // fallback for tabs that might not have a form or use different IDs
+                        const visibleForm = document.querySelector(`div[x-show="settingsTab === '${activeTab}'"] form`);
+                        if (visibleForm) visibleForm.submit();
+                    }
                 }
+            }
+        }
+
+        function previewImage(input, previewId, iconId) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById(previewId);
+                    const icon = document.getElementById(iconId);
+                    if (preview) {
+                        preview.src = e.target.result;
+                        preview.classList.remove('hidden');
+                    }
+                    if (icon) {
+                        icon.classList.add('hidden');
+                    }
+                }
+                reader.readAsDataURL(input.files[0]);
             }
         }
     </script>

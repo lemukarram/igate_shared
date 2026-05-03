@@ -13,6 +13,11 @@ class TeamMember extends Model
         'team_id',
         'user_id',
         'role', // owner, manager, staff
+        'permissions',
+    ];
+
+    protected $casts = [
+        'permissions' => 'array',
     ];
 
     public function team()

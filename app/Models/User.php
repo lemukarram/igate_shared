@@ -25,7 +25,14 @@ class User extends Authenticatable
         'role',
         'phone',
         'plan_id',
+        'profile_picture',
+        'notification_settings',
     ];
+
+    public function getOwnedTeamAttribute()
+    {
+        return $this->ownedTeams()->first();
+    }
 
     public function plan()
     {
@@ -90,6 +97,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'notification_settings' => 'array',
         ];
     }
 }
