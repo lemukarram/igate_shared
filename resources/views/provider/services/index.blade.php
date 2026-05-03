@@ -9,7 +9,7 @@
         </div>
         <button @click="addServiceOpen = true" class="px-6 py-3 bg-primary text-white rounded-xl font-bold hover:bg-primary-dark transition-all flex items-center gap-2 shadow-lg shadow-primary/20">
             <i data-lucide="plus" class="w-5 h-5"></i>
-            <span x-text="$t('common.active')"></span>
+            <span x-text="t('explore.add_new_service')"></span>
         </button>
     </div>
 
