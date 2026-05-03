@@ -161,8 +161,12 @@
             <!-- Bottom Profile -->
             <div class="p-4 border-t border-gray-100 relative ">
                 <div @click="profileOpen = !profileOpen" class="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-all">
-                    <div class="w-8 h-8 bg-gradient-to-br from-primary to-primary-dark rounded-lg flex items-center justify-center text-white font-medium text-xs shadow-sm flex-shrink-0">
-                        {{ substr(Auth::user()->name, 0, 2) }}
+                    <div class="w-8 h-8 bg-gradient-to-br from-primary to-primary-dark rounded-lg flex items-center justify-center text-white font-medium text-xs shadow-sm flex-shrink-0 overflow-hidden">
+                        @if(Auth::user()->profile_picture)
+                            <img src="{{ asset('storage/' . Auth::user()->profile_picture) }}" class="w-full bg-white h-full object-cover">
+                        @else
+                            {{ substr(Auth::user()->name, 0, 2) }}
+                        @endif
                     </div>
                     <div class="flex-1 min-w-0" x-show="!sidebarCollapsed">
                         <p class="text-xs font-medium text-gray-900 truncate">{{ Auth::user()->name }}</p>
@@ -200,13 +204,16 @@
         <div class="bg-white w-full max-w-4xl rounded-lg shadow-2xl relative z-10 overflow-hidden border border-gray-100 animate-in zoom-in duration-300">
             <div class="flex h-[550px]">
                 <div class="w-56 bg-gray-50 border-r border-gray-100 p-8 flex flex-col">
-                    <h3 class="text-[10px] font-medium uppercase tracking-widest text-gray-400 mb-8 px-2">Settings</h3>
+                    <!--<h3 class="text-[10px] font-medium uppercase tracking-widest text-gray-400 mb-8 px-2">{{ __('common.settings') }}</h3>-->
+                    <div class="pb-4 px-4 overflow-hidden">
+                        <img src="/images/logo/logo.png" alt="iGate Shared Services" class="h-10 w-auto object-contain min-w-[40px]" :class="sidebarCollapsed ? 'scale-75' : ''">
+                    </div>
                     <div class="space-y-1 flex-1">
-                        <template x-for="t_tab in ['account', 'company', 'settings', 'permissions', 'plans', 'notifications', 'security']">
+                        <template x-for="t_tab in ['account', 'company', 'preferences', 'permissions', 'plans', 'notifications', 'security']">
                             <button @click="settingsTab = t_tab" 
                                     :class="settingsTab === t_tab ? 'bg-primary text-white font-medium' : 'text-gray-500 hover:bg-gray-100'" 
                                     class="w-full text-left px-4 py-2 rounded-md text-xs transition-all capitalize" 
-                                    x-text="t_tab"></button>
+                                    x-text="t('common.' + t_tab)"></button>
                         </template>
                     </div>
                 </div>
@@ -247,7 +254,9 @@
                                 <div class="flex items-center space-x-4 mb-2">
                                     <div class="w-20 h-20 bg-gray-50 rounded-lg flex items-center justify-center text-[#3da9e4] border border-gray-200 cursor-pointer hover:border-[#3da9e4] transition-all relative group overflow-hidden">
                                         @php
-                                            $logo = Auth::user()->role === 'client' ? (Auth::user()->companies()->first()->logo ?? null) : null;
+                                            $logo = Auth::user()->role === 'client' 
+                                                ? (Auth::user()->companies()->first()->logo ?? null) 
+                                                : (Auth::user()->providerProfile->logo ?? null);
                                         @endphp
                                         <img id="logo-preview" src="{{ $logo ? asset('storage/' . $logo) : '' }}" class="{{ $logo ? '' : 'hidden' }} absolute inset-0 w-full h-full object-contain p-2">
                                         <i data-lucide="image" id="logo-upload-icon" class="{{ $logo ? 'hidden' : '' }} w-6 h-6 group-hover:scale-110 transition-transform"></i>
@@ -280,6 +289,19 @@
                                 </div>
                                 <div class="space-y-1">
                                     <label class="text-[10px] font-black uppercase tracking-widest text-gray-400">Company Documents</label>
+                                    @if(Auth::user()->documents->where('project_id', null)->count() > 0)
+                                        <div class="grid grid-cols-2 gap-2 mb-4">
+                                            @foreach(Auth::user()->documents->where('project_id', null) as $doc)
+                                                <div class="flex items-center gap-2 p-2 bg-gray-50 rounded-lg border border-gray-100">
+                                                    <i data-lucide="file-text" class="w-4 h-4 text-primary"></i>
+                                                    <span class="text-[10px] font-medium text-gray-600 truncate flex-1">{{ $doc->name }}</span>
+                                                    <a href="{{ asset('storage/' . $doc->file_path) }}" target="_blank" class="text-primary hover:text-primary-dark transition-colors">
+                                                        <i data-lucide="external-link" class="w-3 h-3"></i>
+                                                    </a>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @endif
                                     <div class="w-full h-24 border-2 border-dashed border-gray-200 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors relative">
                                         <i data-lucide="upload-cloud" class="w-5 h-5 text-gray-400 mb-1"></i>
                                         <span class="text-xs font-medium text-gray-500">Upload Registration / Tax Certificates</span>
@@ -290,7 +312,7 @@
                         </div>
 
                         <!-- Settings Tab -->
-                        <div x-show="settingsTab === 'settings'" class="space-y-6 animate-in fade-in duration-300">
+                        <div x-show="settingsTab === 'preferences'" class="space-y-6 animate-in fade-in duration-300">
                             <form id="settings-settings-form" action="{{ route('settings.general') }}" method="POST" class="space-y-6">
                                 @csrf
                                 <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
@@ -522,13 +544,37 @@
     <div x-show="addServiceOpen" class="fixed inset-0 z-[100] flex items-center justify-center" style="display: none;">
         <div class="absolute inset-0 bg-black/40 backdrop-blur-md" @click="addServiceOpen = false"></div>
         <div class="bg-white w-full max-w-lg rounded-lg shadow-2xl relative z-10 p-10 border border-gray-100 animate-in zoom-in duration-300">
-            <div class="flex items-center justify-between mb-8"><h2 class="text-2xl font-medium" x-text="t('explore.add_service')"></h2><button @click="addServiceOpen = false" class="text-gray-400 hover:text-gray-600"><i data-lucide="x" class="w-6 h-6"></i></button></div>
+            <div class="flex items-center justify-between mb-8">
+                <h2 class="text-2xl font-medium" x-text="t('explore.add_service')"></h2>
+                <button @click="addServiceOpen = false" class="text-gray-400 hover:text-gray-600">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
             <form action="{{ route('provider.services.store') }}" method="POST" class="space-y-6">
                 @csrf
-                <div class="space-y-1"><label class="text-[10px] font-medium uppercase tracking-widest text-gray-400" x-text="t('explore.service_catalog')"></label><select name="service_id" class="tom-select w-full px-4 py-2.5 border border-gray-100 bg-gray-50 rounded-md text-sm font-medium">@foreach(\App\Models\Service::all() as $s)<option value="{{ $s->id }}">{{ $s->name }}</option>@endforeach</select></div>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-medium uppercase tracking-widest text-gray-400" x-text="t('explore.service_catalog')"></label>
+                    <div class="relative">
+                        <select name="service_id" class="w-full px-4 py-2.5 border border-gray-200 bg-white rounded-md text-sm font-medium text-gray-700 appearance-none cursor-pointer focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all">
+                            @foreach(\App\Models\Service::all() as $s)
+                                <option value="{{ $s->id }}">{{ $s->name }}</option>
+                            @endforeach
+                        </select>
+                        <!-- Custom arrow -->
+                        <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+                            <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
                 <div class="grid grid-cols-2 gap-4">
-                    <div class="space-y-1"><label class="text-[10px] font-medium uppercase tracking-widest text-gray-400" x-text="t('explore.price')"></label><input type="number" name="price" step="0.01" class="w-full px-4 py-2.5 border border-gray-100 rounded-md text-sm"></div>
-                    <div class="space-y-1"><label class="text-[10px] font-medium uppercase tracking-widest text-gray-400" x-text="t('explore.days')"></label><input type="number" name="delivery_time_days" class="w-full px-4 py-2.5 border border-gray-100 rounded-md text-sm"></div>
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-medium uppercase tracking-widest text-gray-400" x-text="t('explore.price')"></label>
+                        <input type="number" name="price" step="0.01" class="w-full px-4 py-2.5 border border-gray-200 bg-white rounded-md text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-medium uppercase tracking-widest text-gray-400" x-text="t('explore.days')"></label>
+                        <input type="number" name="delivery_time_days" class="w-full px-4 py-2.5 border border-gray-200 bg-white rounded-md text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all">
+                    </div>
                 </div>
                 <button type="submit" class="w-full py-4 bg-primary text-white rounded-md font-medium" x-text="t('explore.add_to_portfolio_btn')"></button>
             </form>
@@ -536,7 +582,64 @@
     </div>
     @endif
 
+    <!-- Toast Notifications -->
+    <div x-data="toastManager()" 
+         @toast.window="add($event.detail)" 
+         class="fixed top-5 right-5 z-[200] flex flex-col gap-3 pointer-events-none">
+        <template x-for="toast in toasts" :key="toast.id">
+            <div x-show="toast.visible" 
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="translate-x-full opacity-0"
+                 x-transition:enter-end="translate-x-0 opacity-100"
+                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave-start="translate-x-0 opacity-100"
+                 x-transition:leave-end="translate-x-full opacity-0"
+                 :class="toast.type === 'success' ? 'bg-white border-green-100' : 'bg-white border-red-100'"
+                 class="pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-lg shadow-xl border min-w-[300px] max-w-md animate-in slide-in-from-right duration-300">
+                <div :class="toast.type === 'success' ? 'bg-green-50 text-green-500' : 'bg-red-50 text-red-500'" class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0">
+                    <i :data-lucide="toast.type === 'success' ? 'check-circle' : 'alert-circle'" class="w-5 h-5"></i>
+                </div>
+                <div class="flex-1">
+                    <p class="text-xs font-bold text-gray-900" x-text="toast.title"></p>
+                    <p class="text-[10px] text-gray-500 mt-0.5" x-text="toast.message"></p>
+                </div>
+                <button @click="remove(toast.id)" class="text-gray-400 hover:text-gray-900 transition-colors">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </template>
+    </div>
+
     <script>
+        function toastManager() {
+            return {
+                toasts: [],
+                add(detail) {
+                    const id = Date.now();
+                    this.toasts.push({
+                        id: id,
+                        visible: true,
+                        type: detail.type || 'success',
+                        title: detail.title || (detail.type === 'success' ? 'Success' : 'Error'),
+                        message: detail.message
+                    });
+                    setTimeout(() => {
+                        this.remove(id);
+                    }, 5000);
+                    setTimeout(() => lucide.createIcons(), 50);
+                },
+                remove(id) {
+                    const toast = this.toasts.find(t => t.id === id);
+                    if (toast) {
+                        toast.visible = false;
+                        setTimeout(() => {
+                            this.toasts = this.toasts.filter(t => t.id !== id);
+                        }, 300);
+                    }
+                }
+            }
+        }
+
         function i18nManager() {
             return {
                 lang: localStorage.getItem('igate_lang') || 'en',
@@ -630,5 +733,27 @@
             }
         }
     </script>
+
+    @if(session('success'))
+        <script>
+            window.addEventListener('DOMContentLoaded', () => {
+                window.dispatchEvent(new CustomEvent('toast', { detail: { type: 'success', message: "{{ session('success') }}" } }));
+            });
+        </script>
+    @endif
+    @if(session('error'))
+        <script>
+            window.addEventListener('DOMContentLoaded', () => {
+                window.dispatchEvent(new CustomEvent('toast', { detail: { type: 'error', message: "{{ session('error') }}" } }));
+            });
+        </script>
+    @endif
+    @if($errors->any())
+        <script>
+            window.addEventListener('DOMContentLoaded', () => {
+                window.dispatchEvent(new CustomEvent('toast', { detail: { type: 'error', message: "{{ $errors->first() }}" } }));
+            });
+        </script>
+    @endif
 </body>
 </html>

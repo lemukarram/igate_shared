@@ -202,7 +202,7 @@
 
     <!-- Task Edit Modal -->
     <div x-show="taskModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center" style="display: none;">
-        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="taskModalOpen = false"></div>
+        <div class="absolute inset-0 bg-black/40 " @click="taskModalOpen = false"></div>
         <div class="bg-white w-full max-w-lg rounded-xl shadow-2xl relative z-10 p-8 border border-gray-100">
             <h2 class="text-2xl font-bold mb-6" x-text="t('project.update_task_status')"></h2>
             <form :action="'/tasks/' + selectedTask.id + '/status'" method="POST" class="space-y-6">
@@ -211,15 +211,50 @@
                     <label class="text-xs font-black uppercase tracking-widest text-gray-400 mb-2 block" x-text="t('project.task_title')"></label>
                     <p class="text-lg font-bold text-gray-900" x-text="selectedTask.title"></p>
                 </div>
-                <div>
-                    <label class="text-xs font-black uppercase tracking-widest text-gray-400 mb-2 block" x-text="t('common.status')"></label>
-                    <select name="status" x-model="selectedTask.status" class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-primary/20">
-                        <option value="todo">To Do</option>
-                        <option value="in_progress">In Progress</option>
-                        <option value="review">Review</option>
-                        <option value="done">Done</option>
-                    </select>
-                </div>
+                    <div>
+                        <label class="text-xs font-black uppercase tracking-widest text-gray-400 mb-2 block" x-text="t('common.status')"></label>
+                        <div class="relative" x-data="{ statusOpen: false }">
+                            <button type="button" 
+                                    @click="statusOpen = !statusOpen" 
+                                    @click.outside="statusOpen = false"
+                                    class="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm font-bold outline-none flex items-center justify-between">
+                                <span x-text="{
+                                    todo:        t('common.todo'),
+                                    in_progress: t('common.in_progress'),
+                                    review:      t('common.review'),
+                                    done:        t('common.done')
+                                }[selectedTask.status]"></span>
+                                <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400 transition-transform duration-200" :class="statusOpen ? 'rotate-180' : ''"></i>
+                            </button>
+
+                            <input type="hidden" name="status" :value="selectedTask.status">
+
+                            <div x-show="statusOpen" 
+                                x-transition:enter="transition ease-out duration-100"
+                                x-transition:enter-start="opacity-0 scale-95"
+                                x-transition:enter-end="opacity-100 scale-100"
+                                x-transition:leave="transition ease-in duration-75"
+                                x-transition:leave-start="opacity-100 scale-100"
+                                x-transition:leave-end="opacity-0 scale-95"
+                                class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
+                                <template x-for="option in [
+                                    { value: 'todo',        labelKey: 'common.todo',        color: 'text-gray-600',  bg: 'bg-gray-100'  },
+                                    { value: 'in_progress', labelKey: 'common.in_progress', color: 'text-blue-600',  bg: 'bg-blue-50'   },
+                                    { value: 'review',      labelKey: 'common.review',      color: 'text-amber-600', bg: 'bg-amber-50'  },
+                                    { value: 'done',        labelKey: 'common.done',        color: 'text-green-600', bg: 'bg-green-50'  }
+                                ]" :key="option.value">
+                                    <button type="button"
+                                            @click="selectedTask.status = option.value; statusOpen = false"
+                                            :class="selectedTask.status === option.value ? 'bg-primary-light text-primary' : 'hover:bg-gray-50 text-gray-700'"
+                                            class="w-full px-4 py-3 text-left text-sm font-bold flex items-center gap-3 transition-all">
+                                        <span :class="[option.bg, option.color]" 
+                                            class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider" 
+                                            x-text="t(option.labelKey)"></span>
+                                    </button>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
                 <div class="flex gap-4 pt-4">
                     <button type="button" @click="taskModalOpen = false" class="flex-1 py-4 bg-gray-100 text-gray-700 rounded-xl font-bold" x-text="t('common.cancel')"></button>
                     <button type="submit" class="flex-1 py-4 bg-primary text-white rounded-xl font-bold" x-text="t('common.save')"></button>

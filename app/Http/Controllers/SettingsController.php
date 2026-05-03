@@ -51,10 +51,16 @@ class SettingsController extends Controller
             'name' => 'nullable|string|max:255',
             'industry' => 'nullable|string|max:255',
             'logo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'documents.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:5120',
         ]);
 
         if ($user->role === 'provider' && $user->providerProfile) {
-            $user->providerProfile->update(['bio' => $validated['about']]);
+            $data = ['bio' => $validated['about']];
+            if ($request->hasFile('logo')) {
+                $path = $request->file('logo')->store('logos', 'public');
+                $data['logo'] = $path;
+            }
+            $user->providerProfile->update($data);
         } elseif ($user->role === 'client') {
             $company = $user->companies()->first();
             if ($company) {
@@ -68,6 +74,20 @@ class SettingsController extends Controller
                     $data['logo'] = $path;
                 }
                 $company->update($data);
+            }
+        }
+
+        // Handle documents
+        if ($request->hasFile('documents')) {
+            foreach ($request->file('documents') as $file) {
+                $path = $file->store('company_documents', 'public');
+                \App\Models\Document::create([
+                    'user_id' => $user->id,
+                    'file_path' => $path,
+                    'name' => $file->getClientOriginalName(),
+                    'file_type' => $file->getClientMimeType(),
+                    'file_size' => $file->getSize(),
+                ]);
             }
         }
         
