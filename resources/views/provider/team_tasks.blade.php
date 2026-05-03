@@ -201,6 +201,27 @@
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1" x-text="lang === 'ar' ? 'المرفقات' : 'Attachments'"></label>
+                            
+                            <!-- Existing Documents List -->
+                            <div x-show="editMode && currentTask.documents && currentTask.documents.length > 0" class="grid grid-cols-2 gap-3 mb-4">
+                                <template x-for="doc in currentTask.documents" :key="doc.id">
+                                    <div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg border border-gray-100 group">
+                                        <div class="flex items-center gap-2 overflow-hidden">
+                                            <i data-lucide="file" class="w-4 h-4 text-[#3da9e4] flex-shrink-0"></i>
+                                            <span class="text-[10px] font-medium text-gray-600 truncate" x-text="doc.name"></span>
+                                        </div>
+                                        <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <a :href="'/storage/' + doc.file_path" target="_blank" class="p-1 text-gray-400 hover:text-[#3da9e4]">
+                                                <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                                            </a>
+                                            <button type="button" @click="deleteDoc(doc.id)" class="p-1 text-gray-400 hover:text-red-500">
+                                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+
                             <div @click="$refs.fileInput.click()" class="border-2 border-dashed border-gray-200 rounded-lg p-6 text-center hover:bg-gray-50 transition-colors cursor-pointer">
                                 <i data-lucide="upload-cloud" class="w-8 h-8 text-gray-400 mx-auto mb-2"></i>
                                 <p class="text-sm text-gray-500 font-medium" x-text="lang === 'ar' ? 'اضغط لرفع ملفات متعددة أو اسحب وأفلت' : 'Click to upload multiple files or drag and drop'"></p>
@@ -227,7 +248,10 @@
                             <div class="absolute start-0 top-1.5 w-4 h-4 rounded-full bg-white border-2 border-[#3da9e4] z-10"></div>
                             <div class="space-y-1">
                                 <p class="text-xs text-gray-900 font-bold" x-text="history.user.name"></p>
-                                <p class="text-[10px] text-gray-500 font-medium" x-text="history.action === 'created' ? (lang === 'ar' ? 'أنشأ هذه المهمة' : 'Created this task') : (history.field + (lang === 'ar' ? ' تغير إلى ' : ' changed to ') + history.new_value)"></p>
+                                <p class="text-[10px] text-gray-500 font-medium" 
+                                   x-text="history.action === 'created' ? (lang === 'ar' ? 'أنشأ هذه المهمة' : 'Created this task') : 
+                                          (history.field_label + (lang === 'ar' ? ' تغير من ' : ' changed from ') + history.old_value_label + (lang === 'ar' ? ' إلى ' : ' to ') + history.new_value_label)">
+                                </p>
                                 <p class="text-[8px] text-gray-400 font-medium italic" x-text="formatDate(history.created_at)"></p>
                             </div>
                         </div>
@@ -257,13 +281,33 @@
                 const res = await fetch(`/provider/team-tasks/${taskId}`);
                 if (res.ok) {
                     this.currentTask = await res.json();
-                    this.formData = { ...this.currentTask };
+                    this.formData = { 
+                        id: this.currentTask.id,
+                        title: this.currentTask.title,
+                        description: this.currentTask.description,
+                        assigned_to: this.currentTask.assigned_to ? String(this.currentTask.assigned_to) : "",
+                        due_date: this.currentTask.due_date ? this.currentTask.due_date.substring(0, 10) : "",
+                        priority: this.currentTask.priority,
+                        status: this.currentTask.status
+                    };
                     this.editMode = true;
                     this.showModal = true;
                     this.$nextTick(() => lucide.createIcons());
-                }
-            },
-            formatDate(d) { return new Date(d).toLocaleString(this.lang === 'ar' ? 'ar-SA' : 'en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }); },
+                    }
+                    },
+                    async deleteDoc(docId) {
+                    if (!confirm(this.lang === 'ar' ? 'هل أنت متأكد من حذف هذا الملف؟' : 'Are you sure you want to delete this file?')) return;
+                    const res = await fetch(`/documents/${docId}`, {
+                    method: 'DELETE',
+                    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
+                    });
+                    if (res.ok) {
+                    this.currentTask.documents = this.currentTask.documents.filter(d => d.id !== docId);
+                    window.dispatchEvent(new CustomEvent('toast', { detail: { type: 'success', message: 'File deleted successfully' } }));
+                    }
+                    },
+                    formatDate(d) {
+ return new Date(d).toLocaleString(this.lang === 'ar' ? 'ar-SA' : 'en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }); },
             dragStart(e, id) { this.draggedTaskId = id; e.dataTransfer.effectAllowed = 'move'; },
             async dropTask(col) {
                 if (!this.draggedTaskId) return;

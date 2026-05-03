@@ -66,4 +66,11 @@ return [
     'in_progress' => 'جاري التنفيذ',
     'review'      => 'قيد المراجعة',
     'done'        => 'مكتمل',
+    'title'       => 'العنوان',
+    'description' => 'الوصف',
+    'assigned_to' => 'المكلف',
+    'due_date'    => 'تاريخ الاستحقاق',
+    'none'        => 'لا يوجد',
+    'task_created_success' => 'تم إنشاء المهمة بنجاح.',
+    'task_updated_success' => 'تم تحديث المهمة بنجاح.',
 ];

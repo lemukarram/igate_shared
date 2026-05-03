@@ -9,15 +9,32 @@ use Illuminate\Support\Facades\Auth;
 
 class TeamTaskController extends Controller
 {
+    protected function getProviderId()
+    {
+        $user = Auth::user();
+        if ($user->role === 'provider') {
+            return $user->id;
+        }
+        
+        // If team member, find owner via their team
+        $membership = \App\Models\TeamMember::where('user_id', $user->id)->first();
+        if ($membership && $membership->team) {
+            return $membership->team->owner_id;
+        }
+        
+        return $user->id;
+    }
+
     public function index()
     {
-        $query = Task::where('provider_id', Auth::id())
+        $providerId = $this->getProviderId();
+        $query = Task::where('provider_id', $providerId)
                      ->whereNull('project_id')
                      ->with('assignedUser');
 
         $tasks = $query->get()->groupBy('status');
         
-        $team = Team::where('owner_id', Auth::id())->first();
+        $team = Team::where('owner_id', $providerId)->first();
         $teamMembers = $team ? $team->members()->with('user')->get() : collect();
 
         return view('provider.team_tasks', compact('tasks', 'teamMembers'));
@@ -35,9 +52,14 @@ class TeamTaskController extends Controller
             'files.*' => 'nullable|file|max:10240',
         ]);
 
-        $validated['provider_id'] = Auth::id();
+        if (empty($validated['assigned_to'])) {
+            $validated['assigned_to'] = null;
+        }
+
+        $providerId = $this->getProviderId();
+        $validated['provider_id'] = $providerId;
         
-        $team = Team::where('owner_id', Auth::id())->first();
+        $team = Team::where('owner_id', $providerId)->first();
         if ($team) {
             $validated['team_id'] = $team->id;
         }
@@ -68,21 +90,30 @@ class TeamTaskController extends Controller
             }
         }
 
-        return redirect()->back()->with('success', 'Task created successfully.');
+        return redirect()->back()->with('success', __('common.task_created_success'));
     }
 
     public function show($id)
     {
-        $task = Task::where('provider_id', Auth::id())
+        $providerId = $this->getProviderId();
+        $task = Task::where('provider_id', $providerId)
                     ->with(['assignedUser', 'documents', 'histories.user'])
                     ->findOrFail($id);
         
+        // Format history for frontend display
+        $task->histories->each(function($h) {
+            $h->field_label = $h->field ? __('common.' . $h->field) : null;
+            $h->old_value_label = $this->resolveHistoryValue($h->field, $h->old_value);
+            $h->new_value_label = $this->resolveHistoryValue($h->field, $h->new_value);
+        });
+
         return response()->json($task);
     }
 
     public function update(Request $request, $id)
     {
-        $task = Task::where('provider_id', Auth::id())->findOrFail($id);
+        $providerId = $this->getProviderId();
+        $task = Task::where('provider_id', $providerId)->findOrFail($id);
         
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -94,6 +125,10 @@ class TeamTaskController extends Controller
             'files.*' => 'nullable|file|max:10240',
         ]);
 
+        if (empty($validated['assigned_to'])) {
+            $validated['assigned_to'] = null;
+        }
+
         $oldValues = $task->only(['title', 'description', 'assigned_to', 'due_date', 'priority', 'status']);
         
         $task->update($validated);
@@ -103,7 +138,17 @@ class TeamTaskController extends Controller
             if ($key === 'files') continue;
             
             $oldValue = $oldValues[$key] ?? null;
-            if ($oldValue != $newValue) {
+            
+            // Normalize for comparison
+            $compOld = $oldValue;
+            $compNew = $newValue;
+            
+            if ($key === 'due_date') {
+                $compOld = $oldValue ? \Carbon\Carbon::parse($oldValue)->format('Y-m-d') : null;
+                $compNew = $newValue ? \Carbon\Carbon::parse($newValue)->format('Y-m-d') : null;
+            }
+
+            if ($compOld != $compNew) {
                 \App\Models\TaskHistory::create([
                     'task_id' => $task->id,
                     'user_id' => Auth::id(),
@@ -131,7 +176,44 @@ class TeamTaskController extends Controller
             }
         }
 
-        return redirect()->back()->with('success', 'Task updated successfully.');
+        return redirect()->back()->with('success', __('common.task_updated_success'));
+    }
+
+    public function deleteDocument($id)
+    {
+        $document = \App\Models\Document::findOrFail($id);
+        
+        // Security check: must be owner of task or uploader
+        $task = Task::find($document->task_id);
+        if ($document->user_id !== Auth::id() && ($task && $task->provider_id !== Auth::id())) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        \Illuminate\Support\Facades\Storage::disk('public')->delete($document->file_path);
+        $document->delete();
+
+        return response()->json(['success' => true]);
+    }
+
+    protected function resolveHistoryValue($field, $value)
+    {
+        if (is_null($value) || $value === "") return __('common.none');
+
+        switch ($field) {
+            case 'assigned_to':
+                return \App\Models\User::find($value)->name ?? $value;
+            case 'status':
+            case 'priority':
+                return __('tasks.' . $value);
+            case 'due_date':
+                try {
+                    return \Carbon\Carbon::parse($value)->format('Y-m-d');
+                } catch (\Exception $e) {
+                    return $value;
+                }
+            default:
+                return $value;
+        }
     }
 
     public function updateStatus(Request $request, $id)
@@ -140,7 +222,8 @@ class TeamTaskController extends Controller
             'status' => 'required|in:todo,in_progress,review,done',
         ]);
 
-        $task = Task::where('provider_id', Auth::id())->findOrFail($id);
+        $providerId = $this->getProviderId();
+        $task = Task::where('provider_id', $providerId)->findOrFail($id);
         $oldStatus = $task->status;
         $task->update(['status' => $validated['status']]);
 

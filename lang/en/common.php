@@ -66,4 +66,11 @@ return [
     'in_progress' => 'In Progress',
     'review'      => 'Review',
     'done'        => 'Done',
+    'title'       => 'Title',
+    'description' => 'Description',
+    'assigned_to' => 'Assigned To',
+    'due_date'    => 'Due Date',
+    'none'        => 'None',
+    'task_created_success' => 'Task created successfully.',
+    'task_updated_success' => 'Task updated successfully.',
 ];

@@ -736,21 +736,21 @@
 
     @if(session('success'))
         <script>
-            window.addEventListener('DOMContentLoaded', () => {
+            window.addEventListener('load', () => {
                 window.dispatchEvent(new CustomEvent('toast', { detail: { type: 'success', message: "{{ session('success') }}" } }));
             });
         </script>
     @endif
     @if(session('error'))
         <script>
-            window.addEventListener('DOMContentLoaded', () => {
+            window.addEventListener('load', () => {
                 window.dispatchEvent(new CustomEvent('toast', { detail: { type: 'error', message: "{{ session('error') }}" } }));
             });
         </script>
     @endif
     @if($errors->any())
         <script>
-            window.addEventListener('DOMContentLoaded', () => {
+            window.addEventListener('load', () => {
                 window.dispatchEvent(new CustomEvent('toast', { detail: { type: 'error', message: "{{ $errors->first() }}" } }));
             });
         </script>
