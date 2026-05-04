@@ -16,6 +16,7 @@ return [
     'task_title' => 'عنوان المهمة',
     'no_tasks' => 'لا توجد مهام حالياً',
     'no_files' => 'لم يتم رفع ملفات بعد',
+    'enterprise_client' => 'عميل شركات',
     'you' => 'أنت',
     'not_verified' => '[غير موثق]',
     'verified' => 'موثق',

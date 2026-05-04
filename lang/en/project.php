@@ -16,6 +16,7 @@ return [
     'task_title' => 'Task Title',
     'no_tasks' => 'No tasks yet',
     'no_files' => 'No files uploaded yet',
+    'enterprise_client' => 'Enterprise Client',
     'you' => 'You',
     'not_verified' => '[Not Verified]',
     'verified' => 'Verified',

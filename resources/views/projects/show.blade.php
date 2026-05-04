@@ -30,11 +30,11 @@
                 </div>
                 <div>
                     <p class="text-sm font-semibold text-gray-900">{{ $project->client->name }}</p>
-                    <p class="text-xs text-gray-500 font-medium">{{ $project->company->name ?? 'Enterprise Client' }}</p>
+                    <p class="text-xs text-gray-500 font-medium">{{ $project->company->name ?? '' }}@unless($project->company_id)<span x-text="t('project.enterprise_client')"></span>@endunless</p>
                 </div>
             </a>
             <div class="text-end hidden sm:block">
-                <p class="text-sm font-semibold text-gray-900">{{ number_format($project->total_amount, 0) }} {{ Auth::user()->role === 'provider' ? 'SAR' : 'ر.س' }}</p>
+                <p class="text-sm font-semibold text-gray-900">{{ number_format($project->total_amount, 0) }} <span x-text="t('common.sar')"></span></p>
                 <p class="text-xs text-gray-500 font-medium" x-text="t('project.total_budget')"></p>
             </div>
         </div>
