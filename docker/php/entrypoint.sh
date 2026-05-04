@@ -16,6 +16,13 @@ if [ -z "$APP_KEY" ]; then
     php artisan key:generate --force
 fi
 
+# ✅ Add these two lines
+echo "Linking storage..."
+php artisan storage:link --force || echo "Storage link failed, continuing..."
+
+# ✅ Fix storage permissions
+chmod -R 755 /var/www/storage
+chmod -R 755 /var/www/public/storage
 
 # Wait for DB to be ready
 echo "Waiting for database..."
