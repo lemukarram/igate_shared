@@ -16,6 +16,13 @@ if [ -z "$APP_KEY" ]; then
     php artisan key:generate --force
 fi
 
+# ✅ Add these two lines
+echo "Linking storage..."
+php artisan storage:link --force || echo "Storage link failed, continuing..."
+
+# ✅ Fix storage permissions
+chmod -R 755 /var/www/storage
+chmod -R 755 /var/www/public/storage
 
 # Wait for DB to be ready
 echo "Waiting for database..."
@@ -24,17 +31,11 @@ until php artisan db:show > /dev/null 2>&1; do
     sleep 3
 done
 
-# Fresh wipe + migrate + seed only if DB_SEED=true
 if [ "$DB_SEED" = "true" ]; then
-    echo "DB_SEED=true detected — wiping database..."
     php artisan db:wipe --force || echo "Wipe failed, continuing..."
-    echo "Running migrations..."
     php artisan migrate --force || echo "Migration failed, continuing..."
-    echo "Running seeders..."
     php artisan db:seed --force || echo "Seeding failed, continuing..."
 else
-    # Normal deploy — just migrate, never touch existing data
-    echo "Running migrations..."
     php artisan migrate --force || echo "Migration failed, continuing..."
 fi
 
