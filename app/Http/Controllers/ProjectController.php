@@ -150,6 +150,7 @@ class ProjectController extends Controller
             $action = 'completion_rejected';
         } elseif ($project->mutual_cancellation_requested && (($project->cancellation_requested_by === 'provider' && $role === 'client') || ($project->cancellation_requested_by === 'client' && $role === 'provider'))) {
             $project->update([
+                'status' => 'active', // Revert to active
                 'mutual_cancellation_requested' => false,
                 'cancellation_requested_by' => null,
                 'rejection_reason' => $request->reason,
@@ -189,6 +190,7 @@ class ProjectController extends Controller
 
         $role = Auth::id() === $project->client_id ? 'client' : 'provider';
         $project->update([
+            'status' => 'cancelled', // Immediate reflection as requested
             'mutual_cancellation_requested' => true,
             'cancellation_requested_by' => $role,
             'last_action_by' => $role,
@@ -198,10 +200,10 @@ class ProjectController extends Controller
             'project_id' => $project->id,
             'user_id' => Auth::id(),
             'action' => 'cancellation_requested',
-            'description' => ucfirst($role) . ' requested mutual cancellation.',
+            'description' => ucfirst($role) . ' requested mutual cancellation. Status reflected as cancelled pending confirmation.',
         ]);
 
-        return redirect()->back()->with('success', 'Cancellation requested. Awaiting confirmation from the other party.');
+        return redirect()->back()->with('success', 'Cancellation requested and reflected.');
     }
 
     public function confirmCancellation($id)

@@ -35,7 +35,7 @@
                         </div>
                     </div>
                     <div class="flex items-center gap-4">
-                        <span class="text-[10px] font-black uppercase text-green-500 bg-green-50 px-2 py-0.5 rounded-md" x-text="lang === 'ar' ? 'نشط' : 'Active'"></span>
+                        <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded-md {{ $project->status === 'active' ? 'text-green-500 bg-green-50' : 'text-gray-500 bg-gray-50' }}" x-text="t('project.status_{{ $project->status }}')"></span>
                         <a href="{{ route('projects.show', $project->id) }}" class="text-primary hover:text-primary-dark transition-colors">
                             <i data-lucide="chevron-right" class="w-5 h-5 flip-rtl"></i>
                         </a>

@@ -38,7 +38,7 @@
                         @foreach($clientProjects as $project)
                         <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100">
                             <span class="text-sm font-medium text-gray-700">{{ $project->service->name }}</span>
-                            <span class="text-[10px] font-black uppercase text-green-500 bg-green-50 px-2 py-0.5 rounded-md" x-text="lang === 'ar' ? 'نشط' : 'Active'"></span>
+                            <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded-md {{ $project->status === 'active' ? 'text-green-500 bg-green-50' : 'text-gray-500 bg-gray-50' }}" x-text="t('project.status_{{ $project->status }}')"></span>
                         </div>
                         @endforeach
                     </div>

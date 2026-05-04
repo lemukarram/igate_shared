@@ -27,7 +27,7 @@
                                 <h4 class="font-bold text-gray-900 text-lg">{{ $project->service->name }}</h4>
                                 <div class="flex items-center gap-2 mt-1">
                                     <span class="text-[10px] font-black uppercase text-gray-400 tracking-widest">PRJ-{{ str_pad($project->id, 5, '0', STR_PAD_LEFT) }}</span>
-                                    <span class="text-[10px] font-black uppercase text-green-500 bg-green-50 px-2 py-0.5 rounded-md" x-text="lang === 'ar' ? 'نشط' : 'Active'"></span>
+                                    <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded-md {{ $project->status === 'active' ? 'text-green-500 bg-green-50' : 'text-gray-500 bg-gray-50' }}" x-text="t('project.status_{{ $project->status }}')"></span>
                                 </div>
                             </div>
                         </div>

@@ -94,7 +94,7 @@ Route::middleware(['auth', 'App\Http\Middleware\EnsureProviderIsOnboarded'])->gr
     Route::post('/projects/{id}/reject', [ProjectController::class, 'reject'])->name('projects.reject');
     Route::get('/projects/{id}/history', [ProjectController::class, 'history'])->name('projects.history');
     Route::post('/projects/{id}/cancel-request', [ProjectController::class, 'requestCancellation'])->name('projects.cancel-request');
-    Route::post('/projects/{id}/cancel-confirm', [ProjectController::class, 'confirmCancellation'])->name('projects.cancel-confirm');
+    Route::post('/projects/{id}/confirm-cancellation', [ProjectController::class, 'confirmCancellation'])->name('projects.confirm-cancellation');
     Route::post('/projects/{id}/dispute', [ProjectController::class, 'dispute'])->name('projects.dispute');
     Route::post('/projects/{id}/terminate', [ProjectController::class, 'terminate'])->name('projects.terminate');
 
@@ -109,6 +109,10 @@ Route::middleware(['auth', 'App\Http\Middleware\EnsureProviderIsOnboarded'])->gr
     Route::patch('/settings/team-members/{id}', [App\Http\Controllers\SettingsController::class, 'updateTeamMember'])->name('settings.team_members.update');
     Route::post('/settings/team-members', [App\Http\Controllers\SettingsController::class, 'addTeamMember'])->name('settings.team_members.store');
     Route::delete('/settings/team-members/{id}', [App\Http\Controllers\SettingsController::class, 'removeTeamMember'])->name('settings.team_members.destroy');
+
+    // Internal Messages
+    Route::get('/internal-messages', [App\Http\Controllers\InternalMessageController::class, 'index'])->name('internal-messages.index');
+    Route::post('/internal-messages', [App\Http\Controllers\InternalMessageController::class, 'store'])->name('internal-messages.store');
 
     // Tasks
     Route::post('/tasks', [TaskController::class, 'store'])->name('tasks.store');

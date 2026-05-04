@@ -136,7 +136,7 @@
                         <i data-lucide="search" class="w-4 h-4 flex-shrink-0"></i>
                         <span x-show="!sidebarCollapsed" class="text-sm font-medium whitespace-nowrap" x-text="t('common.explore')"></span>
                     </a>
-                    <a href="#" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 transition-all">
+                    <a href="{{ route('internal-messages.index') }}" class="sidebar-item {{ request()->routeIs('internal-messages.*') ? 'active' : '' }} flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 transition-all">
                         <i data-lucide="message-square" class="w-4 h-4 flex-shrink-0"></i>
                         <span x-show="!sidebarCollapsed" class="text-sm font-medium whitespace-nowrap" x-text="t('common.messages')"></span>
                     </a>
@@ -367,16 +367,48 @@
                                                 <option value="staff">Staff</option>
                                             </select>
                                         </div>
-                                        <div class="space-y-1">
-                                            <label class="text-[10px] font-black uppercase tracking-widest text-gray-400">Initial Permissions</label>
-                                            <div class="flex flex-wrap gap-2 py-2">
-                                                @foreach(['service', 'project', 'company', 'read', 'write'] as $p)
-                                                    <label class="flex items-center gap-1.5 cursor-pointer">
-                                                        <input type="checkbox" name="permissions[]" value="{{ $p }}" checked class="w-3.5 h-3.5 text-primary rounded">
-                                                        <span class="text-[10px] font-bold uppercase text-gray-500">{{ $p }}</span>
-                                                    </label>
-                                                @endforeach
+                                        <div class="col-span-2 bg-white p-3 rounded-lg border border-gray-200">
+                                            <label class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 block">Advanced Permissions</label>
+                                            <div class="grid grid-cols-3 gap-3">
+                                                <div x-data="{ scope: 'overall' }">
+                                                    <label class="text-[9px] font-bold text-gray-500 uppercase">Scope</label>
+                                                    <select name="permissions[0][scope]" x-model="scope" class="w-full px-2 py-1.5 border border-gray-200 rounded text-xs bg-gray-50 mt-1">
+                                                        <option value="overall">Overall (All Access)</option>
+                                                        <option value="company">Specific Company</option>
+                                                        <option value="client">Specific Client</option>
+                                                        <option value="project">Specific Project</option>
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label class="text-[9px] font-bold text-gray-500 uppercase">Target</label>
+                                                    <select name="permissions[0][target_id]" class="w-full px-2 py-1.5 border border-gray-200 rounded text-xs bg-gray-50 mt-1">
+                                                        <option value="">-- Select Target --</option>
+                                                        <template x-if="scope === 'company'">
+                                                            @foreach($permission_companies ?? [] as $c)
+                                                                <option value="{{ $c->id }}">{{ $c->name }}</option>
+                                                            @endforeach
+                                                        </template>
+                                                        <template x-if="scope === 'client'">
+                                                            @foreach($permission_clients ?? [] as $c)
+                                                                <option value="{{ $c->id }}">{{ $c->name }}</option>
+                                                            @endforeach
+                                                        </template>
+                                                        <template x-if="scope === 'project'">
+                                                            @foreach($permission_projects ?? [] as $p)
+                                                                <option value="{{ $p->id }}">{{ $p->service->name }} (PRJ-{{ $p->id }})</option>
+                                                            @endforeach
+                                                        </template>
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label class="text-[9px] font-bold text-gray-500 uppercase">Action</label>
+                                                    <select name="permissions[0][action]" class="w-full px-2 py-1.5 border border-gray-200 rounded text-xs bg-gray-50 mt-1">
+                                                        <option value="edit">Edit (Full Control)</option>
+                                                        <option value="view">View Only</option>
+                                                    </select>
+                                                </div>
                                             </div>
+                                            <p class="text-[10px] text-gray-400 mt-2 italic">Assign this member to a specific scope. Use Target ID to limit access to a single entity (e.g., Project ID: 1).</p>
                                         </div>
                                     </div>
                                     <div class="pt-2 flex justify-end gap-2">
@@ -410,8 +442,8 @@
                                                     <td class="px-4 py-3"><span class="px-2 py-0.5 bg-primary-light text-primary rounded-full text-[10px] font-bold">Full Access</span></td>
                                                     <td class="px-4 py-3 text-right"></td>
                                                 </tr>
-                                                @if(isset($teamMembers))
-                                                    @foreach($teamMembers as $member)
+                                                @if(Auth::user()->ownedTeam && Auth::user()->ownedTeam->members)
+                                                    @foreach(Auth::user()->ownedTeam->members as $member)
                                                     <tr class="hover:bg-gray-50 transition-all">
                                                         <td class="px-4 py-3 font-medium text-xs">{{ $member->user->name ?? 'Invited' }}</td>
                                                         <td class="px-4 py-3">
@@ -421,13 +453,41 @@
                                                             </select>
                                                         </td>
                                                         <td class="px-4 py-3">
-                                                            <div class="flex flex-wrap gap-2">
-                                                                @foreach(['service', 'project', 'company', 'read', 'write'] as $p)
-                                                                    <label class="flex items-center gap-1 cursor-pointer">
-                                                                        <input type="checkbox" name="members[{{ $member->id }}][permissions][]" value="{{ $p }}" {{ in_array($p, $member->permissions ?? []) ? 'checked' : '' }} class="w-3 h-3 text-primary rounded">
-                                                                        <span class="text-[9px] font-bold uppercase text-gray-400">{{ $p }}</span>
-                                                                    </label>
-                                                                @endforeach
+                                                            <div class="flex flex-col gap-2" x-data="{ scope: '{{ $p['scope'] ?? 'overall' }}' }">
+                                                                @php
+                                                                    $perms = is_array($member->permissions) ? $member->permissions : [];
+                                                                    $p = $perms[0] ?? ['scope' => 'overall', 'target_id' => '', 'action' => 'view'];
+                                                                @endphp
+                                                                <div class="grid grid-cols-3 gap-2">
+                                                                    <select name="members[{{ $member->id }}][permissions][0][scope]" x-model="scope" class="w-full px-1.5 py-1 border border-gray-200 rounded text-[9px] bg-white">
+                                                                        <option value="overall" {{ ($p['scope'] ?? '') === 'overall' ? 'selected' : '' }}>Overall</option>
+                                                                        <option value="company" {{ ($p['scope'] ?? '') === 'company' ? 'selected' : '' }}>Company</option>
+                                                                        <option value="client" {{ ($p['scope'] ?? '') === 'client' ? 'selected' : '' }}>Client</option>
+                                                                        <option value="project" {{ ($p['scope'] ?? '') === 'project' ? 'selected' : '' }}>Project</option>
+                                                                    </select>
+                                                                    <select name="members[{{ $member->id }}][permissions][0][target_id]" class="w-full px-1.5 py-1 border border-gray-200 rounded text-[9px] bg-white">
+                                                                        <option value="">-- Target --</option>
+                                                                        <template x-if="scope === 'company'">
+                                                                            @foreach($permission_companies ?? [] as $c)
+                                                                                <option value="{{ $c->id }}" {{ ($p['target_id'] ?? '') == $c->id ? 'selected' : '' }}>{{ $c->name }}</option>
+                                                                            @endforeach
+                                                                        </template>
+                                                                        <template x-if="scope === 'client'">
+                                                                            @foreach($permission_clients ?? [] as $c)
+                                                                                <option value="{{ $c->id }}" {{ ($p['target_id'] ?? '') == $c->id ? 'selected' : '' }}>{{ $c->name }}</option>
+                                                                            @endforeach
+                                                                        </template>
+                                                                        <template x-if="scope === 'project'">
+                                                                            @foreach($permission_projects ?? [] as $pj)
+                                                                                <option value="{{ $pj->id }}" {{ ($p['target_id'] ?? '') == $pj->id ? 'selected' : '' }}>{{ $pj->service->name }}</option>
+                                                                            @endforeach
+                                                                        </template>
+                                                                    </select>
+                                                                    <select name="members[{{ $member->id }}][permissions][0][action]" class="w-full px-1.5 py-1 border border-gray-200 rounded text-[9px] bg-white">
+                                                                        <option value="edit" {{ ($p['action'] ?? '') === 'edit' ? 'selected' : '' }}>Edit</option>
+                                                                        <option value="view" {{ ($p['action'] ?? '') === 'view' ? 'selected' : '' }}>View</option>
+                                                                    </select>
+                                                                </div>
                                                             </div>
                                                         </td>
                                                         <td class="px-4 py-3 text-right">
