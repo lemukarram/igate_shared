@@ -31,19 +31,13 @@ until php artisan db:show > /dev/null 2>&1; do
     sleep 3
 done
 
-# Fresh wipe + migrate + seed only if DB_SEED=true
-#if [ "$DB_SEED" = "true" ]; then
-    #echo "DB_SEED=true detected — wiping database..."
+if [ "$DB_SEED" = "true" ]; then
     php artisan db:wipe --force || echo "Wipe failed, continuing..."
-    echo "Running migrations..."
     php artisan migrate --force || echo "Migration failed, continuing..."
-    echo "Running seeders..."
     php artisan db:seed --force || echo "Seeding failed, continuing..."
-#else
-    # Normal deploy — just migrate, never touch existing data
-    #echo "Running migrations..."
-    #php artisan migrate --force || echo "Migration failed, continuing..."
-#fi
+else
+    php artisan migrate --force || echo "Migration failed, continuing..."
+fi
 
 
 # Cache for production
