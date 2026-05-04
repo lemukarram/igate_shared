@@ -15,9 +15,9 @@
                 <div class="flex items-center gap-2 text-xs font-medium text-gray-500 mt-1">
                     <span class="bg-gray-100 px-2 py-0.5 rounded text-gray-700">PRJ-{{ str_pad($project->id, 5, '0', STR_PAD_LEFT) }}</span>
                     <span>•</span>
-                    <button @click="statusModalOpen = true" class="text-green-600 flex items-center hover:bg-green-50 px-1.5 py-0.5 rounded transition-colors">
-                        <span class="w-1.5 h-1.5 rounded-full bg-green-500 me-1.5 animate-pulse"></span>
-                        <span x-text="t('project.active')"></span>
+                    <button @click="statusModalOpen = true" class="{{ $project->status === 'active' ? 'text-green-600' : 'text-gray-500' }} flex items-center hover:bg-gray-50 px-1.5 py-0.5 rounded transition-colors">
+                        <span class="w-1.5 h-1.5 rounded-full {{ $project->status === 'active' ? 'bg-green-500 animate-pulse' : 'bg-gray-400' }} me-1.5"></span>
+                        <span x-text="t('project.status_{{ $project->status }}')"></span>
                     </button>
                 </div>
             </div>
@@ -129,7 +129,25 @@
                                 <i data-lucide="check" class="w-3 h-3"></i>
                             </div>
                             <div class="flex-1">
-                                <p class="text-sm font-medium {{ $task->status === 'done' ? 'text-gray-500 line-through' : 'text-gray-800' }}">{{ $task->title }}</p>
+                                <div class="flex items-center justify-between">
+                                    <p class="text-sm font-medium {{ $task->status === 'done' ? 'text-gray-500 line-through' : 'text-gray-800' }}">{{ $task->title }}</p>
+                                    @if($task->status === 'done')
+                                        @if($task->is_verified)
+                                            <span class="text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded font-bold" x-text="t('project.verified')"></span>
+                                        @else
+                                            <span class="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-bold" x-text="t('project.not_verified')"></span>
+                                        @endif
+                                    @endif
+                                </div>
+                                @if($task->status === 'done' && !$task->is_verified && Auth::user()->role === 'client')
+                                <form action="{{ route('tasks.verify', $task->id) }}" method="POST" @click.stop class="mt-2">
+                                    @csrf
+                                    <button type="submit" class="text-[10px] bg-primary text-white px-2 py-1 rounded hover:bg-primary-dark transition-colors font-bold">
+                                        <i data-lucide="shield-check" class="w-3 h-3 inline me-1"></i>
+                                        <span x-text="t('project.verify_task')"></span>
+                                    </button>
+                                </form>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -171,6 +189,133 @@
                     <span x-text="t('project.upload_file')"></span>
                 </button>
                 @endif
+            </div>
+
+            <!-- Project Management -->
+            <div class="bg-white border border-gray-100 rounded-lg p-5 shadow-sm">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-sm font-semibold text-gray-900" x-text="t('project.project_management')"></h3>
+                    <button @click="openHistory()" class="text-[10px] font-bold text-primary hover:underline" x-text="t('project.history')"></button>
+                </div>
+                
+                <div class="space-y-2">
+                    <!-- Scenario 1: Successful Completion -->
+                    @if(Auth::user()->role === 'provider' && $project->status === 'active' && !$project->provider_marked_complete)
+                    <form action="{{ route('projects.complete', $project->id) }}" method="POST">
+                        @csrf
+                        <button type="submit" class="w-full py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2">
+                            <i data-lucide="check-circle" class="w-3 h-3"></i>
+                            <span x-text="t('project.mark_complete')"></span>
+                        </button>
+                    </form>
+                    @endif
+
+                    @if(Auth::user()->role === 'client' && $project->provider_marked_complete && $project->status !== 'completed')
+                    <div class="flex gap-2">
+                        <form action="{{ route('projects.approve', $project->id) }}" method="POST" class="flex-1">
+                            @csrf
+                            <button type="submit" class="w-full py-2 bg-primary text-white rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2">
+                                <i data-lucide="award" class="w-3 h-3"></i>
+                                <span x-text="t('common.approve')"></span>
+                            </button>
+                        </form>
+                        <button @click="rejectModalOpen = true" class="px-3 py-2 bg-red-50 text-red-600 rounded-lg text-xs font-bold hover:bg-red-100 transition-all">
+                            <i data-lucide="x" class="w-3 h-3"></i>
+                        </button>
+                    </div>
+                    @endif
+
+                    <!-- Scenario 3: Mutual Cancellation -->
+                    @if($project->status === 'active' || $project->status === 'pending')
+                        @if(!$project->mutual_cancellation_requested)
+                        <form action="{{ route('projects.cancel-request', $project->id) }}" method="POST">
+                            @csrf
+                            <button type="submit" class="w-full py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2">
+                                <i data-lucide="x-circle" class="w-3 h-3"></i>
+                                <span x-text="t('project.request_cancellation')"></span>
+                            </button>
+                        </form>
+                        @else
+                            @if(($project->cancellation_requested_by === 'client' && Auth::user()->role === 'provider') || ($project->cancellation_requested_by === 'provider' && Auth::user()->role === 'client'))
+                            <div class="flex gap-2">
+                                <form action="{{ route('projects.confirm-cancellation', $project->id) }}" method="POST" class="flex-1">
+                                    @csrf
+                                    <button type="submit" class="w-full py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2">
+                                        <i data-lucide="alert-triangle" class="w-3 h-3"></i>
+                                        <span x-text="t('common.confirm')"></span>
+                                    </button>
+                                </form>
+                                <button @click="rejectModalOpen = true" class="px-3 py-2 bg-red-50 text-red-600 rounded-lg text-xs font-bold hover:bg-red-100 transition-all">
+                                    <i data-lucide="x" class="w-3 h-3"></i>
+                                </button>
+                            </div>
+                            @else
+                            <div class="p-2 bg-amber-50 text-amber-700 rounded text-[10px] font-bold text-center">
+                                <span x-text="t('project.cancellation_requested')"></span>
+                            </div>
+                            @endif
+                        @endif
+                    @endif
+
+                    <!-- Scenario 5: Termination Request (2-sided) -->
+                    @if($project->status === 'active' && !$project->termination_requested && Auth::user()->role === 'provider')
+                    <button @click="terminateModalOpen = true" class="w-full py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2">
+                        <i data-lucide="user-x" class="w-3 h-3"></i>
+                        <span x-text="t('project.terminate_project')"></span>
+                    </button>
+                    @endif
+
+                    @if($project->termination_requested && Auth::user()->role === 'client')
+                    <div class="flex gap-2">
+                        <form action="{{ route('projects.approve', $project->id) }}" method="POST" class="flex-1">
+                            @csrf
+                            <button type="submit" class="w-full py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2">
+                                <i data-lucide="check" class="w-3 h-3"></i>
+                                <span x-text="t('common.approve')"></span>
+                            </button>
+                        </form>
+                        <button @click="rejectModalOpen = true" class="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg text-xs font-bold hover:bg-gray-200 transition-all">
+                            <i data-lucide="x" class="w-3 h-3"></i>
+                        </button>
+                    </div>
+                    @endif
+
+                    @if($project->status === 'completed')
+                    <div class="p-3 bg-green-50 text-green-700 rounded-lg text-xs font-bold flex items-center gap-2 justify-center">
+                        <i data-lucide="check-check" class="w-4 h-4"></i>
+                        <span x-text="t('project.status_completed')"></span>
+                    </div>
+                    @endif
+
+                    @if($project->status === 'disputed')
+                    <div class="p-3 bg-red-50 text-red-700 rounded-lg text-xs font-bold flex flex-col gap-1 items-center">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+                            <span x-text="t('project.status_disputed')"></span>
+                        </div>
+                        <p class="text-[10px] opacity-75 font-medium text-center">{{ $project->dispute_reason }}</p>
+                    </div>
+                    @endif
+
+                    @if($project->status === 'terminated')
+                    <div class="p-3 bg-red-50 text-red-700 rounded-lg text-xs font-bold flex flex-col gap-1 items-center">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="slash" class="w-4 h-4"></i>
+                            <span x-text="t('project.status_terminated')"></span>
+                        </div>
+                        <p class="text-[10px] opacity-75 font-medium text-center">{{ $project->termination_reason }}</p>
+                    </div>
+                    @endif
+
+                    @if($project->status === 'sla_breached')
+                    <div class="p-3 bg-amber-50 text-amber-700 rounded-lg text-xs font-bold flex flex-col gap-1 items-center animate-pulse">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="clock" class="w-4 h-4"></i>
+                            <span x-text="t('project.status_sla_breached')"></span>
+                        </div>
+                    </div>
+                    @endif
+                </div>
             </div>
         </div>
     </div>
@@ -282,6 +427,103 @@
             </form>
         </div>
     </div>
+
+    <!-- Dispute Modal -->
+    <div x-show="disputeModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center" style="display: none;">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="disputeModalOpen = false"></div>
+        <div class="bg-white w-full max-w-md rounded-xl shadow-2xl relative z-10 p-8 border border-gray-100">
+            <h2 class="text-2xl font-bold mb-4 text-red-600" x-text="t('project.dispute_project')"></h2>
+            <p class="text-sm text-gray-500 mb-6" x-text="t('project.dispute_notice')"></p>
+            <form action="{{ route('projects.dispute', $project->id) }}" method="POST" class="space-y-6">
+                @csrf
+                <div>
+                    <label class="text-xs font-black uppercase tracking-widest text-gray-400 mb-2 block" x-text="t('project.reason')"></label>
+                    <textarea name="reason" required class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-medium" rows="3"></textarea>
+                </div>
+                <div class="flex gap-4 pt-4">
+                    <button type="button" @click="disputeModalOpen = false" class="flex-1 py-4 bg-gray-100 text-gray-700 rounded-xl font-bold" x-text="t('common.cancel')"></button>
+                    <button type="submit" class="flex-1 py-4 bg-red-600 text-white rounded-xl font-bold" x-text="t('project.dispute_project')"></button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Termination Modal -->
+    <div x-show="terminateModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center" style="display: none;">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="terminateModalOpen = false"></div>
+        <div class="bg-white w-full max-w-md rounded-xl shadow-2xl relative z-10 p-8 border border-gray-100">
+            <h2 class="text-2xl font-bold mb-4 text-red-600" x-text="t('project.terminate_project')"></h2>
+            <p class="text-sm text-gray-500 mb-6" x-text="t('project.termination_notice')"></p>
+            <form action="{{ route('projects.terminate', $project->id) }}" method="POST" class="space-y-6">
+                @csrf
+                <div>
+                    <label class="text-xs font-black uppercase tracking-widest text-gray-400 mb-2 block" x-text="t('project.reason')"></label>
+                    <textarea name="reason" required class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-medium" rows="3"></textarea>
+                </div>
+                <div class="flex gap-4 pt-4">
+                    <button type="button" @click="terminateModalOpen = false" class="flex-1 py-4 bg-gray-100 text-gray-700 rounded-xl font-bold" x-text="t('common.cancel')"></button>
+                    <button type="submit" class="flex-1 py-4 bg-red-600 text-white rounded-xl font-bold" x-text="t('project.terminate_project')"></button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Reject Modal -->
+    <div x-show="rejectModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center" style="display: none;">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="rejectModalOpen = false"></div>
+        <div class="bg-white w-full max-w-md rounded-xl shadow-2xl relative z-10 p-8 border border-gray-100">
+            <h2 class="text-2xl font-bold mb-4 text-red-600" x-text="t('common.reject')"></h2>
+            <p class="text-sm text-gray-500 mb-6" x-text="lang === 'ar' ? 'يرجى تقديم سبب للرفض' : 'Please provide a reason for rejection'"></p>
+            <form action="{{ route('projects.reject', $project->id) }}" method="POST" class="space-y-6">
+                @csrf
+                <div>
+                    <label class="text-xs font-black uppercase tracking-widest text-gray-400 mb-2 block" x-text="t('project.reason')"></label>
+                    <textarea name="reason" required class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-medium" rows="3"></textarea>
+                </div>
+                <div class="flex gap-4 pt-4">
+                    <button type="button" @click="rejectModalOpen = false" class="flex-1 py-4 bg-gray-100 text-gray-700 rounded-xl font-bold" x-text="t('common.cancel')"></button>
+                    <button type="submit" class="flex-1 py-4 bg-red-600 text-white rounded-xl font-bold" x-text="t('common.reject')"></button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- History Modal -->
+    <div x-show="historyModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center" style="display: none;">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="historyModalOpen = false"></div>
+        <div class="bg-white w-full max-w-2xl rounded-xl shadow-2xl relative z-10 p-8 border border-gray-100 max-h-[80vh] flex flex-col">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold" x-text="t('project.history')"></h2>
+                <button @click="historyModalOpen = false" class="text-gray-400 hover:text-gray-600">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            <div class="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-4">
+                <template x-for="item in histories" :key="item.id">
+                    <div class="p-4 rounded-xl border border-gray-100 bg-gray-50/50 relative overflow-hidden">
+                        <div class="flex items-start justify-between gap-4">
+                            <div>
+                                <p class="text-sm font-bold text-gray-900" x-text="item.description"></p>
+                                <p class="text-[10px] text-gray-500 mt-1 flex items-center gap-1">
+                                    <i data-lucide="user" class="w-3 h-3"></i>
+                                    <span x-text="item.user ? item.user.name : 'System'"></span>
+                                    <span>•</span>
+                                    <span x-text="new Date(item.created_at).toLocaleString()"></span>
+                                </p>
+                            </div>
+                            <span class="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full" 
+                                  :class="{
+                                      'bg-green-100 text-green-700': item.action.includes('approve') || item.action.includes('complete'),
+                                      'bg-red-100 text-red-700': item.action.includes('reject') || item.action.includes('dispute'),
+                                      'bg-blue-100 text-blue-700': item.action.includes('status'),
+                                      'bg-gray-100 text-gray-700': !item.action.includes('approve') && !item.action.includes('reject') && !item.action.includes('status')
+                                  }" x-text="item.action.replace('_', ' ')"></span>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -290,7 +532,21 @@
             statusModalOpen: false,
             taskModalOpen: false,
             fileUploadModalOpen: false,
+            disputeModalOpen: false,
+            terminateModalOpen: false,
+            rejectModalOpen: false,
+            historyModalOpen: false,
+            histories: [],
             selectedTask: {id: null, title: '', status: ''},
+            openHistory() {
+                fetch('{{ route('projects.history', $project->id) }}')
+                    .then(res => res.json())
+                    .then(data => {
+                        this.histories = data;
+                        this.historyModalOpen = true;
+                        this.$nextTick(() => lucide.createIcons());
+                    });
+            },
             openTaskModal(task) {
                 this.selectedTask = {...task};
                 this.taskModalOpen = true;

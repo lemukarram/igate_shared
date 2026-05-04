@@ -50,7 +50,15 @@ class TaskController extends Controller
     {
         $task = Task::with('project')->findOrFail($id);
         $oldStatus = $task->status;
-        $task->update(['status' => $request->status]);
+        
+        // If status is changed to done, reset verification if it was verified
+        $updateData = ['status' => $request->status];
+        if ($request->status !== 'done') {
+            $updateData['is_verified'] = false;
+            $updateData['verified_at'] = null;
+        }
+
+        $task->update($updateData);
 
         \App\Models\TaskHistory::create([
             'task_id' => $task->id,
@@ -70,6 +78,32 @@ class TaskController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Task status updated.');
+    }
+
+    public function verify(Request $request, $id)
+    {
+        $task = Task::with('project')->findOrFail($id);
+
+        if (Auth::id() !== $task->project->client_id) {
+            abort(403);
+        }
+
+        if ($task->status !== 'done') {
+            return redirect()->back()->with('error', 'Only completed tasks can be verified.');
+        }
+
+        $task->update([
+            'is_verified' => true,
+            'verified_at' => now(),
+        ]);
+
+        \App\Models\TaskHistory::create([
+            'task_id' => $task->id,
+            'user_id' => Auth::id(),
+            'action' => 'verified',
+        ]);
+
+        return redirect()->back()->with('success', 'Task verified successfully.');
     }
 
     public function destroy($id)

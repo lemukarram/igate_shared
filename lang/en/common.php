@@ -73,4 +73,7 @@ return [
     'none'        => 'None',
     'task_created_success' => 'Task created successfully.',
     'task_updated_success' => 'Task updated successfully.',
+    'approve' => 'Approve',
+    'reject' => 'Reject',
+    'confirm' => 'Confirm',
 ];

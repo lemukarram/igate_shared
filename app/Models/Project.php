@@ -18,7 +18,26 @@ class Project extends Model
         'total_amount',
         'start_date',
         'end_date',
+        'completed_at',
+        'client_notified_at',
+        'escrow_released_at',
+        'dispute_reason',
+        'termination_reason',
+        'provider_marked_complete',
+        'client_approved',
+        'mutual_cancellation_requested',
+        'cancellation_requested_by',
+        'termination_requested',
+        'termination_requested_at',
+        'rejection_reason',
+        'rejected_at',
+        'last_action_by',
     ];
+
+    public function histories()
+    {
+        return $this->hasMany(ProjectHistory::class)->latest();
+    }
 
     public function client()
     {

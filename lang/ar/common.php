@@ -73,4 +73,7 @@ return [
     'none'        => 'لا يوجد',
     'task_created_success' => 'تم إنشاء المهمة بنجاح.',
     'task_updated_success' => 'تم تحديث المهمة بنجاح.',
+    'approve' => 'اعتماد',
+    'reject' => 'رفض',
+    'confirm' => 'تأكيد',
 ];

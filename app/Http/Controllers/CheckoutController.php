@@ -44,6 +44,13 @@ class CheckoutController extends Controller
             'start_date' => now(),
         ]);
 
+        \App\Models\ProjectHistory::create([
+            'project_id' => $project->id,
+            'user_id' => $user->id,
+            'action' => 'project_created',
+            'description' => 'Project created and funds held in escrow.',
+        ]);
+
         // 2. Record Payment (Simulation)
         Payment::create([
             'project_id' => $project->id,

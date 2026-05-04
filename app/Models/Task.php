@@ -20,6 +20,8 @@ class Task extends Model
         'assigned_to',
         'due_date',
         'priority',
+        'is_verified',
+        'verified_at',
     ];
 
     public function project()

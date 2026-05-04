@@ -89,6 +89,14 @@ Route::middleware(['auth', 'App\Http\Middleware\EnsureProviderIsOnboarded'])->gr
     Route::get('/projects/{id}', [ProjectController::class, 'show'])->name('projects.show');
     Route::patch('/projects/{id}/status', [ProjectController::class, 'updateStatus'])->name('projects.update-status');
     Route::post('/projects/{id}/messages', [ProjectController::class, 'sendMessage'])->name('projects.messages.store');
+    Route::post('/projects/{id}/complete', [ProjectController::class, 'complete'])->name('projects.complete');
+    Route::post('/projects/{id}/approve', [ProjectController::class, 'approve'])->name('projects.approve');
+    Route::post('/projects/{id}/reject', [ProjectController::class, 'reject'])->name('projects.reject');
+    Route::get('/projects/{id}/history', [ProjectController::class, 'history'])->name('projects.history');
+    Route::post('/projects/{id}/cancel-request', [ProjectController::class, 'requestCancellation'])->name('projects.cancel-request');
+    Route::post('/projects/{id}/cancel-confirm', [ProjectController::class, 'confirmCancellation'])->name('projects.cancel-confirm');
+    Route::post('/projects/{id}/dispute', [ProjectController::class, 'dispute'])->name('projects.dispute');
+    Route::post('/projects/{id}/terminate', [ProjectController::class, 'terminate'])->name('projects.terminate');
 
     // Settings
     Route::post('/settings/profile', [App\Http\Controllers\SettingsController::class, 'updateProfile'])->name('settings.profile');
@@ -105,6 +113,7 @@ Route::middleware(['auth', 'App\Http\Middleware\EnsureProviderIsOnboarded'])->gr
     // Tasks
     Route::post('/tasks', [TaskController::class, 'store'])->name('tasks.store');
     Route::patch('/tasks/{id}/status', [TaskController::class, 'updateStatus'])->name('tasks.updateStatus');
+    Route::post('/tasks/{id}/verify', [TaskController::class, 'verify'])->name('tasks.verify');
 
     // Milestones
     Route::post('/milestones', [MilestoneController::class, 'store'])->name('milestones.store');
