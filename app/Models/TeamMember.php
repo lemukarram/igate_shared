@@ -14,6 +14,7 @@ class TeamMember extends Model
         'user_id',
         'role', // owner, manager, staff
         'permissions',
+        'is_active',
     ];
 
     protected $casts = [

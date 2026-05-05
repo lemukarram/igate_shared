@@ -82,6 +82,58 @@ class User extends Authenticatable
         return $this->hasMany(Document::class, 'user_id');
     }
 
+    public function enforcePlanLimits()
+    {
+        $plan = $this->plan;
+        if (!$plan) return;
+
+        // 1. Projects
+        $activeProjects = $this->role === 'client' 
+            ? $this->projects()->where('status', 'active')->orderBy('created_at', 'desc')->get()
+            : $this->providerProjects()->where('status', 'active')->orderBy('created_at', 'desc')->get();
+
+        if ($activeProjects->count() > $plan->max_projects) {
+            $projectsToDeactivate = $activeProjects->slice($plan->max_projects);
+            foreach ($projectsToDeactivate as $project) {
+                $project->update(['status' => 'inactive']);
+            }
+        }
+
+        // 2. Companies (Client only)
+        if ($this->role === 'client') {
+            $activeCompanies = $this->companies()->where('is_active', true)->orderBy('created_at', 'desc')->get();
+            if ($activeCompanies->count() > $plan->max_companies) {
+                $companiesToDeactivate = $activeCompanies->slice($plan->max_companies);
+                foreach ($companiesToDeactivate as $company) {
+                    $company->update(['is_active' => false]);
+                }
+            }
+        }
+
+        // 3. Services (Provider only)
+        if ($this->role === 'provider') {
+            $activeServices = $this->providerServices()->where('is_active', true)->orderBy('created_at', 'desc')->get();
+            if ($activeServices->count() > $plan->max_services) {
+                $servicesToDeactivate = $activeServices->slice($plan->max_services);
+                foreach ($servicesToDeactivate as $service) {
+                    $service->update(['is_active' => false]);
+                }
+            }
+        }
+
+        // 4. Team Members
+        $team = $this->ownedTeam;
+        if ($team) {
+            $activeMembers = $team->members()->where('is_active', true)->orderBy('created_at', 'desc')->get();
+            if ($activeMembers->count() > $plan->max_users) {
+                $membersToDeactivate = $activeMembers->slice($plan->max_users);
+                foreach ($membersToDeactivate as $member) {
+                    $member->update(['is_active' => false]);
+                }
+            }
+        }
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *

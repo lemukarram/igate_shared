@@ -72,7 +72,8 @@ Route::middleware(['auth', 'App\Http\Middleware\EnsureProviderIsOnboarded'])->gr
     Route::patch('/provider/team-tasks/{id}/status', [App\Http\Controllers\TeamTaskController::class, 'updateStatus'])->name('provider.team_tasks.status');
 
     // Pre-sale Chat
-    Route::get('/explore/{serviceId}/provider/{providerId}/chat', [MarketplaceController::class, 'preChat'])->name('explore.chat');
+    Route::get('/explore/{serviceId}/provider/{providerId}/chat', [App\Http\Controllers\PreSaleChatController::class, 'show'])->name('explore.chat');
+    Route::post('/explore/{serviceId}/provider/{providerId}/chat', [App\Http\Controllers\PreSaleChatController::class, 'sendMessage'])->name('explore.chat.send');
 
     // Client Portfolio and Companies
     Route::get('/portfolio', [MarketplaceController::class, 'portfolio'])->name('client.portfolio');
@@ -88,7 +89,7 @@ Route::middleware(['auth', 'App\Http\Middleware\EnsureProviderIsOnboarded'])->gr
     // Project Workspace
     Route::get('/projects/{id}', [ProjectController::class, 'show'])->name('projects.show');
     Route::patch('/projects/{id}/status', [ProjectController::class, 'updateStatus'])->name('projects.update-status');
-    Route::post('/projects/{id}/messages', [ProjectController::class, 'sendMessage'])->name('projects.messages.store');
+    Route::post('/projects/{id}/messages', [ProjectController::class, 'sendMessage'])->name('projects.messages.send');
     Route::post('/projects/{id}/complete', [ProjectController::class, 'complete'])->name('projects.complete');
     Route::post('/projects/{id}/approve', [ProjectController::class, 'approve'])->name('projects.approve');
     Route::post('/projects/{id}/reject', [ProjectController::class, 'reject'])->name('projects.reject');
@@ -109,6 +110,10 @@ Route::middleware(['auth', 'App\Http\Middleware\EnsureProviderIsOnboarded'])->gr
     Route::patch('/settings/team-members/{id}', [App\Http\Controllers\SettingsController::class, 'updateTeamMember'])->name('settings.team_members.update');
     Route::post('/settings/team-members', [App\Http\Controllers\SettingsController::class, 'addTeamMember'])->name('settings.team_members.store');
     Route::delete('/settings/team-members/{id}', [App\Http\Controllers\SettingsController::class, 'removeTeamMember'])->name('settings.team_members.destroy');
+    Route::get('/settings/plan/upgrade', function() {
+        $plans = \App\Models\Plan::where('type', Auth::user()->role)->get();
+        return view('settings.upgrade_plan', compact('plans'));
+    })->name('settings.plan.upgrade');
 
     // Internal Messages
     Route::get('/internal-messages', [App\Http\Controllers\InternalMessageController::class, 'index'])->name('internal-messages.index');

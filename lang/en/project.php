@@ -41,4 +41,5 @@ return [
     'reason' => 'Reason',
     'dispute_notice' => 'Admin will review this dispute.',
     'termination_notice' => 'Project terminated due to lack of assets.',
+    'project_id_prefix' => 'PRJ-',
 ];

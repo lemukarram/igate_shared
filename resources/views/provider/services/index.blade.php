@@ -38,7 +38,7 @@
                             <a href="{{ route('explore.show', $ps->service->id) }}" class="p-2 text-gray-400 hover:text-primary transition-colors">
                                 <i data-lucide="edit-3" class="w-5 h-5"></i>
                             </a>
-                            <form action="{{ route('provider.services.destroy', $ps->id) }}" method="POST" onsubmit="return confirm('Are you sure?')">
+                            <form action="{{ route('provider.services.destroy', $ps->id) }}" method="POST" onsubmit="return confirm('{{ __('common.are_you_sure') }}')">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="p-2 text-gray-400 hover:text-red-500 transition-colors">
                                     <i data-lucide="trash-2" class="w-5 h-5"></i>
@@ -50,7 +50,7 @@
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-2xl border border-gray-100">
                         <div>
                             <span class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1" x-text="t('common.status')"></span>
-                            <span class="text-xs font-bold text-emerald-600 uppercase" x-text="t('common.active')"></span>
+                            <span class="text-xs font-bold uppercase {{ $ps->is_active ? 'text-emerald-600' : 'text-red-600' }}" x-text="{{ $ps->is_active ? 'true' : 'false' }} ? t('common.active') : t('common.inactive')"></span>
                         </div>
                         <div>
                             <span class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1" x-text="t('common.delivery')"></span>

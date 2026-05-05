@@ -22,8 +22,8 @@ class CheckoutController extends Controller
     public function process(Request $request)
     {
         $user = Auth::user();
-        if ($user->plan && $user->projects()->count() >= $user->plan->max_projects) {
-            return redirect()->back()->withErrors(['error' => 'You have reached the maximum number of projects allowed by your client plan. Please upgrade to request more services.']);
+        if ($user->plan && $user->projects()->where('status', 'active')->count() >= $user->plan->max_projects) {
+            return redirect()->route('settings.plan.upgrade')->with('error', 'You have reached the maximum number of active projects allowed by your client plan.');
         }
 
         $validated = $request->validate([

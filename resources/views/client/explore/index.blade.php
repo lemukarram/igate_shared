@@ -4,8 +4,8 @@
 <div class="max-w-7xl w-full p-4 mx-auto" x-data="{ searchQuery: '{{ request('search') }}' }">
     <!-- Header -->
     <div class="mb-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
-        <h1 class="text-4xl font-black text-gray-900 tracking-tight" x-text="lang === 'ar' ? 'استكشاف الخدمات' : 'Explore Services'"></h1>
-        <p class="text-gray-500 text-lg mt-2 font-medium" x-text="lang === 'ar' ? 'اكتشف وتواصل مع أفضل مزودي خدمات الأعمال الموثقين في المملكة.' : 'Discover and connect with Saudi Arabia\'s top verified B2B service providers.'"></p>
+        <h1 class="text-4xl font-black text-gray-900 tracking-tight" x-text="t('common.explore_services')"></h1>
+        <p class="text-gray-500 text-lg mt-2 font-medium" x-text="t('common.discover_connect_subtitle')"></p>
     </div>
 
     <!-- Search Bar -->
@@ -14,7 +14,7 @@
             <input type="hidden" name="category" value="{{ request('category') }}">
         @endif
         <i data-lucide="search" class="w-6 h-6 absolute inset-y-1/2 -translate-y-1/2 start-5 text-gray-400"></i>
-        <input type="text" name="search" x-model="searchQuery" :placeholder="lang === 'ar' ? 'ابحث عن الخدمات أو المزودين...' : 'Search services, providers, or categories...'" 
+        <input type="text" name="search" x-model="searchQuery" :placeholder="t('common.search_placeholder')" 
                class="w-full ps-14 pe-6 py-5 rounded-xl border border-gray-100 bg-white text-gray-700 focus:outline-none focus:ring-4 focus:ring-blue-50 shadow-xl shadow-blue-50/50 placeholder-gray-400 transition-all text-lg font-medium">
     </form>
 
@@ -22,7 +22,7 @@
     <div class="flex overflow-x-auto pb-4 mb-8 gap-3 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200 no-scrollbar">
         <a href="{{ route('explore.index', ['search' => request('search')]) }}" 
            class="whitespace-nowrap px-6 py-2.5 rounded-[0.5rem] text-sm font-bold {{ !request('category') ? 'bg-gray-900 text-white shadow-lg shadow-gray-200' : 'bg-white text-gray-500 border border-gray-100 hover:border-primary/20 hover:text-primary hover:bg-primary-light' }} transition-all" 
-           x-text="lang === 'ar' ? 'جميع الخدمات' : 'All Services'"></a>
+           x-text="t('common.all_services')"></a>
         @foreach($categories as $category)
             <a href="{{ route('explore.index', ['category' => $category->slug, 'search' => request('search')]) }}" 
                class="whitespace-nowrap px-6 py-2.5 rounded-[0.5rem] text-sm font-bold {{ request('category') === $category->slug ? 'bg-gray-900 text-white shadow-lg shadow-gray-200' : 'bg-white text-gray-500 border border-gray-100 hover:border-primary/20 hover:text-primary hover:bg-primary-light' }} transition-all">{{ $category->name }}</a>
@@ -84,6 +84,10 @@
 
 <style>
     .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    [dir="rtl"] .flip-rtl { transform: scaleX(-1); }
+
+    ::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     [dir="rtl"] .flip-rtl { transform: scaleX(-1); }
 </style>

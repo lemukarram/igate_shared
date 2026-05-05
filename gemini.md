@@ -13,7 +13,8 @@ You are an expert Full-Stack Developer and Software Architect. Your task is to b
 ## 3. Core Entities & Roles
 Implement a robust Role-Based Access Control (RBAC) system with the following personas:
 1.  **Super Admin:** Manages all content, platform rules, standardized service definitions, disputes, and platform analytics.
-2.  **Client (Business):** Purchases services, manages their subscription, communicates with providers, and tracks progress.
+2.  **Client (Business):** Purchases services, manages their subscription, communicates with providers, and tracks progress.clients have a multi-user sub-system with specific permissions (Owner, Manager, Staff).
+
 3.  **Service Provider (Agency/Freelancer):** Fulfills services, manages their team, and handles client tasks. Providers have a multi-user sub-system with specific permissions (Owner, Manager, Staff).
 
 ## 4. Advanced Platform Features

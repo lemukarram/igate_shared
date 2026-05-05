@@ -114,6 +114,12 @@ class SettingsController extends Controller
     public function addTeamMember(Request $request)
     {
         $user = Auth::user();
+        
+        $team = $user->ownedTeam; 
+        if ($team && $user->plan && $team->members()->where('is_active', true)->count() >= $user->plan->max_users) {
+            return redirect()->route('settings.plan.upgrade')->with('error', 'You have reached the maximum number of active team members allowed by your plan.');
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
@@ -224,6 +230,7 @@ class SettingsController extends Controller
         }
 
         Auth::user()->update(['plan_id' => $plan->id]);
+        Auth::user()->enforcePlanLimits();
 
         return redirect()->back()->with('success', 'Subscription plan updated successfully.');
     }

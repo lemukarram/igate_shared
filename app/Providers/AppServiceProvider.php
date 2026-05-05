@@ -47,13 +47,14 @@ class AppServiceProvider extends ServiceProvider
 
                 // Share entities for permissions scoping
                 if (Auth::user()->role === 'client') {
-                    $view->with('permission_companies', Auth::user()->companies);
-                    $view->with('permission_projects', Auth::user()->projects);
+                    $view->with('permission_companies', Auth::user()->companies()->where('is_active', true)->get());
+                    $view->with('permission_projects', Auth::user()->projects()->where('status', 'active')->get());
                     $view->with('permission_clients', collect()); // Clients don't have other clients
                 } elseif (Auth::user()->role === 'provider') {
                     $view->with('permission_companies', collect()); // Providers don't have companies in this context
-                    $view->with('permission_projects', Auth::user()->providerProjects);
-                    $uniqueClientIds = Auth::user()->providerProjects()->pluck('client_id')->unique();
+                    $view->with('permission_projects', Auth::user()->providerProjects()->where('status', 'active')->get());
+                    $activeProjects = Auth::user()->providerProjects()->where('status', 'active');
+                    $uniqueClientIds = $activeProjects->pluck('client_id')->unique();
                     $view->with('permission_clients', \App\Models\User::whereIn('id', $uniqueClientIds)->get());
                 }
             } else {

@@ -87,7 +87,7 @@
                 </select>
             </div>
             <div class="h-80 w-full flex items-center justify-center bg-gray-50 rounded-[2rem] border-2 border-dashed border-gray-100">
-                <p class="text-gray-400 font-bold text-sm uppercase tracking-widest italic" x-text="lang === 'ar' ? 'مكان الرسم البياني: بيانات الإيرادات' : 'Chart.js Placeholder: Revenue Data'"></p>
+                <p class="text-gray-400 font-bold text-sm uppercase tracking-widest italic" x-text="t('common.revenue_data_placeholder')"></p>
             </div>
         </div>
 

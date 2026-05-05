@@ -81,8 +81,8 @@ class MarketplaceController extends Controller
     public function storeCompany(Request $request)
     {
         $user = Auth::user();
-        if ($user->plan && $user->companies()->count() >= $user->plan->max_companies) {
-            return redirect()->back()->withErrors(['error' => 'You have reached the maximum number of companies allowed by your plan.']);
+        if ($user->plan && $user->companies()->where('is_active', true)->count() >= $user->plan->max_companies) {
+            return redirect()->route('settings.plan.upgrade')->with('error', 'You have reached the maximum number of active companies allowed by your plan.');
         }
 
         $data = $request->validate([
@@ -99,8 +99,18 @@ class MarketplaceController extends Controller
     public function showCompany($id)
     {
         $company = Auth::user()->companies()->with(['projects.service', 'projects.provider'])->findOrFail($id);
-        // Getting active users attached could be via a 'company_user' table, but for now we'll mock users if none exist
-        return view('client.company_show', compact('company'));
+        
+        $preSaleChats = \App\Models\PreSaleMessage::where('client_id', Auth::id())
+            ->with(['service', 'provider.providerProfile'])
+            ->get()
+            ->groupBy(function($msg) {
+                return $msg->service_id . '-' . $msg->provider_id;
+            })
+            ->map(function($group) {
+                return $group->last();
+            });
+
+        return view('client.company_show', compact('company', 'preSaleChats'));
     }
 
     public function updateCompany(Request $request, $id)
@@ -111,8 +121,26 @@ class MarketplaceController extends Controller
             'industry' => 'nullable|string|max:255',
             'registration_number' => 'nullable|string|max:100',
             'about' => 'nullable|string',
+            'logo' => 'nullable|image|max:2048',
         ]);
+
+        if ($request->hasFile('logo')) {
+            $data['logo'] = $request->file('logo')->store('companies/logos', 'public');
+        }
+
+        if ($request->hasFile('documents')) {
+            foreach ($request->file('documents') as $file) {
+                $path = $file->store('companies/documents', 'public');
+                Auth::user()->documents()->create([
+                    'name' => $company->name . ' - ' . $file->getClientOriginalName(),
+                    'file_path' => $path,
+                    'type' => $file->getClientMimeType(),
+                ]);
+            }
+        }
+
         $company->update($data);
+
         return redirect()->back()->with('success', 'Company updated successfully.');
     }
 

@@ -5,13 +5,15 @@
     <!-- Header -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-            <h1 class="text-3xl font-bold text-gray-900" x-text="lang === 'ar' ? 'أهلاً بك، ' + '{{ Auth::user()->name }}' : 'Welcome back, ' + '{{ Auth::user()->name }}'"></h1>
-            <p class="text-gray-500 mt-1" x-text="lang === 'ar' ? 'إدارة مشاريعك وطلبات الخدمات بكل سهولة.' : 'Manage your projects and service requests seamlessly.'"></p>
+            <h1 class="text-3xl font-bold text-gray-900">
+                <span x-text="t('common.welcome_back')"></span>, {{ Auth::user()->name }}
+            </h1>
+            <p class="text-gray-500 mt-1" x-text="t('common.manage_projects_subtitle')"></p>
         </div>
         <div class="flex items-center gap-3">
             <a href="{{ route('explore.index') }}" class="px-5 py-2.5 bg-primary text-white rounded-lg text-sm font-bold hover:bg-primary-dark transition-all flex items-center gap-2 shadow-lg shadow-primary/20">
                 <i data-lucide="plus" class="w-4 h-4"></i>
-                <span x-text="lang === 'ar' ? 'طلب خدمة جديدة' : 'New Service Request'"></span>
+                <span x-text="t('common.new_service_request')"></span>
             </a>
         </div>
     </div>
@@ -20,9 +22,9 @@
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         @php
             $stats = [
-                ['label' => ['en' => 'Active Projects', 'ar' => 'المشاريع النشطة'], 'value' => $ongoingProjects->count(), 'icon' => 'activity', 'color' => 'text-blue-600', 'bg' => 'bg-blue-50'],
-                ['label' => ['en' => 'Total Spent', 'ar' => 'إجمالي المنفق'], 'value' => 'SAR 42,000', 'icon' => 'credit-card', 'color' => 'text-emerald-600', 'bg' => 'bg-emerald-50'],
-                ['label' => ['en' => 'Subscribed Services', 'ar' => 'الخدمات المشترك بها'], 'value' => '5', 'icon' => 'package', 'color' => 'text-purple-600', 'bg' => 'bg-purple-50'],
+                ['label' => 'common.active_projects', 'value' => $ongoingProjects->count(), 'icon' => 'activity', 'color' => 'text-blue-600', 'bg' => 'bg-blue-50'],
+                ['label' => 'common.total_spent', 'value' => 'SAR 42,000', 'icon' => 'credit-card', 'color' => 'text-emerald-600', 'bg' => 'bg-emerald-50'],
+                ['label' => 'common.subscribed_services', 'value' => '5', 'icon' => 'package', 'color' => 'text-purple-600', 'bg' => 'bg-purple-50'],
             ];
         @endphp
 
@@ -31,8 +33,14 @@
             <div class="w-12 h-12 {{ $stat['bg'] }} {{ $stat['color'] }} rounded-xl flex items-center justify-center mb-4">
                 <i data-lucide="{{ $stat['icon'] }}" class="w-6 h-6"></i>
             </div>
-            <h3 class="text-3xl font-bold text-gray-900">{{ $stat['value'] }}</h3>
-            <p class="text-gray-400 text-sm font-bold mt-1 uppercase tracking-wider" x-text="lang === 'ar' ? '{{ $stat['label']['ar'] }}' : '{{ $stat['label']['en'] }}'"></p>
+            <h3 class="text-3xl font-bold text-gray-900">
+                @if($stat['label'] === 'common.total_spent')
+                    {{ number_format(42000) }} <span class="text-sm" x-text="t('common.sar')"></span>
+                @else
+                    {{ $stat['value'] }}
+                @endif
+            </h3>
+            <p class="text-gray-400 text-sm font-bold mt-1 uppercase tracking-wider" x-text="t('{{ $stat['label'] }}')"></p>
         </div>
         @endforeach
     </div>
@@ -41,8 +49,8 @@
         <!-- Active Projects List -->
         <div class="lg:col-span-2 space-y-6">
             <div class="flex items-center justify-between">
-                <h3 class="text-lg font-bold text-gray-900" x-text="lang === 'ar' ? 'المشاريع الجارية' : 'Ongoing Projects'"></h3>
-                <a href="#" class="text-xs font-bold text-primary hover:underline" x-text="lang === 'ar' ? 'عرض الكل' : 'View All'"></a>
+                <h3 class="text-lg font-bold text-gray-900" x-text="t('common.ongoing_projects')"></h3>
+                <a href="#" class="text-xs font-bold text-primary hover:underline" x-text="t('common.view_all')"></a>
             </div>
             
             <div class="grid grid-cols-1 gap-4">
@@ -64,14 +72,14 @@
                             </div>
                             <span class="text-[10px] font-bold text-gray-400">65%</span>
                         </div>
-                        <a href="{{ route('projects.show', $p->id) }}" class="text-xs font-bold text-primary hover:underline" x-text="lang === 'ar' ? 'عرض التقدم' : 'Track Progress'"></a>
+                        <a href="{{ route('projects.show', $p->id) }}" class="text-xs font-bold text-primary hover:underline" x-text="t('common.track_progress')"></a>
                     </div>
                 </div>
                 @empty
                 <div class="py-20 text-center bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200">
                     <i data-lucide="plus-circle" class="w-12 h-12 text-gray-300 mx-auto mb-4"></i>
-                    <h4 class="text-xl font-bold text-gray-900" x-text="lang === 'ar' ? 'لا توجد مشاريع نشطة' : 'No active projects'"></h4>
-                    <p class="text-gray-500 mt-2" x-text="lang === 'ar' ? 'استكشف الخدمات وابدأ مشروعك الأول اليوم.' : 'Explore services and start your first project today.'"></p>
+                    <h4 class="text-xl font-bold text-gray-900" x-text="t('common.no_active_projects')"></h4>
+                    <p class="text-gray-500 mt-2" x-text="t('common.explore_services_start')"></p>
                 </div>
                 @endforelse
             </div>
@@ -79,7 +87,7 @@
 
         <!-- Quick Explore Sidebar -->
         <div class="bg-gray-900 rounded-3xl p-8 text-white">
-            <h3 class="text-xl font-bold mb-6" x-text="lang === 'ar' ? 'خدمات مقترحة' : 'Recommended Services'"></h3>
+            <h3 class="text-xl font-bold mb-6" x-text="t('common.recommended_services')"></h3>
             <div class="space-y-4">
                 @foreach(['ZATCA Compliance', 'Legal Review', 'HR Management'] as $rec)
                 <div class="p-4 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all cursor-pointer group">
@@ -87,7 +95,7 @@
                         <span class="text-xs font-bold text-primary uppercase tracking-widest">{{ $rec }}</span>
                         <i data-lucide="arrow-right" class="w-4 h-4 text-white group-hover:translate-x-1 transition-transform rtl:group-hover:-translate-x-1"></i>
                     </div>
-                    <p class="text-[10px] text-gray-400 leading-relaxed" x-text="lang === 'ar' ? 'نظام متكامل لضمان التوافق مع الأنظمة السعودية.' : 'Complete solution for Saudi regulatory compliance.'"></p>
+                    <p class="text-[10px] text-gray-400 leading-relaxed" x-text="t('common.regulatory_compliance_solution')"></p>
                 </div>
                 @endforeach
             </div>

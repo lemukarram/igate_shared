@@ -13,7 +13,9 @@
             <div>
                 <h1 class="text-xl font-semibold text-gray-900 tracking-tight">{{ $project->service->name }}</h1>
                 <div class="flex items-center gap-2 text-xs font-medium text-gray-500 mt-1">
-                    <span class="bg-gray-100 px-2 py-0.5 rounded text-gray-700">PRJ-{{ str_pad($project->id, 5, '0', STR_PAD_LEFT) }}</span>
+                    <span class="bg-gray-100 px-2 py-0.5 rounded text-gray-700">
+                        <span x-text="t('common.project_id_prefix')"></span>{{ str_pad($project->id, 5, '0', STR_PAD_LEFT) }}
+                    </span>
                     <span>•</span>
                     <button @click="statusModalOpen = true" class="{{ $project->status === 'active' ? 'text-green-600' : 'text-gray-500' }} flex items-center hover:bg-gray-50 px-1.5 py-0.5 rounded transition-colors">
                         <span class="w-1.5 h-1.5 rounded-full {{ $project->status === 'active' ? 'bg-green-500 animate-pulse' : 'bg-gray-400' }} me-1.5"></span>
@@ -25,15 +27,34 @@
 
         <div class="flex items-center gap-6 border-s border-gray-100 ps-6">
             <a href="{{ route('provider.clients.show', $project->client_id) }}" class="flex items-center gap-3 hover:bg-gray-50 p-1.5 rounded-lg transition-all">
-                <div class="w-10 h-10 bg-gray-900 rounded-lg flex items-center justify-center text-white font-semibold text-sm">
-                    {{ substr($project->client->name, 0, 2) }}
+                <div class="w-10 h-10 bg-gray-900 rounded-lg flex items-center justify-center text-white font-semibold text-sm overflow-hidden">
+                    @if($project->client->profile_picture)
+                        <img src="{{ asset('storage/' . $project->client->profile_picture) }}" class="w-full h-full object-cover">
+                    @else
+                        {{ substr($project->client->name, 0, 2) }}
+                    @endif
                 </div>
                 <div>
                     <p class="text-sm font-semibold text-gray-900">{{ $project->client->name }}</p>
                     <p class="text-xs text-gray-500 font-medium">{{ $project->company->name ?? '' }}@unless($project->company_id)<span x-text="t('project.enterprise_client')"></span>@endunless</p>
                 </div>
             </a>
-            <div class="text-end hidden sm:block">
+            
+            <div class="flex items-center gap-3 border-s border-gray-100 ps-6 hover:bg-gray-50 p-1.5 rounded-lg transition-all">
+                <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-white font-semibold text-sm overflow-hidden">
+                    @if($project->provider->providerProfile && $project->provider->providerProfile->logo)
+                        <img src="{{ asset('storage/' . $project->provider->providerProfile->logo) }}" class="w-full h-full object-cover">
+                    @else
+                        {{ substr($project->provider->name, 0, 2) }}
+                    @endif
+                </div>
+                <div>
+                    <p class="text-sm font-semibold text-gray-900">{{ $project->provider->providerProfile->company_name ?? $project->provider->name }}</p>
+                    <p class="text-xs text-gray-500 font-medium" x-text="t('common.verified_provider')"></p>
+                </div>
+            </div>
+
+            <div class="text-end hidden sm:block border-s border-gray-100 ps-6">
                 <p class="text-sm font-semibold text-gray-900">{{ number_format($project->total_amount, 0) }} <span x-text="t('common.sar')"></span></p>
                 <p class="text-xs text-gray-500 font-medium" x-text="t('project.total_budget')"></p>
             </div>
@@ -54,22 +75,21 @@
             
             <div class="flex-1 p-6 overflow-y-auto space-y-6 custom-scrollbar bg-white">
                 @foreach($messages as $msg)
-                <div class="flex gap-4">
+                <div class="flex gap-4 {{ $msg->user_id === Auth::id() ? 'flex-row-reverse' : '' }}">
                     <div class="w-8 h-8 rounded-full {{ $msg->user_id === Auth::id() ? 'bg-primary' : 'bg-gray-900' }} flex-shrink-0 flex items-center justify-center text-white text-xs font-bold shadow-sm">
                         {{ substr($msg->user->name, 0, 1) }}
                     </div>
-                    <div class="flex-1">
-                        <div class="flex items-center gap-2 mb-1">
-                            <span class="text-sm font-semibold text-gray-900">
-                                @if($msg->user_id === Auth::id())
-                                    <span x-text="t('project.you')"></span>
-                                @else
-                                    {{ $msg->user->name }}
-                                @endif
-                            </span>
+                    <div class="flex-1 {{ $msg->user_id === Auth::id() ? 'text-right' : '' }}">
+                        <div class="flex items-center gap-2 mb-1 {{ $msg->user_id === Auth::id() ? 'justify-end' : '' }}">
+                            @if($msg->user_id !== Auth::id())
+                                <span class="text-sm font-semibold text-gray-900">{{ $msg->user->name }}</span>
+                            @endif
                             <span class="text-xs text-gray-400">{{ $msg->created_at->format('M d, g:i A') }}</span>
+                            @if($msg->user_id === Auth::id())
+                                <span class="text-sm font-semibold text-gray-900" x-text="t('project.you')"></span>
+                            @endif
                         </div>
-                        <div class="text-gray-700 text-sm leading-relaxed {{ $msg->user_id === Auth::id() ? 'bg-gray-50 p-4 rounded-lg border border-gray-100' : '' }}">
+                        <div class="text-gray-700 text-sm leading-relaxed {{ $msg->user_id === Auth::id() ? 'bg-primary-light p-4 rounded-lg border border-primary/10 inline-block text-left' : 'bg-gray-50 p-4 rounded-lg border border-gray-100 inline-block' }}">
                             <p>{{ $msg->message }}</p>
                         </div>
                     </div>
@@ -79,7 +99,7 @@
 
             <!-- Chat Input -->
             <div class="p-4 bg-white border-t border-gray-100">
-                <form action="{{ route('projects.messages.store', $project->id) }}" method="POST">
+                <form action="{{ route('projects.messages.send', $project->id) }}" method="POST">
                     @csrf
                     <div class="relative bg-gray-50 border border-gray-200 rounded-2xl shadow-sm focus-within:ring-2 focus-within:ring-primary/50 focus-within:border-primary transition-all">
                         <textarea name="message" required :placeholder="t('project.type_message')" rows="2" class="w-full ps-4 pe-16 py-3 bg-transparent outline-none font-medium text-sm text-gray-700 resize-none custom-scrollbar"></textarea>
@@ -323,7 +343,7 @@
     <!-- Status Change Modal -->
     <div x-show="statusModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center" style="display: none;">
         <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="statusModalOpen = false"></div>
-        <div class="bg-white w-full max-w-sm rounded-xl shadow-2xl relative z-10 p-6 border border-gray-100">
+        <div class="bg-white w-full max-sm rounded-xl shadow-2xl relative z-10 p-6 border border-gray-100">
             <h2 class="text-xl font-bold mb-4" x-text="t('project.change_status')"></h2>
             <form action="{{ route('projects.update-status', $project->id) }}" method="POST" class="space-y-4">
                 @csrf @method('PATCH')
@@ -417,7 +437,7 @@
                 @csrf
                 <input type="hidden" name="project_id" value="{{ $project->id }}">
                 <div class="space-y-1">
-                    <label class="text-xs font-black uppercase tracking-widest text-gray-400 mb-2 block" x-text="lang === 'ar' ? 'اختر الملف' : 'Choose File'"></label>
+                    <label class="text-xs font-black uppercase tracking-widest text-gray-400 mb-2 block" x-text="t('common.choose_file')"></label>
                     <input type="file" name="file" required class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-medium">
                 </div>
                 <div class="flex gap-4 pt-4">
@@ -473,7 +493,7 @@
         <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="rejectModalOpen = false"></div>
         <div class="bg-white w-full max-w-md rounded-xl shadow-2xl relative z-10 p-8 border border-gray-100">
             <h2 class="text-2xl font-bold mb-4 text-red-600" x-text="t('common.reject')"></h2>
-            <p class="text-sm text-gray-500 mb-6" x-text="lang === 'ar' ? 'يرجى تقديم سبب للرفض' : 'Please provide a reason for rejection'"></p>
+            <p class="text-sm text-gray-500 mb-6" x-text="t('common.reject_reason_placeholder')"></p>
             <form action="{{ route('projects.reject', $project->id) }}" method="POST" class="space-y-6">
                 @csrf
                 <div>
@@ -506,7 +526,7 @@
                                 <p class="text-sm font-bold text-gray-900" x-text="item.description"></p>
                                 <p class="text-[10px] text-gray-500 mt-1 flex items-center gap-1">
                                     <i data-lucide="user" class="w-3 h-3"></i>
-                                    <span x-text="item.user ? item.user.name : 'System'"></span>
+                                    <span x-text="item.user ? item.user.name : t('common.system')"></span>
                                     <span>•</span>
                                     <span x-text="new Date(item.created_at).toLocaleString()"></span>
                                 </p>

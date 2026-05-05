@@ -32,8 +32,8 @@ class ProviderServiceController extends Controller
             ->where('service_id', $validated['service_id'])
             ->exists();
             
-        if (!$existing && $user->plan && $user->providerServices()->count() >= $user->plan->max_services) {
-            return redirect()->back()->withErrors(['error' => 'You have reached the maximum number of services allowed by your plan.']);
+        if (!$existing && $user->plan && $user->providerServices()->where('is_active', true)->count() >= $user->plan->max_services) {
+            return redirect()->route('settings.plan.upgrade')->with('error', 'You have reached the maximum number of active services allowed by your plan.');
         }
 
         ProviderService::updateOrCreate(

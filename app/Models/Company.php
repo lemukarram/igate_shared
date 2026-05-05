@@ -16,6 +16,7 @@ class Company extends Model
         'registration_number',
         'about',
         'logo',
+        'is_active',
     ];
 
     public function owner()

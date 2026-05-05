@@ -299,4 +299,25 @@ class ProjectController extends Controller
 
         return response()->json($project->histories);
     }
+
+    public function sendMessage(Request $request, $id)
+    {
+        $request->validate([
+            'message' => 'required|string',
+        ]);
+
+        $project = Project::findOrFail($id);
+
+        if (Auth::user()->role !== 'admin' && Auth::id() !== $project->client_id && Auth::id() !== $project->provider_id) {
+            abort(403);
+        }
+
+        Message::create([
+            'project_id' => $project->id,
+            'user_id' => Auth::id(),
+            'message' => $request->message,
+        ]);
+
+        return redirect()->back()->with('success', 'Message sent.');
+    }
 }

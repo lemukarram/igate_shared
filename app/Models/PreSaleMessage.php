@@ -5,18 +5,22 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ProviderService extends Model
+class PreSaleMessage extends Model
 {
     use HasFactory;
 
     protected $fillable = [
+        'client_id',
         'provider_id',
         'service_id',
-        'price',
-        'delivery_time_days',
-        'provider_notes',
-        'is_active',
+        'sender_id',
+        'message',
     ];
+
+    public function client()
+    {
+        return $this->belongsTo(User::class, 'client_id');
+    }
 
     public function provider()
     {
@@ -26,5 +30,10 @@ class ProviderService extends Model
     public function service()
     {
         return $this->belongsTo(Service::class);
+    }
+
+    public function sender()
+    {
+        return $this->belongsTo(User::class, 'sender_id');
     }
 }

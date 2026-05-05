@@ -8,14 +8,14 @@
         </a>
         <div>
             <h1 class="text-2xl font-bold text-gray-900">{{ $client->name }}</h1>
-            <p class="text-sm text-gray-500 font-medium" x-text="lang === 'ar' ? 'ملف العميل والمشاريع المرتبطة' : 'Client profile and associated projects'"></p>
+            <p class="text-sm text-gray-500 font-medium" x-text="t('common.client_profile_projects')"></p>
         </div>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8" x-data="{ releaseModalOpen: false, releaseAmount: '' }">
         <div class="lg:col-span-2 space-y-8">
             <div class="space-y-4">
-                <h2 class="text-lg font-bold text-gray-900" x-text="lang === 'ar' ? 'المشاريع المتعاقد عليها' : 'Contracted Projects'"></h2>
+                <h2 class="text-lg font-bold text-gray-900" x-text="t('common.contracted_projects')"></h2>
                 <div class="grid grid-cols-1 gap-4">
                     @foreach($projects as $project)
                     <div class="bg-white border border-gray-100 rounded-lg p-6 shadow-sm hover:shadow-md transition-all flex items-center justify-between">
@@ -33,10 +33,10 @@
                         </div>
                         <div class="flex gap-3">
                             <button @click="releaseModalOpen = true; $dispatch('set-project', {id: {{ $project->id }}, name: '{{ $project->service->name }}'})" class="px-4 py-2.5 bg-blue-50 text-blue-600 rounded-lg text-sm font-bold hover:bg-blue-100 transition-all border border-blue-100">
-                                <span x-text="lang === 'ar' ? 'طلب تحويل' : 'Release Schedule'"></span>
+                                <span x-text="t('common.release_schedule')"></span>
                             </button>
                             <a href="{{ route('projects.show', $project->id) }}" class="px-6 py-2.5 bg-gray-900 text-white rounded-lg text-sm font-bold hover:bg-black transition-all">
-                                <span x-text="lang === 'ar' ? 'فتح مساحة العمل' : 'Workspace'"></span>
+                                <span x-text="t('common.workspace')"></span>
                             </a>
                         </div>
                     </div>
@@ -45,7 +45,7 @@
             </div>
 
             <div class="space-y-4">
-                <h2 class="text-lg font-bold text-gray-900" x-text="lang === 'ar' ? 'النشاطات الأخيرة' : 'Recent Activities'"></h2>
+                <h2 class="text-lg font-bold text-gray-900" x-text="t('common.recent_activities')"></h2>
                 <div class="bg-white border border-gray-100 rounded-lg overflow-hidden">
                     <div class="divide-y divide-gray-50">
                         @forelse($activities as $activity)
@@ -59,7 +59,7 @@
                             </div>
                         </div>
                         @empty
-                        <div class="p-12 text-center text-gray-400 italic" x-text="lang === 'ar' ? 'لا توجد نشاطات مسجلة.' : 'No activities recorded.'"></div>
+                        <div class="p-12 text-center text-gray-400 italic" x-text="t('common.no_activities')"></div>
                         @endforelse
                     </div>
                 </div>
@@ -67,7 +67,7 @@
         </div>
 
         <div class="space-y-6">
-            <h2 class="text-lg font-bold text-gray-900" x-text="lang === 'ar' ? 'معلومات التواصل' : 'Contact Information'"></h2>
+            <h2 class="text-lg font-bold text-gray-900" x-text="t('common.contact_information')"></h2>
             <div class="bg-white border border-gray-100 rounded-lg p-8 shadow-sm">
                 <div class="space-y-6">
                     <div class="flex items-center gap-4">
@@ -75,7 +75,7 @@
                             <i data-lucide="mail" class="w-5 h-5"></i>
                         </div>
                         <div>
-                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1" x-text="lang === 'ar' ? 'البريد الإلكتروني' : 'Email Address'"></p>
+                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1" x-text="t('common.email_address')"></p>
                             <p class="text-sm font-bold text-gray-900">{{ $client->email }}</p>
                         </div>
                     </div>
@@ -84,7 +84,7 @@
                             <i data-lucide="phone" class="w-5 h-5"></i>
                         </div>
                         <div>
-                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1" x-text="lang === 'ar' ? 'رقم الجوال' : 'Phone Number'"></p>
+                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1" x-text="t('common.phone_number')"></p>
                             <p class="text-sm font-bold text-gray-900">{{ $client->phone ?? '+966 50 000 0000' }}</p>
                         </div>
                     </div>
@@ -92,7 +92,7 @@
                 <div class="mt-8 pt-8 border-t border-gray-50">
                     <a href="{{ route('projects.show', $projects->first()->id ?? 0) }}" class="w-full py-3 bg-primary text-white rounded-lg text-sm font-bold hover:bg-primary-dark transition-all flex items-center justify-center gap-2">
                         <i data-lucide="message-circle" class="w-4 h-4"></i>
-                        <span x-text="lang === 'ar' ? 'بدء محادثة مباشرة' : 'Chat Now'"></span>
+                        <span x-text="t('common.chat_now')"></span>
                     </a>
                 </div>
             </div>
@@ -103,22 +103,22 @@
              @set-project.window="selectedProject = $event.detail">
             <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="releaseModalOpen = false"></div>
             <div class="bg-white w-full max-w-md rounded-xl shadow-2xl relative z-10 p-8 border border-gray-100">
-                <h2 class="text-2xl font-bold mb-2" x-text="lang === 'ar' ? 'طلب تحرير دفعات' : 'Release Request'"></h2>
+                <h2 class="text-2xl font-bold mb-2" x-text="t('common.release_request')"></h2>
                 <p class="text-gray-500 text-sm mb-6" x-text="'Project: ' + selectedProject.name"></p>
                 <form action="{{ route('provider.release-requests.store') }}" method="POST" class="space-y-4">
                     @csrf
                     <input type="hidden" name="project_id" :value="selectedProject.id">
                     <div>
-                        <label class="text-xs font-black uppercase tracking-widest text-gray-400 mb-2 block" x-text="lang === 'ar' ? 'المبلغ' : 'Amount (SAR)'"></label>
+                        <label class="text-xs font-black uppercase tracking-widest text-gray-400 mb-2 block" x-text="t('common.amount_sar')"></label>
                         <input type="number" name="amount" required step="0.01" class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-lg text-sm font-bold outline-none">
                     </div>
                     <div>
-                        <label class="text-xs font-black uppercase tracking-widest text-gray-400 mb-2 block" x-text="lang === 'ar' ? 'ملاحظات' : 'Notes'"></label>
+                        <label class="text-xs font-black uppercase tracking-widest text-gray-400 mb-2 block" x-text="t('common.notes')"></label>
                         <textarea name="notes" rows="3" class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-lg text-sm font-medium outline-none"></textarea>
                     </div>
                     <div class="flex gap-4 pt-4">
-                        <button type="button" @click="releaseModalOpen = false" class="flex-1 py-3 bg-gray-100 text-gray-700 rounded-lg font-bold" x-text="lang === 'ar' ? 'إلغاء' : 'Cancel'"></button>
-                        <button type="submit" class="flex-1 py-3 bg-primary text-white rounded-lg font-bold" x-text="lang === 'ar' ? 'إرسال الطلب' : 'Release Request'"></button>
+                        <button type="button" @click="releaseModalOpen = false" class="flex-1 py-3 bg-gray-100 text-gray-700 rounded-lg font-bold" x-text="t('common.cancel')"></button>
+                        <button type="submit" class="flex-1 py-3 bg-primary text-white rounded-lg font-bold" x-text="t('common.send_request')"></button>
                     </div>
                 </form>
             </div>

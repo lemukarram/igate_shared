@@ -96,7 +96,7 @@
                     </a>
                 @elseif(Auth::user()->role === 'provider')
                     <a href="#" @click="addServiceOpen = true" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 transition-all">
-                        <i data-lucide="plus" class="w-4 h-4 flex-shrink-0"></i>
+                        <i data-lucide="plus" class="w-6 h-6 flex-shrink-0 bg-primary-light text-primary round-add-button rounded-full px-1"></i>
                         <span x-show="!sidebarCollapsed" class="text-sm font-medium whitespace-nowrap" x-text="t('explore.add_to_portfolio')"></span>
                     </a>
                     <a href="/provider/dashboard" class="sidebar-item {{ request()->routeIs('provider.dashboard') ? 'active' : '' }} flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 transition-all">
@@ -121,7 +121,7 @@
                     </a>
                 @elseif(Auth::user()->role === 'client')
                     <a href="{{ route('explore.index') }}" @click="addServiceOpen = true" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 transition-all">
-                        <i data-lucide="plus" class="w-4 h-4 flex-shrink-0"></i>
+                        <i data-lucide="plus" class="w-6 h-6 flex-shrink-0 bg-primary-light text-primary round-add-button rounded-full px-1"></i>
                         <span x-show="!sidebarCollapsed" class="text-sm font-medium whitespace-nowrap" x-text="t('explore.request')"></span>
                     </a>
                     <a href="/" class="sidebar-item {{ request()->is('/') ? 'active' : '' }} flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 transition-all">
@@ -423,33 +423,45 @@
                                 @method('PATCH')
                                 <div class="space-y-4">
                                     <div class="flex items-center justify-between">
-                                        <p class="text-[10px] font-black uppercase tracking-widest text-gray-400">Team Members</p>
+                                        <p class="text-[10px] font-black uppercase tracking-widest text-gray-400" x-text="t('common.team_members')"></p>
                                     </div>
                                     <div class="overflow-hidden border border-gray-100 rounded-lg">
                                         <table class="w-full text-left text-sm">
                                             <thead class="bg-gray-50 text-[10px] uppercase tracking-widest text-gray-400">
                                                 <tr class="divide-x divide-gray-100">
-                                                    <th class="px-4 py-2 font-medium">Name</th>
-                                                    <th class="px-4 py-2 font-medium">Role</th>
-                                                    <th class="px-4 py-2 font-medium">Permissions</th>
-                                                    <th class="px-4 py-2 font-medium text-right">Actions</th>
+                                                    <th class="px-4 py-2 font-medium" x-text="t('common.name')"></th>
+                                                    <th class="px-4 py-2 font-medium" x-text="t('common.status')"></th>
+                                                    <th class="px-4 py-2 font-medium" x-text="t('common.role')"></th>
+                                                    <th class="px-4 py-2 font-medium" x-text="t('common.permissions')"></th>
+                                                    <th class="px-4 py-2 font-medium text-right" x-text="t('common.actions')"></th>
                                                 </tr>
                                             </thead>
                                             <tbody class="divide-y divide-gray-50">
                                                 <tr class="hover:bg-gray-50 transition-all">
                                                     <td class="px-4 py-3 font-medium text-xs">{{ Auth::user()->name }}</td>
-                                                    <td class="px-4 py-3 capitalize text-xs">{{ Auth::user()->role }} (Owner)</td>
-                                                    <td class="px-4 py-3"><span class="px-2 py-0.5 bg-primary-light text-primary rounded-full text-[10px] font-bold">Full Access</span></td>
+                                                    <td class="px-4 py-3">
+                                                        <span class="px-2 py-0.5 bg-green-50 text-green-600 rounded-full text-[10px] font-bold" x-text="t('common.active')"></span>
+                                                    </td>
+                                                    <td class="px-4 py-3 capitalize text-xs">{{ Auth::user()->role }} (<span x-text="t('common.owner')"></span>)</td>
+                                                    <td class="px-4 py-3"><span class="px-2 py-0.5 bg-primary-light text-primary rounded-full text-[10px] font-bold" x-text="t('common.full_access')"></span></td>
                                                     <td class="px-4 py-3 text-right"></td>
                                                 </tr>
                                                 @if(Auth::user()->ownedTeam && Auth::user()->ownedTeam->members)
                                                     @foreach(Auth::user()->ownedTeam->members as $member)
                                                     <tr class="hover:bg-gray-50 transition-all">
-                                                        <td class="px-4 py-3 font-medium text-xs">{{ $member->user->name ?? 'Invited' }}</td>
+                                                        <td class="px-4 py-3 font-medium text-xs">
+                                                            {{ $member->user->name ?? 'Invited' }}
+                                                            @if(!$member->is_active)
+                                                                <span class="text-[9px] font-black uppercase text-red-500 ml-1" x-text="'(' + t('common.inactive') + ')'"></span>
+                                                            @endif
+                                                        </td>
+                                                        <td class="px-4 py-3">
+                                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold {{ $member->is_active ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600' }}" x-text="{{ $member->is_active ? 'true' : 'false' }} ? t('common.active') : t('common.inactive')"></span>
+                                                        </td>
                                                         <td class="px-4 py-3">
                                                             <select name="members[{{ $member->id }}][role]" class="bg-transparent text-xs font-medium outline-none">
-                                                                <option value="manager" {{ $member->role === 'manager' ? 'selected' : '' }}>Manager</option>
-                                                                <option value="staff" {{ $member->role === 'staff' ? 'selected' : '' }}>Staff</option>
+                                                                <option value="manager" {{ $member->role === 'manager' ? 'selected' : '' }} x-text="t('common.manager')"></option>
+                                                                <option value="staff" {{ $member->role === 'staff' ? 'selected' : '' }} x-text="t('common.staff')"></option>
                                                             </select>
                                                         </td>
                                                         <td class="px-4 py-3">
@@ -460,13 +472,13 @@
                                                                 @endphp
                                                                 <div class="grid grid-cols-3 gap-2">
                                                                     <select name="members[{{ $member->id }}][permissions][0][scope]" x-model="scope" class="w-full px-1.5 py-1 border border-gray-200 rounded text-[9px] bg-white">
-                                                                        <option value="overall" {{ ($p['scope'] ?? '') === 'overall' ? 'selected' : '' }}>Overall</option>
-                                                                        <option value="company" {{ ($p['scope'] ?? '') === 'company' ? 'selected' : '' }}>Company</option>
-                                                                        <option value="client" {{ ($p['scope'] ?? '') === 'client' ? 'selected' : '' }}>Client</option>
-                                                                        <option value="project" {{ ($p['scope'] ?? '') === 'project' ? 'selected' : '' }}>Project</option>
+                                                                        <option value="overall" {{ ($p['scope'] ?? '') === 'overall' ? 'selected' : '' }} x-text="t('common.overall')"></option>
+                                                                        <option value="company" {{ ($p['scope'] ?? '') === 'company' ? 'selected' : '' }} x-text="t('common.company')"></option>
+                                                                        <option value="client" {{ ($p['scope'] ?? '') === 'client' ? 'selected' : '' }} x-text="t('common.client')"></option>
+                                                                        <option value="project" {{ ($p['scope'] ?? '') === 'project' ? 'selected' : '' }} x-text="t('common.project')"></option>
                                                                     </select>
                                                                     <select name="members[{{ $member->id }}][permissions][0][target_id]" class="w-full px-1.5 py-1 border border-gray-200 rounded text-[9px] bg-white">
-                                                                        <option value="">-- Target --</option>
+                                                                        <option value="" x-text="t('common.select_target')"></option>
                                                                         <template x-if="scope === 'company'">
                                                                             @foreach($permission_companies ?? [] as $c)
                                                                                 <option value="{{ $c->id }}" {{ ($p['target_id'] ?? '') == $c->id ? 'selected' : '' }}>{{ $c->name }}</option>
@@ -484,14 +496,14 @@
                                                                         </template>
                                                                     </select>
                                                                     <select name="members[{{ $member->id }}][permissions][0][action]" class="w-full px-1.5 py-1 border border-gray-200 rounded text-[9px] bg-white">
-                                                                        <option value="edit" {{ ($p['action'] ?? '') === 'edit' ? 'selected' : '' }}>Edit</option>
-                                                                        <option value="view" {{ ($p['action'] ?? '') === 'view' ? 'selected' : '' }}>View</option>
+                                                                        <option value="edit" {{ ($p['action'] ?? '') === 'edit' ? 'selected' : '' }} x-text="t('common.edit')"></option>
+                                                                        <option value="view" {{ ($p['action'] ?? '') === 'view' ? 'selected' : '' }} x-text="t('common.view')"></option>
                                                                     </select>
                                                                 </div>
                                                             </div>
                                                         </td>
                                                         <td class="px-4 py-3 text-right">
-                                                            <button type="button" @click="if(confirm('Are you sure?')) { $refs['delete_member_' + {{ $member->id }}].submit() }" class="text-red-500 hover:text-red-700 transition-colors">
+                                                            <button type="button" @click="if(confirm(t('common.are_you_sure'))) { $refs['delete_member_' + {{ $member->id }}].submit() }" class="text-red-500 hover:text-red-700 transition-colors">
                                                                 <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                                                             </button>
                                                         </td>
@@ -512,11 +524,11 @@
                             @endif
 
                             <div class="space-y-2 pt-4">
-                                <p class="text-[10px] font-black uppercase tracking-widest text-gray-400">Enabled Features</p>
+                                <p class="text-[10px] font-black uppercase tracking-widest text-gray-400" x-text="t('common.enabled_features')"></p>
                                 <div class="flex flex-wrap gap-2">
-                                    <span class="px-3 py-1 bg-green-50 text-green-600 rounded-full text-[10px] font-black uppercase">Payments</span>
-                                    <span class="px-3 py-1 bg-green-50 text-green-600 rounded-full text-[10px] font-black uppercase">Service Request</span>
-                                    <span class="px-3 py-1 bg-green-50 text-green-600 rounded-full text-[10px] font-black uppercase">Chat</span>
+                                    <span class="px-3 py-1 bg-green-50 text-green-600 rounded-full text-[10px] font-black uppercase" x-text="t('common.payments')"></span>
+                                    <span class="px-3 py-1 bg-green-50 text-green-600 rounded-full text-[10px] font-black uppercase" x-text="t('common.service_request')"></span>
+                                    <span class="px-3 py-1 bg-green-50 text-green-600 rounded-full text-[10px] font-black uppercase" x-text="t('common.chat')"></span>
                                 </div>
                             </div>
                         </div>
@@ -525,17 +537,17 @@
                         <div x-show="settingsTab === 'plans'" class="space-y-4 animate-in fade-in duration-300">
                             <div class="p-6 border border-primary/20 bg-primary-light rounded-xl">
                                 <div class="flex items-center justify-between mb-4">
-                                    <div><p class="text-[10px] font-black text-primary uppercase tracking-widest mb-1">Current Plan</p><h3 class="text-2xl font-black text-gray-900">{{ Auth::user()->plan->name ?? 'Basic' }}</h3></div>
-                                    <span class="px-3 py-1 bg-primary text-white rounded-full text-[10px] font-black uppercase">Active</span>
+                                    <div><p class="text-[10px] font-black text-primary uppercase tracking-widest mb-1" x-text="t('common.current_plan')"></p><h3 class="text-2xl font-black text-gray-900">{{ Auth::user()->plan->name ?? 'Basic' }}</h3></div>
+                                    <span class="px-3 py-1 bg-primary text-white rounded-full text-[10px] font-black uppercase" x-text="t('common.active')"></span>
                                 </div>
                                 <div class="flex items-center justify-between text-sm">
-                                    <span class="text-gray-500 font-medium">Limits: {{ Auth::user()->plan->max_services ?? 1 }} Services, {{ Auth::user()->plan->max_projects ?? 1 }} Projects</span>
-                                    <button type="button" class="text-primary font-black uppercase tracking-widest text-xs">View Invoices</button>
+                                    <span class="text-gray-500 font-medium" x-text="t('common.plan_limits').replace(':max_services', '{{ Auth::user()->plan->max_services ?? 1 }}').replace(':max_projects', '{{ Auth::user()->plan->max_projects ?? 1 }}')"></span>
+                                    <button type="button" class="text-primary font-black uppercase tracking-widest text-xs" x-text="t('common.view_invoices')"></button>
                                 </div>
                             </div>
                             <form id="settings-plans-form" action="{{ route('settings.plan') }}" method="POST" class="space-y-4 mt-6">
                                 @csrf
-                                <h4 class="text-sm font-bold">Upgrade Plan</h4>
+                                <h4 class="text-sm font-bold" x-text="t('common.upgrade_plan')"></h4>
                                 <div class="grid grid-cols-1 gap-3">
                                     @foreach(\App\Models\Plan::where('type', Auth::user()->role)->get() as $plan)
                                     <label class="flex items-center justify-between p-4 border rounded-lg cursor-pointer transition-all hover:bg-gray-50 {{ Auth::user()->plan_id == $plan->id ? 'border-primary bg-primary-light' : 'border-gray-200' }}">
@@ -543,7 +555,7 @@
                                             <input type="radio" name="plan_id" value="{{ $plan->id }}" {{ Auth::user()->plan_id == $plan->id ? 'checked' : '' }} class="w-4 h-4 text-primary focus:ring-primary">
                                             <div>
                                                 <p class="font-bold text-sm">{{ $plan->name }}</p>
-                                                <p class="text-xs text-gray-500">Up to {{ $plan->max_services }} services</p>
+                                                <p class="text-xs text-gray-500" x-text="t('common.up_to') + ' ' + '{{ $plan->max_services }}' + ' ' + t('common.services')"></p>
                                             </div>
                                         </div>
                                     </label>
@@ -556,15 +568,34 @@
                         <div x-show="settingsTab === 'notifications'" class="space-y-4 animate-in fade-in duration-300">
                             <form id="settings-notifications-form" action="{{ route('settings.notifications') }}" method="POST" class="space-y-4">
                                 @csrf
-                                @foreach(['Email Notifications' => 'email', 'Browser Push' => 'push', 'SMS Alerts' => 'sms', 'Marketing Inquiries' => 'marketing'] as $label => $key)
                                 <div class="flex items-center justify-between p-4 border-b border-gray-50">
-                                    <span class="text-sm font-bold text-gray-700">{{ $label }}</span>
+                                    <span class="text-sm font-bold text-gray-700" x-text="t('common.email_notifications')"></span>
                                     <label class="relative inline-flex items-center cursor-pointer">
-                                        <input type="checkbox" name="notifications[{{ $key }}]" value="1" {{ (Auth::user()->notification_settings[$key] ?? false) ? 'checked' : '' }} class="sr-only peer">
+                                        <input type="checkbox" name="notifications[email]" value="1" {{ (Auth::user()->notification_settings['email'] ?? false) ? 'checked' : '' }} class="sr-only peer">
                                         <div class="w-10 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
                                     </label>
                                 </div>
-                                @endforeach
+                                <div class="flex items-center justify-between p-4 border-b border-gray-50">
+                                    <span class="text-sm font-bold text-gray-700" x-text="t('common.browser_push')"></span>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" name="notifications[push]" value="1" {{ (Auth::user()->notification_settings['push'] ?? false) ? 'checked' : '' }} class="sr-only peer">
+                                        <div class="w-10 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+                                    </label>
+                                </div>
+                                <div class="flex items-center justify-between p-4 border-b border-gray-50">
+                                    <span class="text-sm font-bold text-gray-700" x-text="t('common.sms_alerts')"></span>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" name="notifications[sms]" value="1" {{ (Auth::user()->notification_settings['sms'] ?? false) ? 'checked' : '' }} class="sr-only peer">
+                                        <div class="w-10 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+                                    </label>
+                                </div>
+                                <div class="flex items-center justify-between p-4 border-b border-gray-50">
+                                    <span class="text-sm font-bold text-gray-700" x-text="t('common.marketing_inquiries')"></span>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" name="notifications[marketing]" value="1" {{ (Auth::user()->notification_settings['marketing'] ?? false) ? 'checked' : '' }} class="sr-only peer">
+                                        <div class="w-10 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+                                    </label>
+                                </div>
                             </form>
                         </div>
 
@@ -702,7 +733,7 @@
 
         function i18nManager() {
             return {
-                lang: localStorage.getItem('igate_lang') || 'en',
+                lang: '{{ App::getLocale() }}',
                 settingsOpen: false,
                 addServiceOpen: false,
                 showAddUserForm: false,
@@ -732,8 +763,9 @@
                     return result || key;
                 },
                 toggleLang() {
-                    this.lang = this.lang === 'en' ? 'ar' : 'en';
-                    localStorage.setItem('igate_lang', this.lang);
+                    const newLang = this.lang === 'en' ? 'ar' : 'en';
+                    localStorage.setItem('igate_lang', newLang);
+                    document.cookie = "igate_lang=" + newLang + ";path=/;max-age=" + (365 * 24 * 60 * 60);
                     location.reload();
                 },
                 init() {

@@ -7,11 +7,11 @@
         <div>
             <h1 class="text-2xl font-semibold text-gray-900 tracking-tight" x-text="t('common.team')"></h1>
             <p class="text-gray-500 font-medium mt-1 text-xs uppercase tracking-wider" 
-               x-text="lang === 'ar' ? 'إدارة القوى العاملة الداخلية' : 'Internal Workforce Management'"></p>
+               x-text="t('common.internal_workforce_management')"></p>
         </div>
         <button @click="openCreateModal()" class="px-5 py-2.5 bg-[#3da9e4] text-white rounded-lg font-medium text-sm hover:bg-[#2b8bc2] transition-all flex items-center gap-2 shadow-md">
             <i data-lucide="plus" class="w-4 h-4"></i>
-            <span x-text="lang === 'ar' ? 'إنشاء مهمة داخلية' : 'Create Internal Task'"></span>
+            <span x-text="t('common.create_internal_task')"></span>
         </button>
     </div>
 
@@ -84,7 +84,7 @@
                          class="bg-gray-50 p-4 rounded-lg border border-[#3da9e4]/30 group cursor-grab">
                         <div class="flex items-start justify-between mb-2">
                             <span class="px-2 py-0.5 bg-[#e6f4fd] text-[#3da9e4] rounded text-[10px] font-semibold uppercase tracking-wider" 
-                                  x-text="lang === 'ar' ? 'نشط' : 'Active'"></span>
+                                  x-text="t('common.active')"></span>
                             <i data-lucide="loader" class="w-4 h-4 text-[#3da9e4] animate-spin"></i>
                         </div>
                         <p class="text-sm font-medium text-gray-800 mb-3">{{ $task->title }}</p>
@@ -124,7 +124,7 @@
                          @click="openEditModal({{ $task->id }})"
                          class="bg-gray-50 p-4 rounded-lg border border-gray-100 opacity-60 cursor-grab">
                         <p class="text-sm font-medium text-gray-700 mb-2 line-through">{{ $task->title }}</p>
-                        <p class="text-xs text-gray-400 font-medium" x-text="(lang === 'ar' ? 'تم الإكمال ' : 'Completed ') + '{{ $task->updated_at->diffForHumans() }}'"></p>
+                        <p class="text-xs text-gray-400 font-medium" x-text="t('common.completed') + ' ' + '{{ $task->updated_at->diffForHumans() }}'"></p>
                     </div>
                     @endforeach
                 @endif
@@ -139,7 +139,7 @@
             <div class="flex-1 overflow-y-auto custom-scrollbar border-e border-gray-100">
                 <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
                     <h2 class="text-xl font-semibold text-gray-900" 
-                        x-text="editMode ? (lang === 'ar' ? 'تعديل المهمة' : 'Edit Task') : (lang === 'ar' ? 'إنشاء مهمة جديدة' : 'Create New Task')"></h2>
+                        x-text="editMode ? t('common.edit_task') : t('common.create_new_task')"></h2>
                     <button @click="showModal = false" class="text-gray-400 hover:text-gray-600">
                         <i data-lucide="x" class="w-5 h-5"></i>
                     </button>
@@ -152,7 +152,7 @@
 
                     <div class="p-6 space-y-5">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1" x-text="lang === 'ar' ? 'عنوان المهمة *' : 'Task Title *'"></label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1" x-text="t('common.task_title') + ' *'"></label>
                             <input type="text" name="title" x-model="formData.title" required class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#3da9e4]/50 outline-none text-sm">
                         </div>
                         
@@ -160,7 +160,7 @@
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1" x-text="t('tasks.assigned_to')"></label>
                                 <select name="assigned_to" x-model="formData.assigned_to" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#3da9e4]/50 outline-none text-sm">
-                                    <option value="" x-text="lang === 'ar' ? 'غير مكلف' : 'Unassigned'"></option>
+                                    <option value="" x-text="t('common.unassigned')"></option>
                                     @if(isset($teamMembers))
                                         @foreach($teamMembers as $member)
                                         <option value="{{ $member->user->id }}">{{ $member->user->name }}</option>
@@ -169,7 +169,7 @@
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1" x-text="lang === 'ar' ? 'الموعد النهائي' : 'Deadline'"></label>
+                                <label class="block text-sm font-medium text-gray-700 mb-1" x-text="t('common.deadline')"></label>
                                 <input type="date" name="due_date" x-model="formData.due_date" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#3da9e4]/50 outline-none text-sm text-gray-700">
                             </div>
                         </div>
@@ -195,12 +195,12 @@
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1" x-text="lang === 'ar' ? 'وصف المهمة والملاحظات' : 'Task Description & Comments'"></label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1" x-text="t('common.task_description_comments')"></label>
                             <textarea name="description" x-model="formData.description" rows="3" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#3da9e4]/50 outline-none text-sm resize-none"></textarea>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1" x-text="lang === 'ar' ? 'المرفقات' : 'Attachments'"></label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1" x-text="t('common.attachments')"></label>
                             
                             <!-- Existing Documents List -->
                             <div x-show="editMode && currentTask.documents && currentTask.documents.length > 0" class="grid grid-cols-2 gap-3 mb-4">
@@ -224,14 +224,14 @@
 
                             <div @click="$refs.fileInput.click()" class="border-2 border-dashed border-gray-200 rounded-lg p-6 text-center hover:bg-gray-50 transition-colors cursor-pointer">
                                 <i data-lucide="upload-cloud" class="w-8 h-8 text-gray-400 mx-auto mb-2"></i>
-                                <p class="text-sm text-gray-500 font-medium" x-text="lang === 'ar' ? 'اضغط لرفع ملفات متعددة أو اسحب وأفلت' : 'Click to upload multiple files or drag and drop'"></p>
+                                <p class="text-sm text-gray-500 font-medium" x-text="t('common.click_to_upload')"></p>
                                 <input type="file" name="files[]" multiple x-ref="fileInput" class="hidden">
                             </div>
                         </div>
                     </div>
                     <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50">
-                        <button type="button" @click="showModal = false" class="px-5 py-2.5 text-gray-600 bg-white border border-gray-200 rounded-lg font-medium text-sm hover:bg-gray-100" x-text="lang === 'ar' ? 'إلغاء' : 'Cancel'"></button>
-                        <button type="submit" class="px-5 py-2.5 bg-[#3da9e4] text-white rounded-lg font-medium text-sm hover:bg-[#2b8bc2]" x-text="editMode ? (lang === 'ar' ? 'تحديث' : 'Update Task') : (lang === 'ar' ? 'حفظ التغييرات' : 'Save Changes')"></button>
+                        <button type="button" @click="showModal = false" class="px-5 py-2.5 text-gray-600 bg-white border border-gray-200 rounded-lg font-medium text-sm hover:bg-gray-100" x-text="t('common.cancel')"></button>
+                        <button type="submit" class="px-5 py-2.5 bg-[#3da9e4] text-white rounded-lg font-medium text-sm hover:bg-[#2b8bc2]" x-text="editMode ? t('common.update_task') : t('common.save')"></button>
                     </div>
                 </form>
             </div>
@@ -249,8 +249,8 @@
                             <div class="space-y-1">
                                 <p class="text-xs text-gray-900 font-bold" x-text="history.user.name"></p>
                                 <p class="text-[10px] text-gray-500 font-medium" 
-                                   x-text="history.action === 'created' ? (lang === 'ar' ? 'أنشأ هذه المهمة' : 'Created this task') : 
-                                          (history.field_label + (lang === 'ar' ? ' تغير من ' : ' changed from ') + history.old_value_label + (lang === 'ar' ? ' إلى ' : ' to ') + history.new_value_label)">
+                                   x-text="history.action === 'created' ? t('project.history_created') : 
+                                          (history.field_label + ' ' + t('project.history_changed_from') + ' ' + history.old_value_label + ' ' + t('project.history_to') + ' ' + history.new_value_label)">
                                 </p>
                                 <p class="text-[8px] text-gray-400 font-medium italic" x-text="formatDate(history.created_at)"></p>
                             </div>
@@ -296,7 +296,7 @@
                     }
                     },
                     async deleteDoc(docId) {
-                    if (!confirm(this.lang === 'ar' ? 'هل أنت متأكد من حذف هذا الملف؟' : 'Are you sure you want to delete this file?')) return;
+                    if (!confirm(this.t('common.delete_file_confirm'))) return;
                     const res = await fetch(`/documents/${docId}`, {
                     method: 'DELETE',
                     headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
