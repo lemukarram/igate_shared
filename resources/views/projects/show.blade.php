@@ -29,7 +29,7 @@
             <a href="{{ route('provider.clients.show', $project->client_id) }}" class="flex items-center gap-3 hover:bg-gray-50 p-1.5 rounded-lg transition-all">
                 <div class="w-10 h-10 bg-gray-900 rounded-lg flex items-center justify-center text-white font-semibold text-sm overflow-hidden">
                     @if($project->client->profile_picture)
-                        <img src="{{ asset('storage/' . $project->client->profile_picture) }}" class="w-full h-full object-cover">
+                        <img src="{{ asset('storage/' . $project->client->profile_picture) }}" class="w-full h-full object-cover bg-white">
                     @else
                         {{ substr($project->client->name, 0, 2) }}
                     @endif
@@ -43,7 +43,7 @@
             <div class="flex items-center gap-3 border-s border-gray-100 ps-6 hover:bg-gray-50 p-1.5 rounded-lg transition-all">
                 <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-white font-semibold text-sm overflow-hidden">
                     @if($project->provider->providerProfile && $project->provider->providerProfile->logo)
-                        <img src="{{ asset('storage/' . $project->provider->providerProfile->logo) }}" class="w-full h-full object-cover">
+                        <img src="{{ asset('storage/' . $project->provider->providerProfile->logo) }}" class="w-full h-full object-cover bg-white">
                     @else
                         {{ substr($project->provider->name, 0, 2) }}
                     @endif
@@ -335,6 +335,13 @@
                         </div>
                     </div>
                     @endif
+
+                    @if($project->status === 'completed' && !$userReview)
+                    <button @click="reviewModalOpen = true" class="w-full py-2 bg-primary text-white rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2">
+                        <i data-lucide="star" class="w-3 h-3"></i>
+                        <span x-text="t('project.add_review')"></span>
+                    </button>
+                    @endif
                 </div>
             </div>
         </div>
@@ -544,6 +551,41 @@
             </div>
         </div>
     </div>
+
+    <!-- Review Modal -->
+    <div x-show="reviewModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center" style="display: none;">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="reviewModalOpen = false"></div>
+        <div class="bg-white w-full max-w-md rounded-xl shadow-2xl relative z-10 p-8 border border-gray-100">
+            <h2 class="text-2xl font-bold mb-2 text-gray-900" x-text="t('project.add_review')"></h2>
+            <p class="text-sm text-gray-500 mb-6" x-text="t('project.how_was_your_experience')"></p>
+            <form action="{{ route('reviews.store') }}" method="POST" class="space-y-6">
+                @csrf
+                <input type="hidden" name="project_id" value="{{ $project->id }}">
+                <input type="hidden" name="rating" :value="rating">
+                
+                <div>
+                    <label class="text-xs font-black uppercase tracking-widest text-gray-400 mb-3 block" x-text="t('project.rating')"></label>
+                    <div class="flex gap-2">
+                        <template x-for="i in 5">
+                            <button type="button" @click="rating = i" class="transition-all hover:scale-110 focus:outline-none">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" :class="i <= rating ? 'text-yellow-400 fill-current' : 'text-gray-200'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                            </button>
+                        </template>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-xs font-black uppercase tracking-widest text-gray-400 mb-2 block" x-text="t('project.comment')"></label>
+                    <textarea name="comment" class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-medium resize-none" rows="4" :placeholder="t('project.comment')"></textarea>
+                </div>
+
+                <div class="flex gap-4 pt-4">
+                    <button type="button" @click="reviewModalOpen = false" class="flex-1 py-4 bg-gray-100 text-gray-700 rounded-xl font-bold" x-text="t('common.cancel')"></button>
+                    <button type="submit" class="flex-1 py-4 bg-primary text-white rounded-xl font-bold" x-text="t('project.submit_review')"></button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -556,6 +598,8 @@
             terminateModalOpen: false,
             rejectModalOpen: false,
             historyModalOpen: false,
+            reviewModalOpen: false,
+            rating: 5,
             histories: [],
             selectedTask: {id: null, title: '', status: ''},
             openHistory() {

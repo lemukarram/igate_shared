@@ -131,4 +131,7 @@ Route::middleware(['auth', 'App\Http\Middleware\EnsureProviderIsOnboarded'])->gr
     // Documents
     Route::post('/documents', [DocumentController::class, 'store'])->name('documents.store');
     Route::delete('/documents/{id}', [App\Http\Controllers\TeamTaskController::class, 'deleteDocument'])->name('documents.destroy');
+
+    // Reviews
+    Route::post('/reviews', [App\Http\Controllers\ReviewController::class, 'store'])->name('reviews.store');
 });

@@ -38,7 +38,11 @@ class ProjectController extends Controller
 
         $messages = Message::where('project_id', $project->id)->with('user')->oldest()->get();
 
-        return view('projects.show', compact('project', 'messages'));
+        $userReview = \App\Models\Review::where('project_id', $project->id)
+            ->where('reviewer_id', Auth::id())
+            ->first();
+
+        return view('projects.show', compact('project', 'messages', 'userReview'));
     }
 
     public function updateStatus(Request $request, $id)

@@ -42,4 +42,9 @@ return [
     'dispute_notice' => 'سيقوم المسؤول بمراجعة هذا النزاع.',
     'termination_notice' => 'تم إنهاء المشروع لعدم توفر الأصول.',
     'project_id_prefix' => 'PRJ-',
+    'add_review' => 'إضافة تقييم',
+    'rating' => 'التقييم',
+    'comment' => 'التعليق',
+    'submit_review' => 'إرسال التقييم',
+    'how_was_your_experience' => 'كيف كانت تجربتك؟',
 ];

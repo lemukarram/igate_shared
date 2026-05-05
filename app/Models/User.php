@@ -82,6 +82,41 @@ class User extends Authenticatable
         return $this->hasMany(Document::class, 'user_id');
     }
 
+    public function reviewsGiven()
+    {
+        return $this->hasMany(Review::class, 'reviewer_id');
+    }
+
+    public function reviewsReceived()
+    {
+        return $this->hasMany(Review::class, 'reviewee_id');
+    }
+
+    public function getCompletedProjectsCountAttribute()
+    {
+        return $this->providerProjects()->where('status', 'completed')->count();
+    }
+
+    public function getActiveProjectsCountAttribute()
+    {
+        return $this->providerProjects()->where('status', 'active')->count();
+    }
+
+    public function getTotalClientsCountAttribute()
+    {
+        return $this->providerProjects()->distinct('client_id')->count('client_id');
+    }
+
+    public function getAverageRatingAttribute()
+    {
+        return $this->reviewsReceived()->avg('rating') ?: 5.0;
+    }
+
+    public function getReviewCountAttribute()
+    {
+        return $this->reviewsReceived()->count();
+    }
+
     public function enforcePlanLimits()
     {
         $plan = $this->plan;

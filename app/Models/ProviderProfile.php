@@ -26,4 +26,9 @@ class ProviderProfile extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function getAboutAttribute()
+    {
+        return $this->bio;
+    }
 }

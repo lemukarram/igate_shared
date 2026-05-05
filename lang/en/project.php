@@ -42,4 +42,9 @@ return [
     'dispute_notice' => 'Admin will review this dispute.',
     'termination_notice' => 'Project terminated due to lack of assets.',
     'project_id_prefix' => 'PRJ-',
+    'add_review' => 'Add Review',
+    'rating' => 'Rating',
+    'comment' => 'Comment',
+    'submit_review' => 'Submit Review',
+    'how_was_your_experience' => 'How was your experience?',
 ];

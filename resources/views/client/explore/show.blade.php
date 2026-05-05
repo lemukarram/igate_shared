@@ -66,10 +66,20 @@
                             <button @click="selectedProvider = { 
                                 name: '{{ $ps->provider->providerProfile->company_name ?? $ps->provider->name }}',
                                 logo: '{{ $ps->provider->providerProfile && $ps->provider->providerProfile->logo ? asset('storage/' . $ps->provider->providerProfile->logo) : '' }}',
-                                totalClients: '{{ rand(50, 200) }}',
-                                completedProjects: '{{ rand(150, 500) }}',
-                                activeProjects: '{{ rand(5, 20) }}',
-                                about: '{{ addslashes($ps->provider->providerProfile->about ?? '') }}'
+                                totalClients: '{{ $ps->provider->total_clients_count }}',
+                                completedProjects: '{{ $ps->provider->completed_projects_count }}',
+                                activeProjects: '{{ $ps->provider->active_projects_count }}',
+                                about: '{{ addslashes($ps->provider->providerProfile->about ?? '') }}',
+                                reviews: {{ $ps->provider->reviewsReceived()->with(['reviewer', 'project.service'])->latest()->take(5)->get()->map(function($r) {
+                                    return [
+                                        'rating' => $r->rating,
+                                        'comment' => $r->comment,
+                                        'reviewer_name' => $r->reviewer->name,
+                                        'reviewer_logo' => $r->reviewer->profile_picture ? asset('storage/' . $r->reviewer->profile_picture) : null,
+                                        'project_name' => $r->project->service->name
+                                    ];
+                                })->toJson() }},
+                                averageRating: '{{ number_format($ps->provider->average_rating, 1) }}'
                             }; providerInfoModalOpen = true" class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center overflow-hidden hover:ring-4 hover:ring-primary/10 transition-all">
                                 @if($ps->provider->providerProfile && $ps->provider->providerProfile->logo)
                                     <img src="{{ asset('storage/' . $ps->provider->providerProfile->logo) }}" class="w-full h-full object-cover">
@@ -81,15 +91,25 @@
                                 <button @click="selectedProvider = { 
                                     name: '{{ $ps->provider->providerProfile->company_name ?? $ps->provider->name }}',
                                     logo: '{{ $ps->provider->providerProfile && $ps->provider->providerProfile->logo ? asset('storage/' . $ps->provider->providerProfile->logo) : '' }}',
-                                    totalClients: '{{ rand(50, 200) }}',
-                                    completedProjects: '{{ rand(150, 500) }}',
-                                    activeProjects: '{{ rand(5, 20) }}',
-                                    about: '{{ addslashes($ps->provider->providerProfile->about ?? '') }}'
+                                    totalClients: '{{ $ps->provider->total_clients_count }}',
+                                    completedProjects: '{{ $ps->provider->completed_projects_count }}',
+                                    activeProjects: '{{ $ps->provider->active_projects_count }}',
+                                    about: '{{ addslashes($ps->provider->providerProfile->about ?? '') }}',
+                                    reviews: {{ $ps->provider->reviewsReceived()->with(['reviewer', 'project.service'])->latest()->take(5)->get()->map(function($r) {
+                                        return [
+                                            'rating' => $r->rating,
+                                            'comment' => $r->comment,
+                                            'reviewer_name' => $r->reviewer->name,
+                                            'reviewer_logo' => $r->reviewer->profile_picture ? asset('storage/' . $r->reviewer->profile_picture) : null,
+                                            'project_name' => $r->project->service->name
+                                        ];
+                                    })->toJson() }},
+                                    averageRating: '{{ number_format($ps->provider->average_rating, 1) }}'
                                 }; providerInfoModalOpen = true" class="text-lg font-bold text-gray-900 hover:text-primary transition-colors text-left">
                                     {{ $ps->provider->providerProfile->company_name ?? $ps->provider->name }}
                                 </button>
                                 <div class="flex items-center gap-2 text-sm text-gray-500">
-                                    <span class="flex items-center"><i data-lucide="star" class="w-4 h-4 text-yellow-400 fill-current me-1"></i> 5.0</span>
+                                    <span class="flex items-center"><i data-lucide="star" class="w-4 h-4 text-yellow-400 fill-current me-1"></i> {{ number_format($ps->provider->average_rating, 1) }}</span>
                                     <span>•</span>
                                     <span x-text="t('common.verified_provider')"></span>
                                 </div>
@@ -206,7 +226,13 @@
                 </div>
 
                 <div class="mb-8">
-                    <h2 class="text-3xl font-black text-gray-900 mb-2" x-text="selectedProvider.name"></h2>
+                    <div class="flex items-center justify-between mb-2">
+                        <h2 class="text-3xl font-black text-gray-900" x-text="selectedProvider.name"></h2>
+                        <div class="flex items-center gap-1.5 px-3 py-1 bg-yellow-50 border border-yellow-100 rounded-full">
+                            <i data-lucide="star" class="w-4 h-4 text-yellow-400 fill-current"></i>
+                            <span class="text-sm font-black text-yellow-700" x-text="selectedProvider.averageRating"></span>
+                        </div>
+                    </div>
                     <p class="text-gray-500 text-sm font-medium leading-relaxed" x-text="selectedProvider.about || 'No company bio provided yet.'"></p>
                 </div>
 
@@ -231,19 +257,37 @@
                         <span x-text="t('common.reviews')"></span>
                     </h3>
                     <div class="space-y-4">
-                        <template x-for="i in 2" :key="i">
-                            <div class="p-6 bg-white border border-gray-100 rounded-3xl shadow-sm">
-                                <div class="flex items-center justify-between mb-4">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-[10px] font-black uppercase text-gray-400">CL</div>
-                                        <div>
-                                            <p class="text-xs font-bold text-gray-900">Verified Client</p>
-                                            <p class="text-[10px] text-gray-400 font-medium">Project ID: 49210</p>
+                        <template x-if="selectedProvider.reviews && selectedProvider.reviews.length > 0">
+                            <template x-for="review in selectedProvider.reviews" :key="review.project_name">
+                                <div class="p-6 bg-white border border-gray-100 rounded-3xl shadow-sm">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-10 h-10 bg-gray-50 rounded-2xl flex items-center justify-center text-[10px] font-black uppercase text-gray-400 overflow-hidden border border-gray-100">
+                                                <template x-if="review.reviewer_logo">
+                                                    <img :src="review.reviewer_logo" class="w-full h-full object-cover">
+                                                </template>
+                                                <template x-if="!review.reviewer_logo">
+                                                    <span x-text="review.reviewer_name.substring(0, 2)"></span>
+                                                </template>
+                                            </div>
+                                            <div>
+                                                <p class="text-xs font-bold text-gray-900" x-text="review.reviewer_name"></p>
+                                                <p class="text-[10px] text-gray-400 font-medium" x-text="review.project_name"></p>
+                                            </div>
+                                        </div>
+                                        <div class="flex text-yellow-400">
+                                            <template x-for="star in 5">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" :class="star <= review.rating ? 'fill-current text-yellow-400' : 'text-gray-200'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                            </template>
                                         </div>
                                     </div>
-                                    <div class="flex text-yellow-400"><i data-lucide="star" class="w-3 h-3 fill-current"></i><i data-lucide="star" class="w-3 h-3 fill-current"></i><i data-lucide="star" class="w-3 h-3 fill-current"></i><i data-lucide="star" class="w-3 h-3 fill-current"></i><i data-lucide="star" class="w-3 h-3 fill-current"></i></div>
+                                    <p class="text-xs text-gray-600 leading-relaxed font-medium italic" x-text="'&quot;' + review.comment + '&quot;'"></p>
                                 </div>
-                                <p class="text-xs text-gray-600 leading-relaxed font-medium italic">"Highly professional delivery. The standardized scope really helped us understand exactly what we were getting. Completed 2 days ahead of schedule!"</p>
+                            </template>
+                        </template>
+                        <template x-if="!selectedProvider.reviews || selectedProvider.reviews.length === 0">
+                            <div class="p-8 text-center bg-gray-50 rounded-3xl border border-dashed border-gray-200">
+                                <p class="text-sm text-gray-500 italic" x-text="t('common.no_reviews_yet')"></p>
                             </div>
                         </template>
                     </div>
