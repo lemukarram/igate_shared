@@ -24,8 +24,18 @@ class Company extends Model
         return $this->belongsTo(User::class, 'client_id');
     }
 
+    public function client()
+    {
+        return $this->belongsTo(User::class, 'client_id');
+    }
+
     public function projects()
     {
         return $this->hasMany(Project::class);
+    }
+
+    public function subscriptions()
+    {
+        return $this->hasMany(Subscription::class);
     }
 }

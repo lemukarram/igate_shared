@@ -71,7 +71,13 @@
             </button>
 
             <div class="p-6 overflow-hidden">
-                <img src="/images/logo/logo.png" alt="iGate Shared Services" class="h-10 w-auto object-contain min-w-[40px]" :class="sidebarCollapsed ? 'scale-75' : ''">
+                @php
+                    $logoPath = $settings->logo;
+                    $collapsedLogoPath = $settings->collapsed_logo;
+                    $logoUrl = str_starts_with($logoPath, 'settings/') ? asset('storage/' . $logoPath) : asset($logoPath);
+                    $collapsedLogoUrl = str_starts_with($collapsedLogoPath, 'settings/') ? asset('storage/' . $collapsedLogoPath) : asset($collapsedLogoPath);
+                @endphp
+                <img :src="sidebarCollapsed ? '{{ $collapsedLogoUrl }}' : '{{ $logoUrl }}'" alt="{{ $settings->site_name }}" class="h-10 w-auto object-contain min-w-[40px] transition-all duration-300">
             </div>
 
             <div class="px-6 mb-6 overflow-hidden">
@@ -118,6 +124,10 @@
                     <a href="{{ route('provider.team_tasks') }}" class="sidebar-item {{ request()->routeIs('provider.team_tasks*') ? 'active' : '' }} flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 transition-all">
                         <i data-lucide="check-square" class="w-4 h-4 flex-shrink-0"></i>
                         <span x-show="!sidebarCollapsed" class="text-sm font-medium whitespace-nowrap" x-text="t('common.team')"></span>
+                    </a>
+                    <a href="{{ route('provider.pre_sale_chats.index') }}" class="sidebar-item {{ request()->routeIs('provider.pre_sale_chats.*') ? 'active' : '' }} flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 transition-all">
+                        <i data-lucide="message-circle" class="w-4 h-4 flex-shrink-0"></i>
+                        <span x-show="!sidebarCollapsed" class="text-sm font-medium whitespace-nowrap" x-text="t('common.pre_sale_chats')"></span>
                     </a>
                 @elseif(Auth::user()->role === 'client')
                     <a href="{{ route('explore.index') }}" @click="addServiceOpen = true" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 transition-all">
@@ -206,7 +216,11 @@
                 <div class="w-56 bg-gray-50 border-r border-gray-100 p-8 flex flex-col">
                     <!--<h3 class="text-[10px] font-medium uppercase tracking-widest text-gray-400 mb-8 px-2">{{ __('common.settings') }}</h3>-->
                     <div class="pb-4 px-4 overflow-hidden">
-                        <img src="/images/logo/logo.png" alt="iGate Shared Services" class="h-10 w-auto object-contain min-w-[40px]" :class="sidebarCollapsed ? 'scale-75' : ''">
+                        @php
+                            $modalLogoPath = $settings->logo;
+                            $modalLogoUrl = str_starts_with($modalLogoPath, 'settings/') ? asset('storage/' . $modalLogoPath) : asset($modalLogoPath);
+                        @endphp
+                        <img src="{{ $modalLogoUrl }}" alt="{{ $settings->site_name }}" class="h-10 w-auto object-contain min-w-[40px]">
                     </div>
                     <div class="space-y-1 flex-1">
                         <template x-for="t_tab in ['account', 'company', 'preferences', 'permissions', 'plans', 'notifications', 'security']">
@@ -537,7 +551,7 @@
                         <div x-show="settingsTab === 'plans'" class="space-y-4 animate-in fade-in duration-300">
                             <div class="p-6 border border-primary/20 bg-primary-light rounded-xl">
                                 <div class="flex items-center justify-between mb-4">
-                                    <div><p class="text-[10px] font-black text-primary uppercase tracking-widest mb-1" x-text="t('common.current_plan')"></p><h3 class="text-2xl font-black text-gray-900">{{ Auth::user()->plan->name ?? 'Basic' }}</h3></div>
+                                    <div><p class="text-[10px] font-black text-primary uppercase tracking-widest mb-1" x-text="t('common.current_plan')"></p><h3 class="text-2xl font-black text-gray-900">{{ Auth::user()->plan->name ?? '-' }}</h3></div>
                                     <span class="px-3 py-1 bg-primary text-white rounded-full text-[10px] font-black uppercase" x-text="t('common.active')"></span>
                                 </div>
                                 <div class="flex items-center justify-between text-sm">
@@ -551,11 +565,35 @@
                                 <div class="grid grid-cols-1 gap-3">
                                     @foreach(\App\Models\Plan::where('type', Auth::user()->role)->get() as $plan)
                                     <label class="flex items-center justify-between p-4 border rounded-lg cursor-pointer transition-all hover:bg-gray-50 {{ Auth::user()->plan_id == $plan->id ? 'border-primary bg-primary-light' : 'border-gray-200' }}">
-                                        <div class="flex items-center space-x-3">
+                                        <div class="flex items-center space-x-3 w-full">
                                             <input type="radio" name="plan_id" value="{{ $plan->id }}" {{ Auth::user()->plan_id == $plan->id ? 'checked' : '' }} class="w-4 h-4 text-primary focus:ring-primary">
-                                            <div>
-                                                <p class="font-bold text-sm">{{ $plan->name }}</p>
+                                            <div class="flex-1">
+                                                <div class="flex items-center justify-between">
+                                                    <p class="font-bold text-sm">{{ $plan->name }}</p>
+                                                    <p class="font-bold text-sm">
+                                                        @if($plan->price > 0)
+                                                            {{ number_format($plan->price, 0) }} {{ __('common.sar') }}
+                                                        @elseif($plan->price == 0 && strtolower($plan->name) === 'enterprise')
+                                                            {{ __('common.custom') }}
+                                                        @else
+                                                            {{ __('common.free') }}
+                                                        @endif
+                                                    </p>
+                                                </div>
+                                                @if($plan->description)
+                                                    <p class="text-[10px] text-gray-400 mb-1">{{ $plan->description }}</p>
+                                                @endif
                                                 <p class="text-xs text-gray-500" x-text="t('common.up_to') + ' ' + '{{ $plan->max_services }}' + ' ' + t('common.services')"></p>
+                                                @if($plan->features && is_array($plan->features))
+                                                    <div class="mt-2 flex flex-wrap gap-1">
+                                                        @foreach($plan->features as $feature)
+                                                            <span class="px-1.5 py-0.5 bg-gray-100 text-[9px] text-gray-500 rounded flex items-center gap-1">
+                                                                <i data-lucide="check" class="w-2.5 h-2.5 text-green-500"></i>
+                                                                {{ is_array($feature) ? ($feature['feature'] ?? '') : $feature }}
+                                                            </span>
+                                                        @endforeach
+                                                    </div>
+                                                @endif
                                             </div>
                                         </div>
                                     </label>

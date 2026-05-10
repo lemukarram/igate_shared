@@ -12,16 +12,26 @@
         <div class="bg-white rounded-2xl shadow-xl overflow-hidden border-2 {{ Auth::user()->plan_id == $plan->id ? 'border-primary' : 'border-transparent' }} transition-all hover:scale-105">
             <div class="p-8">
                 <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-xl font-black text-gray-900">{{ __('common.' . strtolower($plan->name)) }}</h3>
+                    <h3 class="text-xl font-black text-gray-900">{{ $plan->name }}</h3>
                     @if(Auth::user()->plan_id == $plan->id)
                         <span class="px-2 py-1 bg-primary text-white text-[9px] font-black uppercase rounded-md">{{ __('common.current_plan') }}</span>
                     @endif
                 </div>
                 
                 <div class="mb-8">
-                    <span class="text-4xl font-black text-gray-900">{{ $plan->name === 'Enterprise' ? __('common.custom') : ($plan->name === 'Professional' ? '499' : '0') }}</span>
+                    @if($plan->price > 0)
+                        <span class="text-4xl font-black text-gray-900">{{ number_format($plan->price, 0) }}</span>
+                    @elseif($plan->price == 0 && strtolower($plan->name) === 'enterprise')
+                        <span class="text-2xl font-black text-gray-900">{{ __('common.custom') }}</span>
+                    @else
+                        <span class="text-4xl font-black text-gray-900">0</span>
+                    @endif
                     <span class="text-gray-500 font-medium">/{{ __('common.month') }}</span>
                 </div>
+
+                @if($plan->description)
+                <p class="text-xs text-gray-500 mb-6 leading-relaxed">{{ $plan->description }}</p>
+                @endif
 
                 <ul class="space-y-4 mb-8">
                     <li class="flex items-start">
@@ -49,6 +59,15 @@
                             {{ $plan->max_companies >= 999 ? __('common.unlimited_companies') : __('common.up_to') . ' ' . $plan->max_companies . ' ' . __('common.companies') }}
                         </span>
                     </li>
+                    @endif
+
+                    @if($plan->features && is_array($plan->features))
+                        @foreach($plan->features as $feature)
+                        <li class="flex items-start">
+                            <i data-lucide="check-circle" class="w-5 h-5 text-green-500 mr-3 flex-shrink-0"></i>
+                            <span class="text-sm text-gray-600">{{ is_array($feature) ? ($feature['feature'] ?? '') : $feature }}</span>
+                        </li>
+                        @endforeach
                     @endif
                 </ul>
 

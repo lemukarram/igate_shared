@@ -11,6 +11,20 @@ use Illuminate\Support\Facades\Auth;
 
 class PreSaleChatController extends Controller
 {
+    public function index()
+    {
+        $providerId = Auth::id();
+        $chats = PreSaleMessage::where('provider_id', $providerId)
+            ->with(['service', 'client'])
+            ->latest()
+            ->get()
+            ->unique(function ($item) {
+                return $item->client_id . '-' . $item->service_id;
+            });
+
+        return view('provider.pre_sale_chats.index', compact('chats'));
+    }
+
     public function show($serviceId, $providerId)
     {
         $service = Service::findOrFail($serviceId);

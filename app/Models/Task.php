@@ -29,6 +29,16 @@ class Task extends Model
         return $this->belongsTo(Project::class);
     }
 
+    public function team()
+    {
+        return $this->belongsTo(Team::class);
+    }
+
+    public function provider()
+    {
+        return $this->belongsTo(User::class, 'provider_id');
+    }
+
     public function assignedUser()
     {
         return $this->belongsTo(User::class, 'assigned_to');

@@ -83,6 +83,37 @@
                 </div>
                 @endforelse
             </div>
+
+            <!-- Pre-sale Consultations -->
+            @if($preSaleChats->count() > 0)
+            <div class="mt-12 space-y-6">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-bold text-gray-900" x-text="t('common.pre_sale_chats')"></h3>
+                </div>
+                
+                <div class="grid grid-cols-1 gap-4">
+                    @foreach($preSaleChats as $chat)
+                    <div class="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center text-amber-600">
+                                <i data-lucide="{{ $chat->service->icon }}" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-gray-900">{{ $chat->service->name }}</h4>
+                                <p class="text-xs text-gray-400 font-medium">{{ $chat->provider->providerProfile->company_name ?? 'iGate Partner' }}</p>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <div class="flex items-center gap-2 mb-1 justify-end">
+                                <span class="px-2 py-0.5 bg-amber-50 text-amber-600 rounded-full text-[10px] font-bold" x-text="t('common.consultation')"></span>
+                            </div>
+                            <a href="{{ route('explore.chat', ['serviceId' => $chat->service_id, 'providerId' => $chat->provider_id]) }}" class="text-xs font-bold text-primary hover:underline" x-text="t('common.chat_now')"></a>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+            @endif
         </div>
 
         <!-- Quick Explore Sidebar -->

@@ -38,7 +38,7 @@ class MarketplaceController extends Controller
         return view('client.explore.index', compact('categories', 'services'));
     }
 
-    public function show($id)
+    public function show($id, \App\Settings\GeneralSettings $settings)
     {
         $service = Service::findOrFail($id);
         $providers = ProviderService::where('service_id', $id)
@@ -60,7 +60,7 @@ class MarketplaceController extends Controller
             }
         }
             
-        return view('client.explore.show', compact('service', 'providers', 'providerService', 'clientCount'));
+        return view('client.explore.show', compact('service', 'providers', 'providerService', 'clientCount', 'settings'));
     }
 
     public function preChat($serviceId, $providerId)

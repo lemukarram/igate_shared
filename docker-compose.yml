@@ -18,6 +18,7 @@ services:
       DB_USERNAME: ${DB_USERNAME:-igate}
       DB_PASSWORD: ${DB_PASSWORD:-root}
     volumes:
+      - .:/var/www
       - public-files:/var/www/public
       - storage-files:/var/www/storage
     networks:

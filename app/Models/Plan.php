@@ -11,10 +11,18 @@ class Plan extends Model
 
     protected $fillable = [
         'name',
+        'description',
         'type',
+        'price',
         'max_services',
         'max_users',
         'max_projects',
         'max_companies',
+        'features',
+    ];
+
+    protected $casts = [
+        'features' => 'array',
+        'price' => 'decimal:2',
     ];
 }

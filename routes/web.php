@@ -37,9 +37,7 @@ Route::get('/', function () {
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 
 Route::middleware(['auth', 'App\Http\Middleware\EnsureProviderIsOnboarded'])->group(function () {
-    Route::get('/provider/dashboard', function () {
-        return view('provider.dashboard');
-    })->name('provider.dashboard');
+    Route::get('/provider/dashboard', [App\Http\Controllers\ProviderDashboardController::class, 'index'])->name('provider.dashboard');
 
     // Onboarding
     Route::get('/provider/onboarding', [ProviderOnboardingController::class, 'index'])->name('provider.onboarding');
@@ -72,6 +70,7 @@ Route::middleware(['auth', 'App\Http\Middleware\EnsureProviderIsOnboarded'])->gr
     Route::patch('/provider/team-tasks/{id}/status', [App\Http\Controllers\TeamTaskController::class, 'updateStatus'])->name('provider.team_tasks.status');
 
     // Pre-sale Chat
+    Route::get('/provider/pre-sale-chats', [App\Http\Controllers\PreSaleChatController::class, 'index'])->name('provider.pre_sale_chats.index');
     Route::get('/explore/{serviceId}/provider/{providerId}/chat', [App\Http\Controllers\PreSaleChatController::class, 'show'])->name('explore.chat');
     Route::post('/explore/{serviceId}/provider/{providerId}/chat', [App\Http\Controllers\PreSaleChatController::class, 'sendMessage'])->name('explore.chat.send');
 

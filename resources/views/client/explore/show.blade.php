@@ -9,7 +9,7 @@
             </a>
             <div>
                 <h1 class="text-3xl font-bold text-gray-900">{{ $service->name }}</h1>
-                <p class="text-gray-500">{{ $service->description }}</p>
+                <div class="text-gray-500">{!! $service->description !!}</div>
             </div>
         </div>
 
@@ -181,18 +181,16 @@
         <!-- Standardized Sidebar -->
         <div class="space-y-6">
             <h2 class="text-lg font-bold text-gray-900" x-text="t('common.standard_catalog')"></h2>
-            <div class="bg-gray-900 rounded-3xl p-6 text-white shadow-xl shadow-gray-200">
-                <p class="text-xs text-gray-400 font-bold uppercase tracking-widest mb-4" x-text="t('common.why_standardized')"></p>
-                <p class="text-sm text-gray-300 leading-relaxed mb-6" x-text="t('common.standardized_explanation')"></p>
+            <div class="rounded-3xl p-6 text-white shadow-xl shadow-gray-200" style="background-color: {{ $settings->protection_block_bg_color ?? '#111827' }}">
+                <p class="text-xs text-gray-400 font-bold uppercase tracking-widest mb-4">{{ $settings->protection_block_title }}</p>
+                <p class="text-sm text-gray-300 leading-relaxed mb-6">{{ $settings->protection_block_description }}</p>
                 <ul class="space-y-4">
+                    @foreach($settings->protection_block_points as $point)
                     <li class="flex items-center gap-3 text-xs font-bold">
-                        <i data-lucide="shield-check" class="w-4 h-4 text-primary"></i>
-                        <span x-text="t('common.guaranteed_payments')"></span>
+                        <i data-lucide="{{ $point['icon'] }}" class="w-4 h-4 text-primary"></i>
+                        <span>{{ $point['text'] }}</span>
                     </li>
-                    <li class="flex items-center gap-3 text-xs font-bold">
-                        <i data-lucide="clock" class="w-4 h-4 text-primary"></i>
-                        <span x-text="t('common.sla_protection')"></span>
-                    </li>
+                    @endforeach
                 </ul>
             </div>
         </div>

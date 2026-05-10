@@ -6,7 +6,9 @@ use Illuminate\Support\ServiceProvider;
 
 use Illuminate\Support\Facades\View;
 use App\Models\Project;
+use App\Models\PreSaleMessage;
 use Illuminate\Support\Facades\Auth;
+use App\Settings\GeneralSettings;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -24,6 +26,9 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         View::composer('*', function ($view) {
+            $settings = app(GeneralSettings::class);
+            $view->with('settings', $settings);
+
             if (Auth::check()) {
                 $ongoingProjects = Project::where(function($query) {
                         $query->where('client_id', Auth::id())
@@ -44,6 +49,29 @@ class AppServiceProvider extends ServiceProvider
                 
                 $view->with('ongoingProjects', $ongoingProjects)
                      ->with('teamMembers', collect($teamMembers));
+
+                // Add Pre-Sale Chats
+                if (Auth::user()->role === 'client') {
+                    $preSaleChats = PreSaleMessage::where('client_id', Auth::id())
+                        ->with(['service', 'provider.providerProfile'])
+                        ->latest()
+                        ->get()
+                        ->unique(function ($item) {
+                            return $item->provider_id . '-' . $item->service_id;
+                        });
+                    $view->with('preSaleChats', $preSaleChats);
+                } elseif (Auth::user()->role === 'provider') {
+                    $preSaleChats = PreSaleMessage::where('provider_id', Auth::id())
+                        ->with(['service', 'client'])
+                        ->latest()
+                        ->get()
+                        ->unique(function ($item) {
+                            return $item->client_id . '-' . $item->service_id;
+                        });
+                    $view->with('preSaleChats', $preSaleChats);
+                } else {
+                    $view->with('preSaleChats', collect());
+                }
 
                 // Share entities for permissions scoping
                 if (Auth::user()->role === 'client') {

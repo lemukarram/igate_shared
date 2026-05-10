@@ -78,4 +78,24 @@ class Project extends Model
     {
         return $this->hasMany(Document::class);
     }
+
+    public function messages()
+    {
+        return $this->hasMany(Message::class);
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    public function releaseRequests()
+    {
+        return $this->hasMany(ReleaseRequest::class);
+    }
+
+    public function providerService()
+    {
+        return $this->belongsTo(ProviderService::class);
+    }
 }
