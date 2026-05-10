@@ -27,7 +27,7 @@ class PreSaleMessageResource extends Resource
     protected static ?string $model = PreSaleMessage::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-chat-bubble-left-right';
-    protected static ?string $navigationGroup = 'Service Provider';
+    protected static ?string $navigationGroup = 'Clients';
     protected static ?int $navigationSort = 3;
     protected static ?string $modelLabel = 'Pre Sale Chat';
     protected static ?string $pluralModelLabel = 'Pre Sale Chats';

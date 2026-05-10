@@ -105,6 +105,16 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasMany(Document::class, 'user_id');
     }
 
+    public function preSaleMessages()
+    {
+        return $this->hasMany(PreSaleMessage::class, 'client_id');
+    }
+
+    public function teamMessages()
+    {
+        return $this->hasManyThrough(InternalMessage::class, Team::class, 'owner_id', 'team_id');
+    }
+
     public function reviewsGiven()
     {
         return $this->hasMany(Review::class, 'reviewer_id');

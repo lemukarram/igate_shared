@@ -3,6 +3,7 @@
 namespace Modules\Admin\Filament\Resources;
 
 use Modules\Admin\Filament\Resources\CompanyResource\Pages;
+use Modules\Admin\Filament\Resources\CompanyResource\RelationManagers;
 use App\Models\Company;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -16,7 +17,7 @@ class CompanyResource extends Resource
     protected static ?string $model = Company::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-building-office-2';
-    protected static ?string $navigationGroup = 'Identity & Organizations';
+    protected static ?string $navigationGroup = 'Clients';
     protected static ?int $navigationSort = 2;
     protected static ?string $modelLabel = 'Client Company';
     protected static ?string $pluralModelLabel = 'Client Companies';
@@ -84,7 +85,7 @@ class CompanyResource extends Resource
     public static function getRelations(): array
     {
         return [
-            // Relation managers will be created for Projects, Subscriptions, and Sub-users.
+            RelationManagers\ProjectsRelationManager::class,
         ];
     }
 
