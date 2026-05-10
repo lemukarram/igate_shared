@@ -11,8 +11,8 @@
                 <i data-lucide="{{ $project->service->icon ?? 'briefcase' }}" class="w-6 h-6"></i>
             </div>
             <div>
-                <h1 class="text-xl font-semibold text-gray-900 tracking-tight">{{ $project->service->name }}</h1>
-                <div class="flex items-center gap-2 text-xs font-medium text-gray-500 mt-1">
+                <h1 class="text-xl font-normal text-gray-900 tracking-tight">{{ $project->service->name }}</h1>
+                <div class="flex items-center gap-2 text-xs font-normal text-gray-500 mt-1">
                     <span class="bg-gray-100 px-2 py-0.5 rounded text-gray-700">
                         <span x-text="t('common.project_id_prefix')"></span>{{ str_pad($project->id, 5, '0', STR_PAD_LEFT) }}
                     </span>
@@ -27,7 +27,7 @@
 
         <div class="flex items-center gap-6 border-s border-gray-100 ps-6">
             <a href="{{ route('provider.clients.show', $project->client_id) }}" class="flex items-center gap-3 hover:bg-gray-50 p-1.5 rounded-lg transition-all">
-                <div class="w-10 h-10 bg-gray-900 rounded-lg flex items-center justify-center text-white font-semibold text-sm overflow-hidden">
+                <div class="w-10 h-10 bg-gray-900 rounded-lg flex items-center justify-center text-white font-normal text-sm overflow-hidden">
                     @if($project->client->profile_picture)
                         <img src="{{ asset('storage/' . $project->client->profile_picture) }}" class="w-full h-full object-cover bg-white">
                     @else
@@ -35,13 +35,13 @@
                     @endif
                 </div>
                 <div>
-                    <p class="text-sm font-semibold text-gray-900">{{ $project->client->name }}</p>
-                    <p class="text-xs text-gray-500 font-medium">{{ $project->company->name ?? '' }}@unless($project->company_id)<span x-text="t('project.enterprise_client')"></span>@endunless</p>
+                    <p class="text-sm font-normal text-gray-900">{{ $project->client->name }}</p>
+                    <p class="text-xs text-gray-500 font-normal">{{ $project->company->name ?? '' }}@unless($project->company_id)<span x-text="t('project.enterprise_client')"></span>@endunless</p>
                 </div>
             </a>
             
             <div class="flex items-center gap-3 border-s border-gray-100 ps-6 hover:bg-gray-50 p-1.5 rounded-lg transition-all">
-                <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-white font-semibold text-sm overflow-hidden">
+                <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-white font-normal text-sm overflow-hidden">
                     @if($project->provider->providerProfile && $project->provider->providerProfile->logo)
                         <img src="{{ asset('storage/' . $project->provider->providerProfile->logo) }}" class="w-full h-full object-cover bg-white">
                     @else
@@ -49,14 +49,14 @@
                     @endif
                 </div>
                 <div>
-                    <p class="text-sm font-semibold text-gray-900">{{ $project->provider->providerProfile->company_name ?? $project->provider->name }}</p>
-                    <p class="text-xs text-gray-500 font-medium" x-text="t('common.verified_provider')"></p>
+                    <p class="text-sm font-normal text-gray-900">{{ $project->provider->providerProfile->company_name ?? $project->provider->name }}</p>
+                    <p class="text-xs text-gray-500 font-normal" x-text="t('common.verified_provider')"></p>
                 </div>
             </div>
 
             <div class="text-end hidden sm:block border-s border-gray-100 ps-6">
-                <p class="text-sm font-semibold text-gray-900">{{ number_format($project->total_amount, 0) }} <span x-text="t('common.sar')"></span></p>
-                <p class="text-xs text-gray-500 font-medium" x-text="t('project.total_budget')"></p>
+                <p class="text-sm font-normal text-gray-900">{{ number_format($project->total_amount, 0) }} <span x-text="t('common.sar')"></span></p>
+                <p class="text-xs text-gray-500 font-normal" x-text="t('project.total_budget')"></p>
             </div>
         </div>
     </div>
@@ -69,24 +69,24 @@
             <div class="p-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
                 <div class="flex items-center gap-2">
                     <i data-lucide="message-square" class="w-4 h-4 text-primary"></i>
-                    <h3 class="text-sm font-semibold text-gray-800" x-text="t('project.workspace')"></h3>
+                    <h3 class="text-sm font-normal text-gray-800" x-text="t('project.workspace')"></h3>
                 </div>
             </div>
             
             <div class="flex-1 p-6 overflow-y-auto space-y-6 custom-scrollbar bg-white">
                 @foreach($messages as $msg)
                 <div class="flex gap-4 {{ $msg->user_id === Auth::id() ? 'flex-row-reverse' : '' }}">
-                    <div class="w-8 h-8 rounded-full {{ $msg->user_id === Auth::id() ? 'bg-primary' : 'bg-gray-900' }} flex-shrink-0 flex items-center justify-center text-white text-xs font-bold shadow-sm">
+                    <div class="w-8 h-8 rounded-full {{ $msg->user_id === Auth::id() ? 'bg-primary' : 'bg-gray-900' }} flex-shrink-0 flex items-center justify-center text-white text-xs font-normal shadow-sm">
                         {{ substr($msg->user->name, 0, 1) }}
                     </div>
                     <div class="flex-1 {{ $msg->user_id === Auth::id() ? 'text-right' : '' }}">
                         <div class="flex items-center gap-2 mb-1 {{ $msg->user_id === Auth::id() ? 'justify-end' : '' }}">
                             @if($msg->user_id !== Auth::id())
-                                <span class="text-sm font-semibold text-gray-900">{{ $msg->user->name }}</span>
+                                <span class="text-sm font-normal text-gray-900">{{ $msg->user->name }}</span>
                             @endif
                             <span class="text-xs text-gray-400">{{ $msg->created_at->format('M d, g:i A') }}</span>
                             @if($msg->user_id === Auth::id())
-                                <span class="text-sm font-semibold text-gray-900" x-text="t('project.you')"></span>
+                                <span class="text-sm font-normal text-gray-900" x-text="t('project.you')"></span>
                             @endif
                         </div>
                         <div class="text-gray-700 text-sm leading-relaxed {{ $msg->user_id === Auth::id() ? 'bg-primary-light p-4 rounded-lg border border-primary/10 inline-block text-left' : 'bg-gray-50 p-4 rounded-lg border border-gray-100 inline-block' }}">
@@ -102,14 +102,14 @@
                 <form action="{{ route('projects.messages.send', $project->id) }}" method="POST">
                     @csrf
                     <div class="relative bg-gray-50 border border-gray-200 rounded-2xl shadow-sm focus-within:ring-2 focus-within:ring-primary/50 focus-within:border-primary transition-all">
-                        <textarea name="message" required :placeholder="t('project.type_message')" rows="2" class="w-full ps-4 pe-16 py-3 bg-transparent outline-none font-medium text-sm text-gray-700 resize-none custom-scrollbar"></textarea>
+                        <textarea name="message" required :placeholder="t('project.type_message')" rows="2" class="w-full ps-4 pe-16 py-3 bg-transparent outline-none font-normal text-sm text-gray-700 resize-none custom-scrollbar"></textarea>
                         <div class="absolute inset-y-2 end-2 flex items-center gap-1">
                             <button type="submit" class="p-2 bg-primary text-white rounded-full flex items-center justify-center hover:bg-primary-dark transition-colors shadow-md">
                                 <i data-lucide="arrow-up" class="w-4 h-4 flip-rtl"></i>
                             </button>
                         </div>
                     </div>
-                    <p class="text-center text-[10px] text-gray-400 mt-2 font-medium" x-text="t('project.sla_notice')"></p>
+                    <p class="text-center text-[10px] text-gray-400 mt-2 font-normal" x-text="t('project.sla_notice')"></p>
                 </form>
             </div>
         </div>
@@ -121,13 +121,13 @@
             <div class="bg-white border border-gray-100 rounded-lg p-5 shadow-sm">
                 <div class="flex justify-between items-end mb-3">
                     <div>
-                        <p class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1" x-text="t('project.progress')"></p>
+                        <p class="text-xs font-normal text-gray-500 uppercase tracking-wider mb-1" x-text="t('project.progress')"></p>
                         @php
                             $totalTasks = $project->tasks->count();
                             $completedTasks = $project->tasks->where('status', 'done')->count();
                             $progress = $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100) : 0;
                         @endphp
-                        <h3 class="text-2xl font-bold text-gray-900">{{ $progress }}%</h3>
+                        <h3 class="text-2xl font-normal text-gray-900">{{ $progress }}%</h3>
                     </div>
                     <div class="w-10 h-10 rounded-full border-4 border-primary-light flex items-center justify-center">
                         <i data-lucide="activity" class="w-4 h-4 text-primary"></i>
@@ -140,7 +140,7 @@
 
             <!-- Service Tasks -->
             <div class="bg-white border border-gray-100 rounded-lg p-5 shadow-sm flex flex-col">
-                <h3 class="text-sm font-semibold text-gray-900 mb-5" x-text="t('project.service_tasks')"></h3>
+                <h3 class="text-sm font-normal text-gray-900 mb-5" x-text="t('project.service_tasks')"></h3>
                 <div class="space-y-3">
                     @forelse($project->tasks as $task)
                     <div class="p-3 rounded-lg border {{ $task->status === 'done' ? 'bg-gray-50 border-gray-200' : 'bg-white border-gray-100 hover:border-primary/20' }} transition-colors cursor-pointer group" @click="openTaskModal({{ json_encode($task) }})">
@@ -150,19 +150,19 @@
                             </div>
                             <div class="flex-1">
                                 <div class="flex items-center justify-between">
-                                    <p class="text-sm font-medium {{ $task->status === 'done' ? 'text-gray-500 line-through' : 'text-gray-800' }}">{{ $task->title }}</p>
+                                    <p class="text-sm font-normal {{ $task->status === 'done' ? 'text-gray-500 line-through' : 'text-gray-800' }}">{{ $task->title }}</p>
                                     @if($task->status === 'done')
                                         @if($task->is_verified)
-                                            <span class="text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded font-bold" x-text="t('project.verified')"></span>
+                                            <span class="text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded font-normal" x-text="t('project.verified')"></span>
                                         @else
-                                            <span class="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-bold" x-text="t('project.not_verified')"></span>
+                                            <span class="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-normal" x-text="t('project.not_verified')"></span>
                                         @endif
                                     @endif
                                 </div>
                                 @if($task->status === 'done' && !$task->is_verified && Auth::user()->role === 'client')
                                 <form action="{{ route('tasks.verify', $task->id) }}" method="POST" @click.stop class="mt-2">
                                     @csrf
-                                    <button type="submit" class="text-[10px] bg-primary text-white px-2 py-1 rounded hover:bg-primary-dark transition-colors font-bold">
+                                    <button type="submit" class="text-[10px] bg-primary text-white px-2 py-1 rounded hover:bg-primary-dark transition-colors font-normal">
                                         <i data-lucide="shield-check" class="w-3 h-3 inline me-1"></i>
                                         <span x-text="t('project.verify_task')"></span>
                                     </button>
@@ -180,7 +180,7 @@
             <!-- Vault -->
             <div class="bg-white border border-gray-100 rounded-lg p-5 shadow-sm">
                 <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-sm font-semibold text-gray-900" x-text="t('project.vault')"></h3>
+                    <h3 class="text-sm font-normal text-gray-900" x-text="t('project.vault')"></h3>
                     <i data-lucide="folder" class="w-4 h-4 text-gray-400"></i>
                 </div>
                 <div class="space-y-2">
@@ -191,7 +191,7 @@
                                 <i data-lucide="file-text" class="w-4 h-4"></i>
                             </div>
                             <div class="overflow-hidden">
-                                <p class="text-xs font-medium text-gray-800 truncate max-w-[120px]">{{ $doc->name }}</p>
+                                <p class="text-xs font-normal text-gray-800 truncate max-w-[120px]">{{ $doc->name }}</p>
                                 <p class="text-[10px] text-gray-400">{{ $doc->created_at->diffForHumans() }}</p>
                             </div>
                         </div>
@@ -204,7 +204,7 @@
                     @endforelse
                 </div>
                 @if(Auth::user()->role === 'provider')
-                <button @click="fileUploadModalOpen = true" class="w-full mt-3 py-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 border-dashed rounded-lg text-xs font-medium text-gray-600 transition-all flex items-center justify-center gap-2">
+                <button @click="fileUploadModalOpen = true" class="w-full mt-3 py-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 border-dashed rounded-lg text-xs font-normal text-gray-600 transition-all flex items-center justify-center gap-2">
                     <i data-lucide="upload" class="w-3 h-3"></i>
                     <span x-text="t('project.upload_file')"></span>
                 </button>
@@ -214,8 +214,8 @@
             <!-- Project Management -->
             <div class="bg-white border border-gray-100 rounded-lg p-5 shadow-sm">
                 <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-sm font-semibold text-gray-900" x-text="t('project.project_management')"></h3>
-                    <button @click="openHistory()" class="text-[10px] font-bold text-primary hover:underline" x-text="t('project.history')"></button>
+                    <h3 class="text-sm font-normal text-gray-900" x-text="t('project.project_management')"></h3>
+                    <button @click="openHistory()" class="text-[10px] font-normal text-primary hover:underline" x-text="t('project.history')"></button>
                 </div>
                 
                 <div class="space-y-2">
@@ -223,7 +223,7 @@
                     @if(Auth::user()->role === 'provider' && $project->status === 'active' && !$project->provider_marked_complete)
                     <form action="{{ route('projects.complete', $project->id) }}" method="POST">
                         @csrf
-                        <button type="submit" class="w-full py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2">
+                        <button type="submit" class="w-full py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs font-normal transition-all flex items-center justify-center gap-2">
                             <i data-lucide="check-circle" class="w-3 h-3"></i>
                             <span x-text="t('project.mark_complete')"></span>
                         </button>
@@ -234,12 +234,12 @@
                     <div class="flex gap-2">
                         <form action="{{ route('projects.approve', $project->id) }}" method="POST" class="flex-1">
                             @csrf
-                            <button type="submit" class="w-full py-2 bg-primary text-white rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2">
+                            <button type="submit" class="w-full py-2 bg-primary text-white rounded-lg text-xs font-normal transition-all flex items-center justify-center gap-2">
                                 <i data-lucide="award" class="w-3 h-3"></i>
                                 <span x-text="t('common.approve')"></span>
                             </button>
                         </form>
-                        <button @click="rejectModalOpen = true" class="px-3 py-2 bg-red-50 text-red-600 rounded-lg text-xs font-bold hover:bg-red-100 transition-all">
+                        <button @click="rejectModalOpen = true" class="px-3 py-2 bg-red-50 text-red-600 rounded-lg text-xs font-normal hover:bg-red-100 transition-all">
                             <i data-lucide="x" class="w-3 h-3"></i>
                         </button>
                     </div>
@@ -250,7 +250,7 @@
                         @if(!$project->mutual_cancellation_requested)
                         <form action="{{ route('projects.cancel-request', $project->id) }}" method="POST">
                             @csrf
-                            <button type="submit" class="w-full py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2">
+                            <button type="submit" class="w-full py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-xs font-normal transition-all flex items-center justify-center gap-2">
                                 <i data-lucide="x-circle" class="w-3 h-3"></i>
                                 <span x-text="t('project.request_cancellation')"></span>
                             </button>
@@ -260,17 +260,17 @@
                             <div class="flex gap-2">
                                 <form action="{{ route('projects.confirm-cancellation', $project->id) }}" method="POST" class="flex-1">
                                     @csrf
-                                    <button type="submit" class="w-full py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2">
+                                    <button type="submit" class="w-full py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-normal transition-all flex items-center justify-center gap-2">
                                         <i data-lucide="alert-triangle" class="w-3 h-3"></i>
                                         <span x-text="t('common.confirm')"></span>
                                     </button>
                                 </form>
-                                <button @click="rejectModalOpen = true" class="px-3 py-2 bg-red-50 text-red-600 rounded-lg text-xs font-bold hover:bg-red-100 transition-all">
+                                <button @click="rejectModalOpen = true" class="px-3 py-2 bg-red-50 text-red-600 rounded-lg text-xs font-normal hover:bg-red-100 transition-all">
                                     <i data-lucide="x" class="w-3 h-3"></i>
                                 </button>
                             </div>
                             @else
-                            <div class="p-2 bg-amber-50 text-amber-700 rounded text-[10px] font-bold text-center">
+                            <div class="p-2 bg-amber-50 text-amber-700 rounded text-[10px] font-normal text-center">
                                 <span x-text="t('project.cancellation_requested')"></span>
                             </div>
                             @endif
@@ -279,7 +279,7 @@
 
                     <!-- Scenario 5: Termination Request (2-sided) -->
                     @if($project->status === 'active' && !$project->termination_requested && Auth::user()->role === 'provider')
-                    <button @click="terminateModalOpen = true" class="w-full py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2">
+                    <button @click="terminateModalOpen = true" class="w-full py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg text-xs font-normal transition-all flex items-center justify-center gap-2">
                         <i data-lucide="user-x" class="w-3 h-3"></i>
                         <span x-text="t('project.terminate_project')"></span>
                     </button>
@@ -289,46 +289,46 @@
                     <div class="flex gap-2">
                         <form action="{{ route('projects.approve', $project->id) }}" method="POST" class="flex-1">
                             @csrf
-                            <button type="submit" class="w-full py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2">
+                            <button type="submit" class="w-full py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-normal transition-all flex items-center justify-center gap-2">
                                 <i data-lucide="check" class="w-3 h-3"></i>
                                 <span x-text="t('common.approve')"></span>
                             </button>
                         </form>
-                        <button @click="rejectModalOpen = true" class="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg text-xs font-bold hover:bg-gray-200 transition-all">
+                        <button @click="rejectModalOpen = true" class="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg text-xs font-normal hover:bg-gray-200 transition-all">
                             <i data-lucide="x" class="w-3 h-3"></i>
                         </button>
                     </div>
                     @endif
 
                     @if($project->status === 'completed')
-                    <div class="p-3 bg-green-50 text-green-700 rounded-lg text-xs font-bold flex items-center gap-2 justify-center">
+                    <div class="p-3 bg-green-50 text-green-700 rounded-lg text-xs font-normal flex items-center gap-2 justify-center">
                         <i data-lucide="check-check" class="w-4 h-4"></i>
                         <span x-text="t('project.status_completed')"></span>
                     </div>
                     @endif
 
                     @if($project->status === 'disputed')
-                    <div class="p-3 bg-red-50 text-red-700 rounded-lg text-xs font-bold flex flex-col gap-1 items-center">
+                    <div class="p-3 bg-red-50 text-red-700 rounded-lg text-xs font-normal flex flex-col gap-1 items-center">
                         <div class="flex items-center gap-2">
                             <i data-lucide="alert-octagon" class="w-4 h-4"></i>
                             <span x-text="t('project.status_disputed')"></span>
                         </div>
-                        <p class="text-[10px] opacity-75 font-medium text-center">{{ $project->dispute_reason }}</p>
+                        <p class="text-[10px] opacity-75 font-normal text-center">{{ $project->dispute_reason }}</p>
                     </div>
                     @endif
 
                     @if($project->status === 'terminated')
-                    <div class="p-3 bg-red-50 text-red-700 rounded-lg text-xs font-bold flex flex-col gap-1 items-center">
+                    <div class="p-3 bg-red-50 text-red-700 rounded-lg text-xs font-normal flex flex-col gap-1 items-center">
                         <div class="flex items-center gap-2">
                             <i data-lucide="slash" class="w-4 h-4"></i>
                             <span x-text="t('project.status_terminated')"></span>
                         </div>
-                        <p class="text-[10px] opacity-75 font-medium text-center">{{ $project->termination_reason }}</p>
+                        <p class="text-[10px] opacity-75 font-normal text-center">{{ $project->termination_reason }}</p>
                     </div>
                     @endif
 
                     @if($project->status === 'sla_breached')
-                    <div class="p-3 bg-amber-50 text-amber-700 rounded-lg text-xs font-bold flex flex-col gap-1 items-center animate-pulse">
+                    <div class="p-3 bg-amber-50 text-amber-700 rounded-lg text-xs font-normal flex flex-col gap-1 items-center animate-pulse">
                         <div class="flex items-center gap-2">
                             <i data-lucide="clock" class="w-4 h-4"></i>
                             <span x-text="t('project.status_sla_breached')"></span>
@@ -337,7 +337,7 @@
                     @endif
 
                     @if($project->status === 'completed' && !$userReview)
-                    <button @click="reviewModalOpen = true" class="w-full py-2 bg-primary text-white rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2">
+                    <button @click="reviewModalOpen = true" class="w-full py-2 bg-primary text-white rounded-lg text-xs font-normal transition-all flex items-center justify-center gap-2">
                         <i data-lucide="star" class="w-3 h-3"></i>
                         <span x-text="t('project.add_review')"></span>
                     </button>
@@ -351,22 +351,22 @@
     <div x-show="statusModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center" style="display: none;">
         <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="statusModalOpen = false"></div>
         <div class="bg-white w-full max-sm rounded-xl shadow-2xl relative z-10 p-6 border border-gray-100">
-            <h2 class="text-xl font-bold mb-4" x-text="t('project.change_status')"></h2>
+            <h2 class="text-xl font-normal mb-4" x-text="t('project.change_status')"></h2>
             <form action="{{ route('projects.update-status', $project->id) }}" method="POST" class="space-y-4">
                 @csrf @method('PATCH')
                 <div class="space-y-2">
                     <label class="flex items-center gap-3 p-3 border border-gray-100 rounded-lg cursor-pointer hover:bg-gray-50">
                         <input type="radio" name="status" value="active" {{ $project->status === 'active' ? 'checked' : '' }} class="w-4 h-4 text-primary">
-                        <span class="text-sm font-medium" x-text="t('common.active')"></span>
+                        <span class="text-sm font-normal" x-text="t('common.active')"></span>
                     </label>
                     <label class="flex items-center gap-3 p-3 border border-gray-100 rounded-lg cursor-pointer hover:bg-gray-50">
                         <input type="radio" name="status" value="inactive" {{ $project->status === 'inactive' ? 'checked' : '' }} class="w-4 h-4 text-primary">
-                        <span class="text-sm font-medium" x-text="t('common.inactive')"></span>
+                        <span class="text-sm font-normal" x-text="t('common.inactive')"></span>
                     </label>
                 </div>
                 <div class="flex gap-3 mt-6">
-                    <button type="button" @click="statusModalOpen = false" class="flex-1 py-2.5 bg-gray-100 text-gray-700 rounded-lg font-bold text-sm" x-text="t('common.cancel')"></button>
-                    <button type="submit" class="flex-1 py-2.5 bg-primary text-white rounded-lg font-bold text-sm" x-text="t('common.save')"></button>
+                    <button type="button" @click="statusModalOpen = false" class="flex-1 py-2.5 bg-gray-100 text-gray-700 rounded-lg font-normal text-sm" x-text="t('common.cancel')"></button>
+                    <button type="submit" class="flex-1 py-2.5 bg-primary text-white rounded-lg font-normal text-sm" x-text="t('common.save')"></button>
                 </div>
             </form>
         </div>
@@ -376,20 +376,20 @@
     <div x-show="taskModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center" style="display: none;">
         <div class="absolute inset-0 bg-black/40 " @click="taskModalOpen = false"></div>
         <div class="bg-white w-full max-w-lg rounded-xl shadow-2xl relative z-10 p-8 border border-gray-100">
-            <h2 class="text-2xl font-bold mb-6" x-text="t('project.update_task_status')"></h2>
+            <h2 class="text-2xl font-normal mb-6" x-text="t('project.update_task_status')"></h2>
             <form :action="'/tasks/' + selectedTask.id + '/status'" method="POST" class="space-y-6">
                 @csrf @method('PATCH')
                 <div>
-                    <label class="text-xs font-black uppercase tracking-widest text-gray-400 mb-2 block" x-text="t('project.task_title')"></label>
-                    <p class="text-lg font-bold text-gray-900" x-text="selectedTask.title"></p>
+                    <label class="text-xs font-normal uppercase tracking-widest text-gray-400 mb-2 block" x-text="t('project.task_title')"></label>
+                    <p class="text-lg font-normal text-gray-900" x-text="selectedTask.title"></p>
                 </div>
                     <div>
-                        <label class="text-xs font-black uppercase tracking-widest text-gray-400 mb-2 block" x-text="t('common.status')"></label>
+                        <label class="text-xs font-normal uppercase tracking-widest text-gray-400 mb-2 block" x-text="t('common.status')"></label>
                         <div class="relative" x-data="{ statusOpen: false }">
                             <button type="button" 
                                     @click="statusOpen = !statusOpen" 
                                     @click.outside="statusOpen = false"
-                                    class="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm font-bold outline-none flex items-center justify-between">
+                                    class="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm font-normal outline-none flex items-center justify-between">
                                 <span x-text="{
                                     todo:        t('common.todo'),
                                     in_progress: t('common.in_progress'),
@@ -418,9 +418,9 @@
                                     <button type="button"
                                             @click="selectedTask.status = option.value; statusOpen = false"
                                             :class="selectedTask.status === option.value ? 'bg-primary-light text-primary' : 'hover:bg-gray-50 text-gray-700'"
-                                            class="w-full px-4 py-3 text-left text-sm font-bold flex items-center gap-3 transition-all">
+                                            class="w-full px-4 py-3 text-left text-sm font-normal flex items-center gap-3 transition-all">
                                         <span :class="[option.bg, option.color]" 
-                                            class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider" 
+                                            class="px-2 py-0.5 rounded-full text-[10px] font-normal uppercase tracking-wider" 
                                             x-text="t(option.labelKey)"></span>
                                     </button>
                                 </template>
@@ -428,8 +428,8 @@
                         </div>
                     </div>
                 <div class="flex gap-4 pt-4">
-                    <button type="button" @click="taskModalOpen = false" class="flex-1 py-4 bg-gray-100 text-gray-700 rounded-xl font-bold" x-text="t('common.cancel')"></button>
-                    <button type="submit" class="flex-1 py-4 bg-primary text-white rounded-xl font-bold" x-text="t('common.save')"></button>
+                    <button type="button" @click="taskModalOpen = false" class="flex-1 py-4 bg-gray-100 text-gray-700 rounded-xl font-normal" x-text="t('common.cancel')"></button>
+                    <button type="submit" class="flex-1 py-4 bg-primary text-white rounded-xl font-normal" x-text="t('common.save')"></button>
                 </div>
             </form>
         </div>
@@ -439,17 +439,17 @@
     <div x-show="fileUploadModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center" style="display: none;">
         <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="fileUploadModalOpen = false"></div>
         <div class="bg-white w-full max-w-md rounded-xl shadow-2xl relative z-10 p-8 border border-gray-100">
-            <h2 class="text-2xl font-bold mb-6" x-text="t('project.upload_file')"></h2>
+            <h2 class="text-2xl font-normal mb-6" x-text="t('project.upload_file')"></h2>
             <form action="{{ route('documents.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
                 @csrf
                 <input type="hidden" name="project_id" value="{{ $project->id }}">
                 <div class="space-y-1">
-                    <label class="text-xs font-black uppercase tracking-widest text-gray-400 mb-2 block" x-text="t('common.choose_file')"></label>
-                    <input type="file" name="file" required class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-medium">
+                    <label class="text-xs font-normal uppercase tracking-widest text-gray-400 mb-2 block" x-text="t('common.choose_file')"></label>
+                    <input type="file" name="file" required class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-normal">
                 </div>
                 <div class="flex gap-4 pt-4">
-                    <button type="button" @click="fileUploadModalOpen = false" class="flex-1 py-4 bg-gray-100 text-gray-700 rounded-xl font-bold" x-text="t('common.cancel')"></button>
-                    <button type="submit" class="flex-1 py-4 bg-primary text-white rounded-xl font-bold" x-text="t('common.upload')"></button>
+                    <button type="button" @click="fileUploadModalOpen = false" class="flex-1 py-4 bg-gray-100 text-gray-700 rounded-xl font-normal" x-text="t('common.cancel')"></button>
+                    <button type="submit" class="flex-1 py-4 bg-primary text-white rounded-xl font-normal" x-text="t('common.upload')"></button>
                 </div>
             </form>
         </div>
@@ -459,17 +459,17 @@
     <div x-show="disputeModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center" style="display: none;">
         <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="disputeModalOpen = false"></div>
         <div class="bg-white w-full max-w-md rounded-xl shadow-2xl relative z-10 p-8 border border-gray-100">
-            <h2 class="text-2xl font-bold mb-4 text-red-600" x-text="t('project.dispute_project')"></h2>
+            <h2 class="text-2xl font-normal mb-4 text-red-600" x-text="t('project.dispute_project')"></h2>
             <p class="text-sm text-gray-500 mb-6" x-text="t('project.dispute_notice')"></p>
             <form action="{{ route('projects.dispute', $project->id) }}" method="POST" class="space-y-6">
                 @csrf
                 <div>
-                    <label class="text-xs font-black uppercase tracking-widest text-gray-400 mb-2 block" x-text="t('project.reason')"></label>
-                    <textarea name="reason" required class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-medium" rows="3"></textarea>
+                    <label class="text-xs font-normal uppercase tracking-widest text-gray-400 mb-2 block" x-text="t('project.reason')"></label>
+                    <textarea name="reason" required class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-normal" rows="3"></textarea>
                 </div>
                 <div class="flex gap-4 pt-4">
-                    <button type="button" @click="disputeModalOpen = false" class="flex-1 py-4 bg-gray-100 text-gray-700 rounded-xl font-bold" x-text="t('common.cancel')"></button>
-                    <button type="submit" class="flex-1 py-4 bg-red-600 text-white rounded-xl font-bold" x-text="t('project.dispute_project')"></button>
+                    <button type="button" @click="disputeModalOpen = false" class="flex-1 py-4 bg-gray-100 text-gray-700 rounded-xl font-normal" x-text="t('common.cancel')"></button>
+                    <button type="submit" class="flex-1 py-4 bg-red-600 text-white rounded-xl font-normal" x-text="t('project.dispute_project')"></button>
                 </div>
             </form>
         </div>
@@ -479,17 +479,17 @@
     <div x-show="terminateModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center" style="display: none;">
         <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="terminateModalOpen = false"></div>
         <div class="bg-white w-full max-w-md rounded-xl shadow-2xl relative z-10 p-8 border border-gray-100">
-            <h2 class="text-2xl font-bold mb-4 text-red-600" x-text="t('project.terminate_project')"></h2>
+            <h2 class="text-2xl font-normal mb-4 text-red-600" x-text="t('project.terminate_project')"></h2>
             <p class="text-sm text-gray-500 mb-6" x-text="t('project.termination_notice')"></p>
             <form action="{{ route('projects.terminate', $project->id) }}" method="POST" class="space-y-6">
                 @csrf
                 <div>
-                    <label class="text-xs font-black uppercase tracking-widest text-gray-400 mb-2 block" x-text="t('project.reason')"></label>
-                    <textarea name="reason" required class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-medium" rows="3"></textarea>
+                    <label class="text-xs font-normal uppercase tracking-widest text-gray-400 mb-2 block" x-text="t('project.reason')"></label>
+                    <textarea name="reason" required class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-normal" rows="3"></textarea>
                 </div>
                 <div class="flex gap-4 pt-4">
-                    <button type="button" @click="terminateModalOpen = false" class="flex-1 py-4 bg-gray-100 text-gray-700 rounded-xl font-bold" x-text="t('common.cancel')"></button>
-                    <button type="submit" class="flex-1 py-4 bg-red-600 text-white rounded-xl font-bold" x-text="t('project.terminate_project')"></button>
+                    <button type="button" @click="terminateModalOpen = false" class="flex-1 py-4 bg-gray-100 text-gray-700 rounded-xl font-normal" x-text="t('common.cancel')"></button>
+                    <button type="submit" class="flex-1 py-4 bg-red-600 text-white rounded-xl font-normal" x-text="t('project.terminate_project')"></button>
                 </div>
             </form>
         </div>
@@ -499,17 +499,17 @@
     <div x-show="rejectModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center" style="display: none;">
         <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="rejectModalOpen = false"></div>
         <div class="bg-white w-full max-w-md rounded-xl shadow-2xl relative z-10 p-8 border border-gray-100">
-            <h2 class="text-2xl font-bold mb-4 text-red-600" x-text="t('common.reject')"></h2>
+            <h2 class="text-2xl font-normal mb-4 text-red-600" x-text="t('common.reject')"></h2>
             <p class="text-sm text-gray-500 mb-6" x-text="t('common.reject_reason_placeholder')"></p>
             <form action="{{ route('projects.reject', $project->id) }}" method="POST" class="space-y-6">
                 @csrf
                 <div>
-                    <label class="text-xs font-black uppercase tracking-widest text-gray-400 mb-2 block" x-text="t('project.reason')"></label>
-                    <textarea name="reason" required class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-medium" rows="3"></textarea>
+                    <label class="text-xs font-normal uppercase tracking-widest text-gray-400 mb-2 block" x-text="t('project.reason')"></label>
+                    <textarea name="reason" required class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-normal" rows="3"></textarea>
                 </div>
                 <div class="flex gap-4 pt-4">
-                    <button type="button" @click="rejectModalOpen = false" class="flex-1 py-4 bg-gray-100 text-gray-700 rounded-xl font-bold" x-text="t('common.cancel')"></button>
-                    <button type="submit" class="flex-1 py-4 bg-red-600 text-white rounded-xl font-bold" x-text="t('common.reject')"></button>
+                    <button type="button" @click="rejectModalOpen = false" class="flex-1 py-4 bg-gray-100 text-gray-700 rounded-xl font-normal" x-text="t('common.cancel')"></button>
+                    <button type="submit" class="flex-1 py-4 bg-red-600 text-white rounded-xl font-normal" x-text="t('common.reject')"></button>
                 </div>
             </form>
         </div>
@@ -520,7 +520,7 @@
         <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="historyModalOpen = false"></div>
         <div class="bg-white w-full max-w-2xl rounded-xl shadow-2xl relative z-10 p-8 border border-gray-100 max-h-[80vh] flex flex-col">
             <div class="flex items-center justify-between mb-6">
-                <h2 class="text-2xl font-bold" x-text="t('project.history')"></h2>
+                <h2 class="text-2xl font-normal" x-text="t('project.history')"></h2>
                 <button @click="historyModalOpen = false" class="text-gray-400 hover:text-gray-600">
                     <i data-lucide="x" class="w-6 h-6"></i>
                 </button>
@@ -530,7 +530,7 @@
                     <div class="p-4 rounded-xl border border-gray-100 bg-gray-50/50 relative overflow-hidden">
                         <div class="flex items-start justify-between gap-4">
                             <div>
-                                <p class="text-sm font-bold text-gray-900" x-text="item.description"></p>
+                                <p class="text-sm font-normal text-gray-900" x-text="item.description"></p>
                                 <p class="text-[10px] text-gray-500 mt-1 flex items-center gap-1">
                                     <i data-lucide="user" class="w-3 h-3"></i>
                                     <span x-text="item.user ? item.user.name : t('common.system')"></span>
@@ -538,7 +538,7 @@
                                     <span x-text="new Date(item.created_at).toLocaleString()"></span>
                                 </p>
                             </div>
-                            <span class="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full" 
+                            <span class="text-[10px] font-normal uppercase tracking-wider px-2 py-0.5 rounded-full" 
                                   :class="{
                                       'bg-green-100 text-green-700': item.action.includes('approve') || item.action.includes('complete'),
                                       'bg-red-100 text-red-700': item.action.includes('reject') || item.action.includes('dispute'),
@@ -556,7 +556,7 @@
     <div x-show="reviewModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center" style="display: none;">
         <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="reviewModalOpen = false"></div>
         <div class="bg-white w-full max-w-md rounded-xl shadow-2xl relative z-10 p-8 border border-gray-100">
-            <h2 class="text-2xl font-bold mb-2 text-gray-900" x-text="t('project.add_review')"></h2>
+            <h2 class="text-2xl font-normal mb-2 text-gray-900" x-text="t('project.add_review')"></h2>
             <p class="text-sm text-gray-500 mb-6" x-text="t('project.how_was_your_experience')"></p>
             <form action="{{ route('reviews.store') }}" method="POST" class="space-y-6">
                 @csrf
@@ -564,7 +564,7 @@
                 <input type="hidden" name="rating" :value="rating">
                 
                 <div>
-                    <label class="text-xs font-black uppercase tracking-widest text-gray-400 mb-3 block" x-text="t('project.rating')"></label>
+                    <label class="text-xs font-normal uppercase tracking-widest text-gray-400 mb-3 block" x-text="t('project.rating')"></label>
                     <div class="flex gap-2">
                         <template x-for="i in 5">
                             <button type="button" @click="rating = i" class="transition-all hover:scale-110 focus:outline-none">
@@ -575,13 +575,13 @@
                 </div>
 
                 <div>
-                    <label class="text-xs font-black uppercase tracking-widest text-gray-400 mb-2 block" x-text="t('project.comment')"></label>
-                    <textarea name="comment" class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-medium resize-none" rows="4" :placeholder="t('project.comment')"></textarea>
+                    <label class="text-xs font-normal uppercase tracking-widest text-gray-400 mb-2 block" x-text="t('project.comment')"></label>
+                    <textarea name="comment" class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-sm font-normal resize-none" rows="4" :placeholder="t('project.comment')"></textarea>
                 </div>
 
                 <div class="flex gap-4 pt-4">
-                    <button type="button" @click="reviewModalOpen = false" class="flex-1 py-4 bg-gray-100 text-gray-700 rounded-xl font-bold" x-text="t('common.cancel')"></button>
-                    <button type="submit" class="flex-1 py-4 bg-primary text-white rounded-xl font-bold" x-text="t('project.submit_review')"></button>
+                    <button type="button" @click="reviewModalOpen = false" class="flex-1 py-4 bg-gray-100 text-gray-700 rounded-xl font-normal" x-text="t('common.cancel')"></button>
+                    <button type="submit" class="flex-1 py-4 bg-primary text-white rounded-xl font-normal" x-text="t('project.submit_review')"></button>
                 </div>
             </form>
         </div>

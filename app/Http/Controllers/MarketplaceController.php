@@ -78,6 +78,29 @@ class MarketplaceController extends Controller
         return view('client.portfolio', compact('companies'));
     }
 
+    public function myProviders()
+    {
+        $user = Auth::user();
+        
+        // Providers from Projects
+        $projectProviderIds = \App\Models\Project::where('client_id', $user->id)
+            ->pluck('provider_id')
+            ->toArray();
+
+        // Providers from PreSaleMessages
+        $chatProviderIds = \App\Models\PreSaleMessage::where('client_id', $user->id)
+            ->pluck('provider_id')
+            ->toArray();
+        
+        $allProviderIds = array_unique(array_merge($projectProviderIds, $chatProviderIds));
+        
+        $providers = User::whereIn('id', $allProviderIds)
+            ->with(['providerProfile', 'providerServices.service'])
+            ->get();
+
+        return view('client.my_providers', compact('providers'));
+    }
+
     public function storeCompany(Request $request)
     {
         $user = Auth::user();

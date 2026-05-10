@@ -32,7 +32,7 @@ class AuthController extends Controller
                 return redirect()->route('provider.onboarding');
             }
 
-            return redirect()->intended('/');
+            return redirect()->intended('/explore');
         }
 
         return back()->withErrors([
@@ -78,7 +78,7 @@ class AuthController extends Controller
             return redirect()->route('provider.onboarding');
         }
         
-        return redirect()->intended('/');
+        return redirect()->intended('/explore');
     }
 
     public function showForgot()

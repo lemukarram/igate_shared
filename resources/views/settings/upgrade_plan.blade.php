@@ -3,7 +3,7 @@
 @section('content')
 <div class="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
     <div class="text-center mb-12">
-        <h1 class="text-4xl font-black text-gray-900 mb-4">{{ __('common.upgrade_plan_title') }}</h1>
+        <h1 class="text-4xl font-normal text-gray-900 mb-4">{{ __('common.upgrade_plan_title') }}</h1>
         <p class="text-lg text-gray-600">{{ __('common.upgrade_plan_subtitle') }}</p>
     </div>
 
@@ -12,21 +12,21 @@
         <div class="bg-white rounded-2xl shadow-xl overflow-hidden border-2 {{ Auth::user()->plan_id == $plan->id ? 'border-primary' : 'border-transparent' }} transition-all hover:scale-105">
             <div class="p-8">
                 <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-xl font-black text-gray-900">{{ $plan->name }}</h3>
+                    <h3 class="text-xl font-normal text-gray-900">{{ $plan->name }}</h3>
                     @if(Auth::user()->plan_id == $plan->id)
-                        <span class="px-2 py-1 bg-primary text-white text-[9px] font-black uppercase rounded-md">{{ __('common.current_plan') }}</span>
+                        <span class="px-2 py-1 bg-primary text-white text-[9px] font-normal uppercase rounded-md">{{ __('common.current_plan') }}</span>
                     @endif
                 </div>
                 
                 <div class="mb-8">
                     @if($plan->price > 0)
-                        <span class="text-4xl font-black text-gray-900">{{ number_format($plan->price, 0) }}</span>
+                        <span class="text-4xl font-normal text-gray-900">{{ number_format($plan->price, 0) }}</span>
                     @elseif($plan->price == 0 && strtolower($plan->name) === 'enterprise')
-                        <span class="text-2xl font-black text-gray-900">{{ __('common.custom') }}</span>
+                        <span class="text-2xl font-normal text-gray-900">{{ __('common.custom') }}</span>
                     @else
-                        <span class="text-4xl font-black text-gray-900">0</span>
+                        <span class="text-4xl font-normal text-gray-900">0</span>
                     @endif
-                    <span class="text-gray-500 font-medium">/{{ __('common.month') }}</span>
+                    <span class="text-gray-500 font-normal">/{{ __('common.month') }}</span>
                 </div>
 
                 @if($plan->description)
@@ -75,12 +75,12 @@
                 <form action="{{ route('settings.plan') }}" method="POST">
                     @csrf
                     <input type="hidden" name="plan_id" value="{{ $plan->id }}">
-                    <button type="submit" class="w-full py-3 px-6 bg-primary text-white rounded-xl font-black uppercase tracking-widest text-xs hover:bg-primary-dark transition-all">
+                    <button type="submit" class="w-full py-3 px-6 bg-primary text-white rounded-xl font-normal uppercase tracking-widest text-xs hover:bg-primary-dark transition-all">
                         {{ __('common.select_plan') }}
                     </button>
                 </form>
                 @else
-                <button disabled class="w-full py-3 px-6 bg-gray-100 text-gray-400 rounded-xl font-black uppercase tracking-widest text-xs cursor-not-allowed">
+                <button disabled class="w-full py-3 px-6 bg-gray-100 text-gray-400 rounded-xl font-normal uppercase tracking-widest text-xs cursor-not-allowed">
                     {{ __('common.active') }}
                 </button>
                 @endif

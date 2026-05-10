@@ -3,10 +3,20 @@
 @section('content')
 <div class="max-w-7xl w-full p-4 mx-auto" x-data="{ searchQuery: '{{ request('search') }}' }">
     <!-- Header -->
-    <div class="mb-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
-        <h1 class="text-4xl font-black text-gray-900 tracking-tight" x-text="t('common.explore_services')"></h1>
-        <p class="text-gray-500 text-lg mt-2 font-medium" x-text="t('common.discover_connect_subtitle')"></p>
+    <div class="flex pb-10 flex-col md:flex-row md:items-center justify-between gap:4">
+        <div>
+            <h1 class="text-2xl font-normal text-gray-900" x-text="t('common.explore_services')"></h1>
+            <p class="text-gray-500 mt-1" x-text="t('common.discover_connect_subtitle')"></p>
+        </div>
+        @if(Auth::user()->role === 'provider')
+            <button @click="addServiceOpen = true" class="px-6 py-3 bg-primary text-white rounded-xl font-normal hover:bg-primary-dark transition-all flex items-center gap-2 shadow-lg shadow-primary/20">
+                <i data-lucide="plus" class="w-5 h-5"></i>
+                <span x-text="t('explore.add_new_service')"></span>
+            </button>
+        @endif
     </div>
+
+
 
     <!-- Search Bar -->
     <form action="{{ route('explore.index') }}" method="GET" class="relative mb-10 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
@@ -15,17 +25,17 @@
         @endif
         <i data-lucide="search" class="w-6 h-6 absolute inset-y-1/2 -translate-y-1/2 start-5 text-gray-400"></i>
         <input type="text" name="search" x-model="searchQuery" :placeholder="t('common.search_placeholder')" 
-               class="w-full ps-14 pe-6 py-5 rounded-xl border border-gray-100 bg-white text-gray-700 focus:outline-none focus:ring-4 focus:ring-blue-50 shadow-xl shadow-blue-50/50 placeholder-gray-400 transition-all text-lg font-medium">
+               class="w-full ps-14 pe-6 py-5 rounded-xl border border-gray-100 bg-white text-gray-700 focus:outline-none focus:ring-4 focus:ring-blue-50 shadow-xl shadow-blue-50/50 placeholder-gray-400 transition-all text-lg font-normal">
     </form>
 
     <!-- Filter Pills -->
     <div class="flex overflow-x-auto pb-4 mb-8 gap-3 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200 no-scrollbar">
         <a href="{{ route('explore.index', ['search' => request('search')]) }}" 
-           class="whitespace-nowrap px-6 py-2.5 rounded-[0.5rem] text-sm font-bold {{ !request('category') ? 'bg-gray-900 text-white shadow-lg shadow-gray-200' : 'bg-white text-gray-500 border border-gray-100 hover:border-primary/20 hover:text-primary hover:bg-primary-light' }} transition-all" 
+           class="whitespace-nowrap px-6 py-2.5 rounded-[0.5rem] text-sm font-normal {{ !request('category') ? 'bg-gray-900 text-white shadow-lg shadow-gray-200' : 'bg-white text-gray-500 border border-gray-100 hover:border-primary/20 hover:text-primary hover:bg-primary-light' }} transition-all" 
            x-text="t('common.all_services')"></a>
         @foreach($categories as $category)
             <a href="{{ route('explore.index', ['category' => $category->slug, 'search' => request('search')]) }}" 
-               class="whitespace-nowrap px-6 py-2.5 rounded-[0.5rem] text-sm font-bold {{ request('category') === $category->slug ? 'bg-gray-900 text-white shadow-lg shadow-gray-200' : 'bg-white text-gray-500 border border-gray-100 hover:border-primary/20 hover:text-primary hover:bg-primary-light' }} transition-all">{{ $category->name }}</a>
+               class="whitespace-nowrap px-6 py-2.5 rounded-[0.5rem] text-sm font-normal {{ request('category') === $category->slug ? 'bg-gray-900 text-white shadow-lg shadow-gray-200' : 'bg-white text-gray-500 border border-gray-100 hover:border-primary/20 hover:text-primary hover:bg-primary-light' }} transition-all">{{ $category->name }}</a>
         @endforeach
     </div>
 
@@ -56,17 +66,17 @@
 
                 <div class="p-6 flex flex-col flex-1">
                     <div class="flex items-center justify-between mb-3">
-                        <span class="text-[10px] font-black uppercase tracking-widest text-primary">{{ $service->category }}</span>
+                        <span class="text-[10px] font-normal uppercase tracking-widest text-primary">{{ $service->category }}</span>
                         <div class="flex items-center gap-1">
                             <i data-lucide="star" class="w-3 h-3 text-amber-400 fill-current"></i>
-                            <span class="text-xs font-bold text-gray-400">4.9</span>
+                            <span class="text-xs font-normal text-gray-400">4.9</span>
                         </div>
                     </div>
-                    <h3 class="text-lg font-bold text-gray-900 mb-2 group-hover:text-primary transition-colors">{{ $service->name }}</h3>
+                    <h3 class="text-lg font-normal text-gray-900 mb-2 group-hover:text-primary transition-colors">{{ $service->name }}</h3>
                     <p class="text-xs text-gray-500 leading-relaxed mb-6 flex-1">{{ Str::limit($service->description, 100) }}</p>
                     
                     <a href="{{ route('explore.show', $service->id) }}" 
-                       class="w-full py-3 rounded-lg text-sm font-bold bg-primary-light text-primary hover:bg-gray-900 hover:text-white transition-all duration-300 text-center flex items-center justify-center gap-2">
+                       class="w-full py-3 rounded-lg text-sm font-normal bg-primary-light text-primary hover:bg-gray-900 hover:text-white transition-all duration-300 text-center flex items-center justify-center gap-2">
                         <span x-text="'{{ Auth::user()->role }}' === 'provider' ? (lang === 'ar' ? 'انضمام' : 'Opt-in') : (lang === 'ar' ? 'طلب' : 'Request')"></span>
                         <i data-lucide="arrow-right" class="w-4 h-4 flip-rtl"></i>
                     </a>
@@ -75,7 +85,7 @@
         @empty
             <div class="col-span-full py-20 text-center bg-gray-50 rounded-3xl border border-dashed border-gray-200">
                 <i data-lucide="search-x" class="w-12 h-12 text-gray-300 mx-auto mb-4"></i>
-                <h3 class="text-lg font-semibold text-gray-900" x-text="lang === 'ar' ? 'لا توجد نتائج' : 'No services found'"></h3>
+                <h3 class="text-lg font-normal text-gray-900" x-text="lang === 'ar' ? 'لا توجد نتائج' : 'No services found'"></h3>
                 <p class="text-gray-500" x-text="lang === 'ar' ? 'جرب البحث بكلمات أخرى.' : 'Try searching for something else.'"></p>
             </div>
         @endforelse

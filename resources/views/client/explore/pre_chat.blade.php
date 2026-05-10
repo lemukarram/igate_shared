@@ -14,18 +14,18 @@
                 <i data-lucide="arrow-left" class="w-5 h-5 flip-rtl"></i>
             </a>
             <div>
-                <h1 class="text-xl font-black text-gray-900 tracking-tight" x-text="t('common.consultation')"></h1>
+                <h1 class="text-xl font-normal text-gray-900 tracking-tight" x-text="t('common.consultation')"></h1>
                 @if(Auth::user()->role === 'provider')
                     @php $client = \App\Models\User::find(request('client_id')); @endphp
-                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">{{ $service->name }} • {{ $client->name ?? 'Client' }}</p>
+                    <p class="text-[10px] font-normal text-gray-400 uppercase tracking-widest">{{ $service->name }} • {{ $client->name ?? 'Client' }}</p>
                 @else
-                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">{{ $service->name }} • {{ $provider->providerProfile->company_name }}</p>
+                    <p class="text-[10px] font-normal text-gray-400 uppercase tracking-widest">{{ $service->name }} • {{ $provider->providerProfile->company_name }}</p>
                 @endif
             </div>
         </div>
         <div class="flex items-center space-x-3 bg-green-50 px-4 py-2 rounded-full border border-green-100">
             <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-            <span class="text-[10px] font-black uppercase text-green-600 tracking-widest" x-text="t('common.active')"></span>
+            <span class="text-[10px] font-normal uppercase text-green-600 tracking-widest" x-text="t('common.active')"></span>
         </div>
     </div>
 
@@ -36,8 +36,8 @@
             <div class="w-16 h-16 bg-white rounded-lg flex items-center justify-center text-primary shadow-lg shadow-primary/10 mb-6">
                 <i data-lucide="{{ $service->icon }}" class="w-8 h-8"></i>
             </div>
-            <h2 class="text-2xl font-black text-gray-900 mb-3">{{ $service->name }}</h2>
-            <p class="text-gray-500 text-sm leading-relaxed font-medium mb-8">{!! $service->description !!}</p>
+            <h2 class="text-2xl font-normal text-gray-900 mb-3">{{ $service->name }}</h2>
+            <p class="text-gray-500 text-sm leading-relaxed font-normal mb-8">{!! $service->description !!}</p>
 
             <div class="space-y-6 flex-1">
                 <div class="bg-white p-6 rounded-lg border border-gray-100 shadow-sm">
@@ -45,12 +45,12 @@
                     @if(Auth::user()->role === 'provider')
                         @php $client = \App\Models\User::find(request('client_id')); @endphp
                         <div class="flex items-center space-x-3 mb-6 pb-6 border-b border-gray-50">
-                            <div class="w-10 h-10 bg-primary-light text-primary rounded-lg flex items-center justify-center font-black text-xs uppercase">
+                            <div class="w-10 h-10 bg-primary-light text-primary rounded-lg flex items-center justify-center font-normal text-xs uppercase">
                                 {{ substr($client->name ?? 'C', 0, 2) }}
                             </div>
                             <div class="flex-1">
-                                <p class="text-xs font-black text-gray-900 leading-tight mb-1">{{ $client->name ?? 'Client' }}</p>
-                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">Service Inquirer</p>
+                                <p class="text-xs font-normal text-gray-900 leading-tight mb-1">{{ $client->name ?? 'Client' }}</p>
+                                <p class="text-[10px] font-normal text-gray-400 uppercase tracking-tighter">Service Inquirer</p>
                             </div>
                         </div>
                     @else
@@ -63,37 +63,37 @@
                                 </div>
                             @endif
                             <div class="flex-1">
-                                <p class="text-xs font-black text-gray-900 leading-tight mb-1">{{ $provider->providerProfile->company_name }}</p>
+                                <p class="text-xs font-normal text-gray-900 leading-tight mb-1">{{ $provider->providerProfile->company_name }}</p>
                                 <div class="flex items-center space-x-1.5">
                                     <div class="flex items-center">
                                         <i data-lucide="star" class="w-3 h-3 text-yellow-400 fill-current"></i>
-                                        <span class="text-[10px] font-black text-gray-700 ms-1">{{ number_format($provider->average_rating, 1) }}</span>
+                                        <span class="text-[10px] font-normal text-gray-700 ms-1">{{ number_format($provider->average_rating, 1) }}</span>
                                     </div>
                                     <span class="text-[10px] text-gray-300">•</span>
-                                    <span class="text-[10px] font-bold text-primary uppercase tracking-tighter" x-text="t('common.verified_provider')"></span>
+                                    <span class="text-[10px] font-normal text-primary uppercase tracking-tighter" x-text="t('common.verified_provider')"></span>
                                 </div>
                             </div>
                         </div>
                     @endif
 
-                    <p class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-4">{{ __('common.standard_package') }}</p>
+                    <p class="text-[10px] font-normal uppercase tracking-widest text-gray-400 mb-4">{{ __('common.standard_package') }}</p>
                     <div class="flex items-center justify-between mb-2">
-                        <span class="text-sm font-bold text-gray-600" x-text="t('common.price')"></span>
-                        <span class="text-lg font-black text-primary">{{ number_format($ps->price, 0) }} <span x-text="t('common.sar')"></span></span>
+                        <span class="text-sm font-normal text-gray-600" x-text="t('common.price')"></span>
+                        <span class="text-lg font-normal text-primary">{{ number_format($ps->price, 0) }} <span x-text="t('common.sar')"></span></span>
                     </div>
                     <div class="flex items-center justify-between">
-                        <span class="text-sm font-bold text-gray-600" x-text="t('common.delivery')"></span>
-                        <span class="text-sm font-black text-gray-900" x-text="t('common.days_count').replace(':count', '{{ $ps->delivery_time_days }}')"></span>
+                        <span class="text-sm font-normal text-gray-600" x-text="t('common.delivery')"></span>
+                        <span class="text-sm font-normal text-gray-900" x-text="t('common.days_count').replace(':count', '{{ $ps->delivery_time_days }}')"></span>
                     </div>
                 </div>
 
                 @if(Auth::user()->role === 'client')
                 <div class="p-6 bg-primary-light rounded-lg border border-primary/10">
-                    <p class="text-xs font-bold text-primary mb-2 flex items-center">
+                    <p class="text-xs font-normal text-primary mb-2 flex items-center">
                         <i data-lucide="info" class="w-4 h-4 mr-2"></i>
                         Next Steps
                     </p>
-                    <p class="text-[11px] text-primary/80 font-medium leading-relaxed">
+                    <p class="text-[11px] text-primary/80 font-normal leading-relaxed">
                         After the consultation, you can proceed to request this service by clicking the button below. Funds will be held in escrow.
                     </p>
                 </div>
@@ -102,7 +102,7 @@
 
             @if(Auth::user()->role === 'client')
             <div class="pt-8 mt-auto">
-                <a href="{{ route('checkout.review', $ps->id) }}" class="w-full py-4 bg-primary text-white rounded-lg font-black text-sm hover:bg-primary-dark transition-all shadow-lg shadow-primary/20 text-center flex items-center justify-center space-x-2">
+                <a href="{{ route('checkout.review', $ps->id) }}" class="w-full py-4 bg-primary text-white rounded-lg font-normal text-sm hover:bg-primary-dark transition-all shadow-lg shadow-primary/20 text-center flex items-center justify-center space-x-2">
                     <span x-text="t('common.request_service')"></span>
                     <i data-lucide="arrow-right" class="w-4 h-4 flip-rtl"></i>
                 </a>
@@ -115,31 +115,31 @@
             <!-- Chat Messages -->
             <div class="flex-1 p-8 overflow-y-auto space-y-6 custom-scrollbar bg-white">
                 <div class="text-center mb-8">
-                    <span class="px-4 py-1 bg-gray-50 text-[10px] font-black text-gray-400 uppercase tracking-widest rounded-full" x-text="t('common.secure_consultation')"></span>
+                    <span class="px-4 py-1 bg-gray-50 text-[10px] font-normal text-gray-400 uppercase tracking-widest rounded-full" x-text="t('common.secure_consultation')"></span>
                 </div>
 
                 @forelse($messages as $msg)
                 <div class="flex items-start {{ $msg->sender_id === Auth::id() ? 'flex-row-reverse space-x-reverse' : 'space-x-3' }} max-w-[80%] {{ $msg->sender_id === Auth::id() ? 'ml-auto' : '' }}">
-                    <div class="w-8 h-8 {{ $msg->sender_id === Auth::id() ? 'bg-gray-900 text-white' : 'bg-primary-light text-primary' }} rounded-lg flex items-center justify-center font-black text-xs uppercase">
+                    <div class="w-8 h-8 {{ $msg->sender_id === Auth::id() ? 'bg-gray-900 text-white' : 'bg-primary-light text-primary' }} rounded-lg flex items-center justify-center font-normal text-xs uppercase">
                         {{ substr($msg->sender->name, 0, 2) }}
                     </div>
                     <div class="{{ $msg->sender_id === Auth::id() ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-gray-50 border border-gray-100 text-gray-700' }} p-4 rounded-lg {{ $msg->sender_id === Auth::id() ? 'rounded-tr-none' : 'rounded-tl-none' }}">
-                        <p class="text-sm font-medium leading-relaxed">
+                        <p class="text-sm font-normal leading-relaxed">
                             {{ $msg->message }}
                         </p>
-                        <span class="text-[8px] font-black {{ $msg->sender_id === Auth::id() ? 'text-white/60' : 'text-gray-300' }} uppercase mt-2 block">{{ $msg->created_at->format('g:i A') }}</span>
+                        <span class="text-[8px] font-normal {{ $msg->sender_id === Auth::id() ? 'text-white/60' : 'text-gray-300' }} uppercase mt-2 block">{{ $msg->created_at->format('g:i A') }}</span>
                     </div>
                 </div>
                 @empty
                 <div class="flex items-start space-x-3 max-w-[80%]">
-                    <div class="w-8 h-8 bg-primary-light rounded-lg flex items-center justify-center text-primary font-black text-xs uppercase">
+                    <div class="w-8 h-8 bg-primary-light rounded-lg flex items-center justify-center text-primary font-normal text-xs uppercase">
                         {{ substr($provider->providerProfile->company_name, 0, 2) }}
                     </div>
                     <div class="bg-gray-50 p-4 rounded-lg rounded-tl-none border border-gray-100">
-                        <p class="text-sm font-medium text-gray-700 leading-relaxed">
+                        <p class="text-sm font-normal text-gray-700 leading-relaxed">
                             "{{ __('common.pre_sale_welcome', ['service' => $service->name]) }}"
                         </p>
-                        <span class="text-[8px] font-black text-gray-300 uppercase mt-2 block">{{ now()->format('g:i A') }}</span>
+                        <span class="text-[8px] font-normal text-gray-300 uppercase mt-2 block">{{ now()->format('g:i A') }}</span>
                     </div>
                 </div>
                 @endforelse
@@ -153,7 +153,7 @@
                         <input type="hidden" name="client_id" value="{{ request('client_id') }}">
                     @endif
                     <div class="flex-1 relative">
-                        <textarea name="message" required :placeholder="t('project.type_message')" rows="1" class="w-full pl-4 pr-12 py-4 bg-white border border-gray-200 rounded-lg focus:ring-4 focus:ring-primary/10 focus:border-primary/20 outline-none transition-all font-medium text-sm resize-none"></textarea>
+                        <textarea name="message" required :placeholder="t('project.type_message')" rows="1" class="w-full pl-4 pr-12 py-4 bg-white border border-gray-200 rounded-lg focus:ring-4 focus:ring-primary/10 focus:border-primary/20 outline-none transition-all font-normal text-sm resize-none"></textarea>
                         <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-300 hover:text-primary transition-colors">
                             <i data-lucide="paperclip" class="w-5 h-5"></i>
                         </button>

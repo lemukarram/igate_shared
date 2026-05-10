@@ -8,7 +8,7 @@
                 <i data-lucide="arrow-left" class="w-5 h-5 flip-rtl"></i>
             </a>
             <div>
-                <h1 class="text-3xl font-bold text-gray-900">{{ $service->name }}</h1>
+                <h1 class="text-3xl font-normal text-gray-900">{{ $service->name }}</h1>
                 <div class="text-gray-500">{!! $service->description !!}</div>
             </div>
         </div>
@@ -17,17 +17,17 @@
             <div class="flex items-center gap-3">
                 @if($providerService)
                     <div class="bg-blue-50 px-4 py-2 rounded-xl border border-blue-100 flex items-center gap-3 me-2">
-                        <div class="text-blue-600 font-bold text-xl">{{ $clientCount }}</div>
-                        <div class="text-blue-500 text-xs uppercase font-bold leading-tight" x-html="t('common.active_clients_br')"></div>
+                        <div class="text-blue-600 font-normal text-xl">{{ $clientCount }}</div>
+                        <div class="text-blue-500 text-xs uppercase font-normal leading-tight" x-html="t('common.active_clients_br')"></div>
                     </div>
                     <form action="{{ route('provider.services.destroy', $providerService->id) }}" method="POST" onsubmit="return confirm('{{ __('common.are_you_sure') }}')">
                         @csrf @method('DELETE')
-                        <button type="submit" class="px-6 py-3 bg-red-50 text-red-600 rounded-xl font-bold hover:bg-red-100 transition-all border border-red-100">
+                        <button type="submit" class="px-6 py-3 bg-red-50 text-red-600 rounded-xl font-normal hover:bg-red-100 transition-all border border-red-100">
                             <span x-text="t('common.remove_service')"></span>
                         </button>
                     </form>
                 @else
-                    <button @click="addServiceModalOpen = true" class="px-6 py-3 bg-primary text-white rounded-xl font-bold hover:bg-primary-dark transition-all shadow-sm">
+                    <button @click="addServiceModalOpen = true" class="px-6 py-3 bg-primary text-white rounded-xl font-normal hover:bg-primary-dark transition-all shadow-sm">
                         <span x-text="t('common.add_to_my_services')"></span>
                     </button>
                 @endif
@@ -38,7 +38,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div class="lg:col-span-2 space-y-6">
             <div class="bg-white border border-gray-100 rounded-3xl p-8 shadow-sm">
-                <h2 class="text-xl font-bold text-gray-900 mb-6" x-text="t('common.service_scope_subtasks')"></h2>
+                <h2 class="text-xl font-normal text-gray-900 mb-6" x-text="t('common.service_scope_subtasks')"></h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     @if($service->subtasks)
                         @foreach($service->subtasks as $subtask)
@@ -46,7 +46,7 @@
                                 <div class="mt-1 w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
                                     <i data-lucide="check" class="w-3 h-3 text-blue-600"></i>
                                 </div>
-                                <span class="text-gray-700 font-medium">{{ $subtask }}</span>
+                                <span class="text-gray-700 font-normal">{{ $subtask }}</span>
                             </div>
                         @endforeach
                     @else
@@ -57,7 +57,7 @@
 
             @if(auth()->user()->role === 'client')
             <div class="space-y-6">
-                <h2 class="text-xl font-bold text-gray-900" x-text="t('common.available_providers')"></h2>
+                <h2 class="text-xl font-normal text-gray-900" x-text="t('common.available_providers')"></h2>
                 
                 <div class="grid grid-cols-1 gap-4">
                     @forelse($providers as $ps)
@@ -105,7 +105,7 @@
                                         ];
                                     })->toJson() }},
                                     averageRating: '{{ number_format($ps->provider->average_rating, 1) }}'
-                                }; providerInfoModalOpen = true" class="text-lg font-bold text-gray-900 hover:text-primary transition-colors text-left">
+                                }; providerInfoModalOpen = true" class="text-lg font-normal text-gray-900 hover:text-primary transition-colors text-left">
                                     {{ $ps->provider->providerProfile->company_name ?? $ps->provider->name }}
                                 </button>
                                 <div class="flex items-center gap-2 text-sm text-gray-500">
@@ -118,21 +118,21 @@
 
                         <div class="flex items-center gap-12 px-8 border-x border-gray-50 hidden lg:flex">
                             <div class="text-center">
-                                <span class="block text-xs text-gray-400 uppercase font-semibold" x-text="t('common.delivery')"></span>
-                                <span class="text-sm font-bold text-gray-900" x-text="t('common.days_count').replace(':count', '{{ $ps->delivery_time_days }}')"></span>
+                                <span class="block text-xs text-gray-400 uppercase font-normal" x-text="t('common.delivery')"></span>
+                                <span class="text-sm font-normal text-gray-900" x-text="t('common.days_count').replace(':count', '{{ $ps->delivery_time_days }}')"></span>
                             </div>
                             <div class="text-center">
-                                <span class="block text-xs text-gray-400 uppercase font-semibold" x-text="t('common.price')"></span>
-                                <span class="text-xl font-black text-blue-600">{{ number_format($ps->price, 0) }} <span x-text="t('common.sar')"></span></span>
+                                <span class="block text-xs text-gray-400 uppercase font-normal" x-text="t('common.price')"></span>
+                                <span class="text-xl font-normal text-blue-600">{{ number_format($ps->price, 0) }} <span x-text="t('common.sar')"></span></span>
                             </div>
                         </div>
 
                         <div class="flex items-center gap-3 w-full md:w-auto">
                             <a href="{{ route('explore.chat', ['serviceId' => $service->id, 'providerId' => $ps->provider_id]) }}" 
-                               class="flex-1 md:flex-none px-6 py-3 bg-gray-50 text-gray-700 rounded-xl font-bold hover:bg-gray-100 transition-all border border-gray-100 text-center">
+                               class="flex-1 md:flex-none px-6 py-3 bg-gray-50 text-gray-700 rounded-xl font-normal hover:bg-gray-100 transition-all border border-gray-100 text-center">
                                 <span x-text="t('common.chat')"></span>
                             </a>
-                            <a href="{{ route('checkout.review', $ps->id) }}" class="flex-1 md:flex-none px-8 py-3 bg-primary text-white rounded-lg font-bold hover:bg-primary-dark transition-all shadow-sm text-center">
+                            <a href="{{ route('checkout.review', $ps->id) }}" class="flex-1 md:flex-none px-8 py-3 bg-primary text-white rounded-lg font-normal hover:bg-primary-dark transition-all shadow-sm text-center">
                                 <span x-text="t('common.request')"></span>
                             </a>
                         </div>
@@ -140,7 +140,7 @@
                     @empty
                     <div class="py-20 text-center bg-gray-50 rounded-3xl border border-dashed border-gray-200">
                         <i data-lucide="users-2" class="w-12 h-12 text-gray-300 mx-auto mb-4"></i>
-                        <h3 class="text-lg font-semibold text-gray-900" x-text="t('common.no_providers_yet')"></h3>
+                        <h3 class="text-lg font-normal text-gray-900" x-text="t('common.no_providers_yet')"></h3>
                         <p class="text-gray-500" x-text="t('common.no_providers_subtitle')"></p>
                     </div>
                     @endforelse
@@ -151,25 +151,25 @@
             @if(auth()->user()->role === 'provider' && $providerService)
             <div class="bg-white border border-gray-100 rounded-3xl p-8 shadow-sm">
                 <div class="flex items-center justify-between mb-6">
-                    <h2 class="text-xl font-bold text-gray-900" x-text="t('common.my_offering_details')"></h2>
-                    <button @click="editServiceModalOpen = true" class="px-4 py-2 bg-gray-900 text-white rounded-xl text-sm font-bold hover:bg-gray-800 transition-all flex items-center gap-2">
+                    <h2 class="text-xl font-normal text-gray-900" x-text="t('common.my_offering_details')"></h2>
+                    <button @click="editServiceModalOpen = true" class="px-4 py-2 bg-gray-900 text-white rounded-xl text-sm font-normal hover:bg-gray-800 transition-all flex items-center gap-2">
                         <i data-lucide="edit-3" class="w-4 h-4"></i> <span x-text="t('common.edit_details')"></span>
                     </button>
                 </div>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                     <div class="p-6 bg-blue-50 rounded-2xl border border-blue-100">
-                        <span class="block text-xs text-blue-500 uppercase font-black tracking-widest mb-1" x-text="t('common.my_price')"></span>
-                        <span class="text-3xl font-black text-blue-700">{{ number_format($providerService->price, 0) }} <span class="text-sm" x-text="t('common.sar')"></span></span>
+                        <span class="block text-xs text-blue-500 uppercase font-normal tracking-widest mb-1" x-text="t('common.my_price')"></span>
+                        <span class="text-3xl font-normal text-blue-700">{{ number_format($providerService->price, 0) }} <span class="text-sm" x-text="t('common.sar')"></span></span>
                     </div>
                     <div class="p-6 bg-indigo-50 rounded-2xl border border-indigo-100">
-                        <span class="block text-xs text-indigo-500 uppercase font-black tracking-widest mb-1" x-text="t('common.delivery')"></span>
-                        <span class="text-3xl font-black text-indigo-700" x-text="t('common.days_count').replace(':count', '{{ $providerService->delivery_time_days }}')"></span>
+                        <span class="block text-xs text-indigo-500 uppercase font-normal tracking-widest mb-1" x-text="t('common.delivery')"></span>
+                        <span class="text-3xl font-normal text-indigo-700" x-text="t('common.days_count').replace(':count', '{{ $providerService->delivery_time_days }}')"></span>
                     </div>
                 </div>
 
                 <div>
-                    <span class="block text-xs text-gray-400 uppercase font-black tracking-widest mb-3" x-text="t('common.service_notes_terms')"></span>
+                    <span class="block text-xs text-gray-400 uppercase font-normal tracking-widest mb-3" x-text="t('common.service_notes_terms')"></span>
                     <div class="p-6 bg-gray-50 rounded-2xl border border-gray-100 text-gray-700 leading-relaxed italic">
                         {{ $providerService->provider_notes ?? __('common.no_specific_notes') }}
                     </div>
@@ -180,13 +180,13 @@
 
         <!-- Standardized Sidebar -->
         <div class="space-y-6">
-            <h2 class="text-lg font-bold text-gray-900" x-text="t('common.standard_catalog')"></h2>
+            <h2 class="text-lg font-normal text-gray-900" x-text="t('common.standard_catalog')"></h2>
             <div class="rounded-3xl p-6 text-white shadow-xl shadow-gray-200" style="background-color: {{ $settings->protection_block_bg_color ?? '#111827' }}">
-                <p class="text-xs text-gray-400 font-bold uppercase tracking-widest mb-4">{{ $settings->protection_block_title }}</p>
+                <p class="text-xs text-gray-400 font-normal uppercase tracking-widest mb-4">{{ $settings->protection_block_title }}</p>
                 <p class="text-sm text-gray-300 leading-relaxed mb-6">{{ $settings->protection_block_description }}</p>
                 <ul class="space-y-4">
                     @foreach($settings->protection_block_points as $point)
-                    <li class="flex items-center gap-3 text-xs font-bold">
+                    <li class="flex items-center gap-3 text-xs font-normal">
                         <i data-lucide="{{ $point['icon'] }}" class="w-4 h-4 text-primary"></i>
                         <span>{{ $point['text'] }}</span>
                     </li>
@@ -219,38 +219,38 @@
                         </template>
                     </div>
                     <div class="flex gap-2">
-                        <span class="px-4 py-1.5 bg-green-50 text-green-600 rounded-full text-[10px] font-black uppercase tracking-widest border border-green-100" x-text="t('common.verified_expert')"></span>
+                        <span class="px-4 py-1.5 bg-green-50 text-green-600 rounded-full text-[10px] font-normal uppercase tracking-widest border border-green-100" x-text="t('common.verified_expert')"></span>
                     </div>
                 </div>
 
                 <div class="mb-8">
                     <div class="flex items-center justify-between mb-2">
-                        <h2 class="text-3xl font-black text-gray-900" x-text="selectedProvider.name"></h2>
+                        <h2 class="text-3xl font-normal text-gray-900" x-text="selectedProvider.name"></h2>
                         <div class="flex items-center gap-1.5 px-3 py-1 bg-yellow-50 border border-yellow-100 rounded-full">
                             <i data-lucide="star" class="w-4 h-4 text-yellow-400 fill-current"></i>
-                            <span class="text-sm font-black text-yellow-700" x-text="selectedProvider.averageRating"></span>
+                            <span class="text-sm font-normal text-yellow-700" x-text="selectedProvider.averageRating"></span>
                         </div>
                     </div>
-                    <p class="text-gray-500 text-sm font-medium leading-relaxed" x-text="selectedProvider.about || 'No company bio provided yet.'"></p>
+                    <p class="text-gray-500 text-sm font-normal leading-relaxed" x-text="selectedProvider.about || 'No company bio provided yet.'"></p>
                 </div>
 
                 <div class="grid grid-cols-3 gap-4 mb-8">
                     <div class="bg-gray-50 p-6 rounded-3xl border border-gray-100 text-center">
-                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1" x-text="t('common.total_clients')"></p>
-                        <p class="text-2xl font-black text-gray-900" x-text="selectedProvider.totalClients"></p>
+                        <p class="text-[10px] font-normal text-gray-400 uppercase tracking-widest mb-1" x-text="t('common.total_clients')"></p>
+                        <p class="text-2xl font-normal text-gray-900" x-text="selectedProvider.totalClients"></p>
                     </div>
                     <div class="bg-gray-50 p-6 rounded-3xl border border-gray-100 text-center">
-                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1" x-text="t('common.completed_projects')"></p>
-                        <p class="text-2xl font-black text-green-600" x-text="selectedProvider.completedProjects"></p>
+                        <p class="text-[10px] font-normal text-gray-400 uppercase tracking-widest mb-1" x-text="t('common.completed_projects')"></p>
+                        <p class="text-2xl font-normal text-green-600" x-text="selectedProvider.completedProjects"></p>
                     </div>
                     <div class="bg-gray-50 p-6 rounded-3xl border border-gray-100 text-center">
-                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1" x-text="t('common.active_projects')"></p>
-                        <p class="text-2xl font-black text-primary" x-text="selectedProvider.activeProjects"></p>
+                        <p class="text-[10px] font-normal text-gray-400 uppercase tracking-widest mb-1" x-text="t('common.active_projects')"></p>
+                        <p class="text-2xl font-normal text-primary" x-text="selectedProvider.activeProjects"></p>
                     </div>
                 </div>
 
                 <div class="space-y-4">
-                    <h3 class="text-lg font-black text-gray-900 flex items-center gap-2">
+                    <h3 class="text-lg font-normal text-gray-900 flex items-center gap-2">
                         <i data-lucide="message-square-quote" class="w-5 h-5 text-primary"></i>
                         <span x-text="t('common.reviews')"></span>
                     </h3>
@@ -260,7 +260,7 @@
                                 <div class="p-6 bg-white border border-gray-100 rounded-3xl shadow-sm">
                                     <div class="flex items-center justify-between mb-4">
                                         <div class="flex items-center gap-3">
-                                            <div class="w-10 h-10 bg-gray-50 rounded-2xl flex items-center justify-center text-[10px] font-black uppercase text-gray-400 overflow-hidden border border-gray-100">
+                                            <div class="w-10 h-10 bg-gray-50 rounded-2xl flex items-center justify-center text-[10px] font-normal uppercase text-gray-400 overflow-hidden border border-gray-100">
                                                 <template x-if="review.reviewer_logo">
                                                     <img :src="review.reviewer_logo" class="w-full h-full object-cover">
                                                 </template>
@@ -269,8 +269,8 @@
                                                 </template>
                                             </div>
                                             <div>
-                                                <p class="text-xs font-bold text-gray-900" x-text="review.reviewer_name"></p>
-                                                <p class="text-[10px] text-gray-400 font-medium" x-text="review.project_name"></p>
+                                                <p class="text-xs font-normal text-gray-900" x-text="review.reviewer_name"></p>
+                                                <p class="text-[10px] text-gray-400 font-normal" x-text="review.project_name"></p>
                                             </div>
                                         </div>
                                         <div class="flex text-yellow-400">
@@ -279,7 +279,7 @@
                                             </template>
                                         </div>
                                     </div>
-                                    <p class="text-xs text-gray-600 leading-relaxed font-medium italic" x-text="'&quot;' + review.comment + '&quot;'"></p>
+                                    <p class="text-xs text-gray-600 leading-relaxed font-normal italic" x-text="'&quot;' + review.comment + '&quot;'"></p>
                                 </div>
                             </template>
                         </template>
@@ -300,15 +300,15 @@
     <div x-show="addServiceModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center" style="display: none;">
         <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="addServiceModalOpen = false"></div>
         <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl relative z-10 p-10 border border-gray-100 animate-in zoom-in duration-300">
-            <div class="flex items-center justify-between mb-8"><h2 class="text-2xl font-bold" x-text="t('explore.add_service')"></h2><button @click="addServiceModalOpen = false" class="text-gray-400 hover:text-gray-600"><i data-lucide="x" class="w-6 h-6"></i></button></div>
+            <div class="flex items-center justify-between mb-8"><h2 class="text-2xl font-normal" x-text="t('explore.add_service')"></h2><button @click="addServiceModalOpen = false" class="text-gray-400 hover:text-gray-600"><i data-lucide="x" class="w-6 h-6"></i></button></div>
             <form action="{{ route('provider.services.store') }}" method="POST" class="space-y-6">
                 @csrf
                 <input type="hidden" name="service_id" value="{{ $service->id }}">
                 <div class="grid grid-cols-2 gap-4">
-                    <div class="space-y-1"><label class="text-[10px] font-black uppercase tracking-widest text-gray-400" x-text="t('explore.price')"></label><input type="number" name="price" step="0.01" required class="w-full px-4 py-3 border border-gray-100 bg-gray-50 rounded-xl text-sm font-bold"></div>
-                    <div class="space-y-1"><label class="text-[10px] font-black uppercase tracking-widest text-gray-400" x-text="t('explore.days')"></label><input type="number" name="delivery_time_days" required class="w-full px-4 py-3 border border-gray-100 bg-gray-50 rounded-xl text-sm font-bold"></div>
+                    <div class="space-y-1"><label class="text-[10px] font-normal uppercase tracking-widest text-gray-400" x-text="t('explore.price')"></label><input type="number" name="price" step="0.01" required class="w-full px-4 py-3 border border-gray-100 bg-gray-50 rounded-xl text-sm font-normal"></div>
+                    <div class="space-y-1"><label class="text-[10px] font-normal uppercase tracking-widest text-gray-400" x-text="t('explore.days')"></label><input type="number" name="delivery_time_days" required class="w-full px-4 py-3 border border-gray-100 bg-gray-50 rounded-xl text-sm font-normal"></div>
                 </div>
-                <button type="submit" class="w-full py-4 bg-primary text-white rounded-xl font-bold" x-text="t('explore.add_to_portfolio_btn')"></button>
+                <button type="submit" class="w-full py-4 bg-primary text-white rounded-xl font-normal" x-text="t('explore.add_to_portfolio_btn')"></button>
             </form>
         </div>
     </div>
@@ -318,18 +318,18 @@
     <div x-show="editServiceModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center" style="display: none;">
         <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="editServiceModalOpen = false"></div>
         <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl relative z-10 p-10 border border-gray-100 animate-in zoom-in duration-300">
-            <div class="flex items-center justify-between mb-8"><h2 class="text-2xl font-bold" x-text="t('common.edit_service')"></h2><button @click="editServiceModalOpen = false" class="text-gray-400 hover:text-gray-600"><i data-lucide="x" class="w-6 h-6"></i></button></div>
+            <div class="flex items-center justify-between mb-8"><h2 class="text-2xl font-normal" x-text="t('common.edit_service')"></h2><button @click="editServiceModalOpen = false" class="text-gray-400 hover:text-gray-600"><i data-lucide="x" class="w-6 h-6"></i></button></div>
             <form action="{{ route('provider.services.update', $providerService->id) }}" method="POST" class="space-y-6">
                 @csrf @method('PATCH')
                 <div class="grid grid-cols-2 gap-4">
-                    <div class="space-y-1"><label class="text-[10px] font-black uppercase tracking-widest text-gray-400" x-text="t('common.price')"></label><input type="number" name="price" step="0.01" value="{{ $providerService->price }}" required class="w-full px-4 py-3 border border-gray-100 bg-gray-50 rounded-xl text-sm font-bold"></div>
-                    <div class="space-y-1"><label class="text-[10px] font-black uppercase tracking-widest text-gray-400" x-text="t('common.days')"></label><input type="number" name="delivery_time_days" value="{{ $providerService->delivery_time_days }}" required class="w-full px-4 py-3 border border-gray-100 bg-gray-50 rounded-xl text-sm font-bold"></div>
+                    <div class="space-y-1"><label class="text-[10px] font-normal uppercase tracking-widest text-gray-400" x-text="t('common.price')"></label><input type="number" name="price" step="0.01" value="{{ $providerService->price }}" required class="w-full px-4 py-3 border border-gray-100 bg-gray-50 rounded-xl text-sm font-normal"></div>
+                    <div class="space-y-1"><label class="text-[10px] font-normal uppercase tracking-widest text-gray-400" x-text="t('common.days')"></label><input type="number" name="delivery_time_days" value="{{ $providerService->delivery_time_days }}" required class="w-full px-4 py-3 border border-gray-100 bg-gray-50 rounded-xl text-sm font-normal"></div>
                 </div>
                 <div class="space-y-1">
-                    <label class="text-[10px] font-black uppercase tracking-widest text-gray-400" x-text="t('common.additional_notes')"></label>
-                    <textarea name="provider_notes" rows="4" class="w-full px-4 py-3 border border-gray-100 bg-gray-50 rounded-xl text-sm font-medium resize-none">{{ $providerService->provider_notes }}</textarea>
+                    <label class="text-[10px] font-normal uppercase tracking-widest text-gray-400" x-text="t('common.additional_notes')"></label>
+                    <textarea name="provider_notes" rows="4" class="w-full px-4 py-3 border border-gray-100 bg-gray-50 rounded-xl text-sm font-normal resize-none">{{ $providerService->provider_notes }}</textarea>
                 </div>
-                <button type="submit" class="w-full py-4 bg-gray-900 text-white rounded-xl font-bold" x-text="t('common.save')"></button>
+                <button type="submit" class="w-full py-4 bg-gray-900 text-white rounded-xl font-normal" x-text="t('common.save')"></button>
             </form>
         </div>
     </div>

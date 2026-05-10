@@ -5,13 +5,13 @@
     <!-- Header -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-            <h1 class="text-3xl font-bold text-gray-900">
+            <h1 class="text-3xl font-normal text-gray-900">
                 <span x-text="t('common.welcome_back')"></span>, {{ Auth::user()->name }}
             </h1>
             <p class="text-gray-500 mt-1" x-text="t('common.manage_projects_subtitle')"></p>
         </div>
         <div class="flex items-center gap-3">
-            <a href="{{ route('explore.index') }}" class="px-5 py-2.5 bg-primary text-white rounded-lg text-sm font-bold hover:bg-primary-dark transition-all flex items-center gap-2 shadow-lg shadow-primary/20">
+            <a href="{{ route('explore.index') }}" class="px-5 py-2.5 bg-primary text-white rounded-lg text-sm font-normal hover:bg-primary-dark transition-all flex items-center gap-2 shadow-lg shadow-primary/20">
                 <i data-lucide="plus" class="w-4 h-4"></i>
                 <span x-text="t('common.new_service_request')"></span>
             </a>
@@ -33,14 +33,14 @@
             <div class="w-12 h-12 {{ $stat['bg'] }} {{ $stat['color'] }} rounded-xl flex items-center justify-center mb-4">
                 <i data-lucide="{{ $stat['icon'] }}" class="w-6 h-6"></i>
             </div>
-            <h3 class="text-3xl font-bold text-gray-900">
+            <h3 class="text-3xl font-normal text-gray-900">
                 @if($stat['label'] === 'common.total_spent')
                     {{ number_format(42000) }} <span class="text-sm" x-text="t('common.sar')"></span>
                 @else
                     {{ $stat['value'] }}
                 @endif
             </h3>
-            <p class="text-gray-400 text-sm font-bold mt-1 uppercase tracking-wider" x-text="t('{{ $stat['label'] }}')"></p>
+            <p class="text-gray-400 text-sm font-normal mt-1 uppercase tracking-wider" x-text="t('{{ $stat['label'] }}')"></p>
         </div>
         @endforeach
     </div>
@@ -49,8 +49,8 @@
         <!-- Active Projects List -->
         <div class="lg:col-span-2 space-y-6">
             <div class="flex items-center justify-between">
-                <h3 class="text-lg font-bold text-gray-900" x-text="t('common.ongoing_projects')"></h3>
-                <a href="#" class="text-xs font-bold text-primary hover:underline" x-text="t('common.view_all')"></a>
+                <h3 class="text-lg font-normal text-gray-900" x-text="t('common.ongoing_projects')"></h3>
+                <a href="#" class="text-xs font-normal text-primary hover:underline" x-text="t('common.view_all')"></a>
             </div>
             
             <div class="grid grid-cols-1 gap-4">
@@ -61,8 +61,8 @@
                             <i data-lucide="{{ $p->service->icon }}" class="w-6 h-6"></i>
                         </div>
                         <div>
-                            <h4 class="font-bold text-gray-900">{{ $p->service->name }}</h4>
-                            <p class="text-xs text-gray-400 font-medium">{{ $p->provider->providerProfile->company_name ?? 'iGate Partner' }}</p>
+                            <h4 class="font-normal text-gray-900">{{ $p->service->name }}</h4>
+                            <p class="text-xs text-gray-400 font-normal">{{ $p->provider->providerProfile->company_name ?? 'iGate Partner' }}</p>
                         </div>
                     </div>
                     <div class="text-end">
@@ -70,15 +70,15 @@
                             <div class="w-24 h-1.5 bg-gray-100 rounded-full overflow-hidden">
                                 <div class="h-full bg-primary w-2/3"></div>
                             </div>
-                            <span class="text-[10px] font-bold text-gray-400">65%</span>
+                            <span class="text-[10px] font-normal text-gray-400">65%</span>
                         </div>
-                        <a href="{{ route('projects.show', $p->id) }}" class="text-xs font-bold text-primary hover:underline" x-text="t('common.track_progress')"></a>
+                        <a href="{{ route('projects.show', $p->id) }}" class="text-xs font-normal text-primary hover:underline" x-text="t('common.track_progress')"></a>
                     </div>
                 </div>
                 @empty
                 <div class="py-20 text-center bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200">
                     <i data-lucide="plus-circle" class="w-12 h-12 text-gray-300 mx-auto mb-4"></i>
-                    <h4 class="text-xl font-bold text-gray-900" x-text="t('common.no_active_projects')"></h4>
+                    <h4 class="text-xl font-normal text-gray-900" x-text="t('common.no_active_projects')"></h4>
                     <p class="text-gray-500 mt-2" x-text="t('common.explore_services_start')"></p>
                 </div>
                 @endforelse
@@ -88,7 +88,7 @@
             @if($preSaleChats->count() > 0)
             <div class="mt-12 space-y-6">
                 <div class="flex items-center justify-between">
-                    <h3 class="text-lg font-bold text-gray-900" x-text="t('common.pre_sale_chats')"></h3>
+                    <h3 class="text-lg font-normal text-gray-900" x-text="t('common.pre_sale_chats')"></h3>
                 </div>
                 
                 <div class="grid grid-cols-1 gap-4">
@@ -99,15 +99,15 @@
                                 <i data-lucide="{{ $chat->service->icon }}" class="w-6 h-6"></i>
                             </div>
                             <div>
-                                <h4 class="font-bold text-gray-900">{{ $chat->service->name }}</h4>
-                                <p class="text-xs text-gray-400 font-medium">{{ $chat->provider->providerProfile->company_name ?? 'iGate Partner' }}</p>
+                                <h4 class="font-normal text-gray-900">{{ $chat->service->name }}</h4>
+                                <p class="text-xs text-gray-400 font-normal">{{ $chat->provider->providerProfile->company_name ?? 'iGate Partner' }}</p>
                             </div>
                         </div>
                         <div class="text-end">
                             <div class="flex items-center gap-2 mb-1 justify-end">
-                                <span class="px-2 py-0.5 bg-amber-50 text-amber-600 rounded-full text-[10px] font-bold" x-text="t('common.consultation')"></span>
+                                <span class="px-2 py-0.5 bg-amber-50 text-amber-600 rounded-full text-[10px] font-normal" x-text="t('common.consultation')"></span>
                             </div>
-                            <a href="{{ route('explore.chat', ['serviceId' => $chat->service_id, 'providerId' => $chat->provider_id]) }}" class="text-xs font-bold text-primary hover:underline" x-text="t('common.chat_now')"></a>
+                            <a href="{{ route('explore.chat', ['serviceId' => $chat->service_id, 'providerId' => $chat->provider_id]) }}" class="text-xs font-normal text-primary hover:underline" x-text="t('common.chat_now')"></a>
                         </div>
                     </div>
                     @endforeach
@@ -118,12 +118,12 @@
 
         <!-- Quick Explore Sidebar -->
         <div class="bg-gray-900 rounded-3xl p-8 text-white">
-            <h3 class="text-xl font-bold mb-6" x-text="t('common.recommended_services')"></h3>
+            <h3 class="text-xl font-normal mb-6" x-text="t('common.recommended_services')"></h3>
             <div class="space-y-4">
                 @foreach(['ZATCA Compliance', 'Legal Review', 'HR Management'] as $rec)
                 <div class="p-4 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all cursor-pointer group">
                     <div class="flex items-center justify-between mb-2">
-                        <span class="text-xs font-bold text-primary uppercase tracking-widest">{{ $rec }}</span>
+                        <span class="text-xs font-normal text-primary uppercase tracking-widest">{{ $rec }}</span>
                         <i data-lucide="arrow-right" class="w-4 h-4 text-white group-hover:translate-x-1 transition-transform rtl:group-hover:-translate-x-1"></i>
                     </div>
                     <p class="text-[10px] text-gray-400 leading-relaxed" x-text="t('common.regulatory_compliance_solution')"></p>
@@ -131,6 +131,26 @@
                 @endforeach
             </div>
         </div>
+
+        <!-- Team Task Manager -->
+        <div class="bg-white border border-gray-100 rounded-[2.5rem] p-8 shadow-sm">
+            <div class="flex items-center justify-between mb-8">
+                <h3 class="text-lg font-normal"  x-text="t('common.messages')></h3>
+            </div>
+            <div class="space-y-4">
+                <a href="{{ route('internal-messages.index') }}" class="block p-4 bg-gray-50 rounded-2xl border border-gray-100 hover:border-primary/20 hover:bg-primary-light transition-all group">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 bg-white rounded-lg flex items-center justify-center text-primary shadow-sm group-hover:scale-110 transition-transform">
+                            <i data-lucide="check-square" class="w-4 h-4"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <h4 class="text-xs font-normal text-gray-900 truncate" x-text="t('common.messages')"></h4>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+        
     </div>
 </div>
 @endsection

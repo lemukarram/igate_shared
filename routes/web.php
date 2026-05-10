@@ -23,13 +23,10 @@ Route::middleware('guest')->group(function () {
 // Landing Page for guests, Dashboard for auth users
 Route::get('/', function () {
     if (Auth::check()) {
-        if (Auth::user()->role === 'provider') {
-            return redirect()->route('provider.dashboard');
-        }
         if (Auth::user()->role === 'admin') {
             return view('welcome'); // Admin view
         }
-        return view('client.dashboard'); // Client dashboard
+        return redirect()->route('explore.index');
     }
     return view('landing');
 });
@@ -76,6 +73,7 @@ Route::middleware(['auth', 'App\Http\Middleware\EnsureProviderIsOnboarded'])->gr
 
     // Client Portfolio and Companies
     Route::get('/portfolio', [MarketplaceController::class, 'portfolio'])->name('client.portfolio');
+    Route::get('/my-providers', [MarketplaceController::class, 'myProviders'])->name('client.my_providers');
     Route::post('/companies', [MarketplaceController::class, 'storeCompany'])->name('companies.store');
     Route::get('/companies/{id}', [MarketplaceController::class, 'showCompany'])->name('companies.show');
     Route::put('/companies/{id}', [MarketplaceController::class, 'updateCompany'])->name('companies.update');
