@@ -25,11 +25,20 @@ chmod -R 755 /var/www/storage
 chmod -R 755 /var/www/public/storage
 
 # Wait for DB to be ready
-echo "Waiting for database..."
+echo "Waiting for database connection..."
+MAX_TRIES=20
+COUNT=0
 until php artisan db:show > /dev/null 2>&1; do
-    echo "Database not ready, retrying in 3s..."
+    COUNT=$((COUNT+1))
+    if [ $COUNT -gt $MAX_TRIES ]; then
+        echo "ERROR: Database connection timed out after $MAX_TRIES attempts."
+        php artisan db:show # Run one last time without redirection to show the error
+        exit 1
+    fi
+    echo "Database not ready (Attempt $COUNT/$MAX_TRIES), retrying in 3s..."
     sleep 3
 done
+echo "Database connected!"
 
 if [ "$DB_SEED" = "true" ]; then
     php artisan db:wipe --force || echo "Wipe failed, continuing..."
