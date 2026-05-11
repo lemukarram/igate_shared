@@ -27,4 +27,10 @@ class ProviderService extends Model
     {
         return $this->belongsTo(Service::class);
     }
+
+    public function projects()
+    {
+        return $this->hasMany(Project::class, 'service_id', 'service_id')
+                    ->whereColumn('provider_id', 'provider_services.provider_id');
+    }
 }

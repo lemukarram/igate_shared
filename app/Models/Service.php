@@ -24,4 +24,14 @@ class Service extends Model
     {
         return $this->hasMany(ProviderService::class);
     }
+
+    public function projects()
+    {
+        return $this->hasMany(Project::class);
+    }
+
+    public function reviews()
+    {
+        return $this->hasManyThrough(Review::class, Project::class);
+    }
 }

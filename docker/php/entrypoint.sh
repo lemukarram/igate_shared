@@ -2,6 +2,13 @@
 
 
 # If volume is empty (first run), files are already here from image build
+# Clear bootstrap cache if it exists (prevents host-to-container pollution)
+echo "Clearing bootstrap cache..."
+rm -f /var/www/bootstrap/cache/config.php
+rm -f /var/www/bootstrap/cache/packages.php
+rm -f /var/www/bootstrap/cache/services.php
+rm -f /var/www/bootstrap/cache/routes-v7.php
+
 # If public/index.php is missing, something is wrong
 if [ ! -f "/var/www/public/index.php" ]; then
     echo "ERROR: /var/www/public/index.php not found!"

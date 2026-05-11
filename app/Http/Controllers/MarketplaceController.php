@@ -34,6 +34,15 @@ class MarketplaceController extends Controller
             });
         }
 
+        $user = Auth::user();
+        $query->withAvg('reviews', 'rating');
+        
+        if ($user && $user->role === 'provider') {
+            $query->with(['providerServices' => function($q) use ($user) {
+                $q->where('provider_id', $user->id)->withCount('projects');
+            }]);
+        }
+
         $services = $query->get();
         return view('client.explore.index', compact('categories', 'services'));
     }

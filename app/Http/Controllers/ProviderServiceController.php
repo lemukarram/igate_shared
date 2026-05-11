@@ -13,7 +13,7 @@ class ProviderServiceController extends Controller
     public function index()
     {
         $allServices = Service::all();
-        $myServices = ProviderService::where('provider_id', Auth::id())->with('service')->get();
+        $myServices = ProviderService::where('provider_id', Auth::id())->with('service')->withCount('projects')->get();
         return view('provider.services.index', compact('allServices', 'myServices'));
     }
 

@@ -66,20 +66,44 @@
 
                 <div class="p-6 flex flex-col flex-1">
                     <div class="flex items-center justify-between mb-3">
-                        <span class="text-[10px] font-normal uppercase tracking-widest text-primary">{{ $service->category }}</span>
+                        <span class="text-[10px] font-normal uppercase tracking-widest text-primary">{{ $service->serviceCategory->name ?? $service->category }}</span>
                         <div class="flex items-center gap-1">
                             <i data-lucide="star" class="w-3 h-3 text-amber-400 fill-current"></i>
-                            <span class="text-xs font-normal text-gray-400">4.9</span>
+                            <span class="text-xs font-normal text-gray-400">{{ number_format($service->reviews_avg_rating ?? 5.0, 1) }}</span>
                         </div>
                     </div>
                     <h3 class="text-lg font-normal text-gray-900 mb-2 group-hover:text-primary transition-colors">{{ $service->name }}</h3>
-                    <p class="text-xs text-gray-500 leading-relaxed mb-6 flex-1">{{ Str::limit($service->description, 100) }}</p>
+                    <p class="text-xs text-gray-500 leading-relaxed mb-6 flex-1">{{ Str::limit(strip_tags($service->description), 100) }}</p>
                     
-                    <a href="{{ route('explore.show', $service->id) }}" 
-                       class="w-full py-3 rounded-lg text-sm font-normal bg-primary-light text-primary hover:bg-gray-900 hover:text-white transition-all duration-300 text-center flex items-center justify-center gap-2">
-                        <span x-text="'{{ Auth::user()->role }}' === 'provider' ? (lang === 'ar' ? 'انضمام' : 'Opt-in') : (lang === 'ar' ? 'طلب' : 'Request')"></span>
-                        <i data-lucide="arrow-right" class="w-4 h-4 flip-rtl"></i>
-                    </a>
+                    @php
+                        $providerService = null;
+                        if(Auth::user()->role === 'provider' && $service->providerServices->isNotEmpty()) {
+                            $providerService = $service->providerServices->first();
+                        }
+                    @endphp
+
+                    @if($providerService)
+                        <a href="{{ route('explore.show', $service->id) }}" 
+                           class="w-full py-2.5 rounded-lg text-sm font-normal bg-gray-900 text-white hover:bg-primary transition-all duration-300 flex flex-col items-center justify-center">
+                            <div class="flex items-center gap-2">
+                                <span x-text="t('common.update')"></span>
+                                <i data-lucide="edit-3" class="w-4 h-4"></i>
+                            </div>
+                            <div class="flex items-center gap-2 text-[10px] opacity-70 mt-1">
+                                <span>{{ $providerService->projects_count }} <span x-text="t('common.projects')"></span></span>
+                                <span>•</span>
+                                <span>{{ number_format($providerService->price, 0) }} <span x-text="t('common.sar')"></span></span>
+                                <span>•</span>
+                                <span>{{ $providerService->delivery_time_days }} <span x-text="t('explore.days')"></span></span>
+                            </div>
+                        </a>
+                    @else
+                        <a href="{{ route('explore.show', $service->id) }}" 
+                           class="w-full py-3 rounded-lg text-sm font-normal bg-primary-light text-primary hover:bg-gray-900 hover:text-white transition-all duration-300 text-center flex items-center justify-center gap-2">
+                            <span x-text="'{{ Auth::user()->role }}' === 'provider' ? t('common.opt_in') : t('common.request')"></span>
+                            <i data-lucide="arrow-right" class="w-4 h-4 flip-rtl"></i>
+                        </a>
+                    @endif
                 </div>
             </div>
         @empty

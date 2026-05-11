@@ -39,6 +39,7 @@ class CheckoutController extends Controller
             'company_id' => $request->company_id,
             'provider_id' => $ps->provider_id,
             'service_id' => $ps->service_id,
+            'provider_service_id' => $ps->id,
             'status' => 'active',
             'total_amount' => $ps->price,
             'start_date' => now(),

@@ -58,7 +58,7 @@
                         </div>
                         <div>
                             <span class="block text-[10px] font-normal text-gray-400 uppercase tracking-widest mb-1" x-text="t('common.clients')"></span>
-                            <span class="text-sm font-normal text-gray-900">0</span>
+                            <span class="text-sm font-normal text-gray-900">{{ $ps->projects_count }}</span>
                         </div>
                         <div>
                             <span class="block text-[10px] font-normal text-gray-400 uppercase tracking-widest mb-1" x-text="t('common.rating')"></span>
