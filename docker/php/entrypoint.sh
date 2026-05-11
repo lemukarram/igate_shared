@@ -66,6 +66,10 @@ fi
 
 # Cache for production
 if [ "$APP_ENV" = "production" ]; then
+    echo "Running filament upgrade..."
+    php artisan filament:upgrade || echo "Filament upgrade failed, continuing..."
+    
+    echo "Caching configuration..."
     php artisan config:cache || echo "Config cache failed, continuing..."
     php artisan route:cache  || echo "Route cache failed, continuing..."
     php artisan view:cache   || echo "View cache failed, continuing..."
