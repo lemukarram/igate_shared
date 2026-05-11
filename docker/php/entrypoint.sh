@@ -62,13 +62,13 @@ until php artisan db:show > /dev/null 2>&1; do
 done
 echo "Database connected!"
 
-if [ "$DB_SEED" = "true" ]; then
+#if [ "$DB_SEED" = "true" ]; then
     php artisan db:wipe --force || echo "Wipe failed, continuing..."
     php artisan migrate --force || echo "Migration failed, continuing..."
     php artisan db:seed --force || echo "Seeding failed, continuing..."
-else
-    php artisan migrate --force || echo "Migration failed, continuing..."
-fi
+#else
+#    php artisan migrate --force || echo "Migration failed, continuing..."
+#fi
 
 
 # Cache for production
