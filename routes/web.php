@@ -26,7 +26,10 @@ Route::get('/', function () {
         if (Auth::user()->role === 'admin') {
             return view('welcome'); // Admin view
         }
-        return redirect()->route('explore.index');
+        if (Auth::user()->role === 'provider') {
+            return redirect()->route('provider.dashboard');
+        }
+        return redirect()->route('client.dashboard');
     }
     return view('landing');
 });
@@ -34,6 +37,7 @@ Route::get('/', function () {
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 
 Route::middleware(['auth', 'App\Http\Middleware\EnsureProviderIsOnboarded'])->group(function () {
+    Route::get('/dashboard', [MarketplaceController::class, 'dashboard'])->name('client.dashboard');
     Route::get('/provider/dashboard', [App\Http\Controllers\ProviderDashboardController::class, 'index'])->name('provider.dashboard');
 
     // Onboarding

@@ -38,4 +38,9 @@ class Company extends Model
     {
         return $this->hasMany(Subscription::class);
     }
+
+    public function preSaleMessages()
+    {
+        return $this->hasMany(PreSaleMessage::class);
+    }
 }

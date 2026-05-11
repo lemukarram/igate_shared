@@ -42,13 +42,16 @@ class PreSaleChatController extends Controller
             ->oldest()
             ->get();
 
-        return view('client.explore.pre_chat', compact('service', 'provider', 'ps', 'messages'));
+        $companies = Auth::user()->role === 'client' ? Auth::user()->companies : collect();
+
+        return view('client.explore.pre_chat', compact('service', 'provider', 'ps', 'messages', 'companies'));
     }
 
     public function sendMessage(Request $request, $serviceId, $providerId)
     {
         $request->validate([
             'message' => 'required|string',
+            'company_id' => 'nullable|exists:companies,id',
         ]);
 
         $clientId = Auth::user()->role === 'client' ? Auth::id() : $request->client_id;
@@ -57,6 +60,7 @@ class PreSaleChatController extends Controller
             'client_id' => $clientId,
             'provider_id' => $providerId,
             'service_id' => $serviceId,
+            'company_id' => $request->company_id,
             'sender_id' => Auth::id(),
             'message' => $request->message,
         ]);

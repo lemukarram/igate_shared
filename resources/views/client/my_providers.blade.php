@@ -55,17 +55,22 @@
             <p class="text-sm text-gray-400 font-normal mb-6">{{ Str::limit($provider->providerProfile->about ?? __('common.no_bio_provided'), 100) }}</p>
             
             <div class="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100 mb-6">
-                <div class="text-center">
-                    <span class="block text-xs font-normal text-gray-400 uppercase tracking-widest mb-1" x-text="t('common.rating')"></span>
+                <div class="text-center flex-1">
+                    <span class="block text-[10px] font-normal text-gray-400 uppercase tracking-widest mb-1" x-text="t('common.rating')"></span>
                     <span class="text-lg font-normal text-gray-900 flex items-center justify-center gap-1">
                         <i data-lucide="star" class="w-4 h-4 text-yellow-400 fill-current"></i>
                         {{ number_format($provider->average_rating, 1) }}
                     </span>
                 </div>
                 <div class="w-px h-8 bg-gray-200"></div>
-                <div class="text-center">
-                    <span class="block text-xs font-normal text-gray-400 uppercase tracking-widest mb-1" x-text="t('common.projects')"></span>
+                <div class="text-center flex-1">
+                    <span class="block text-[10px] font-normal text-gray-400 uppercase tracking-widest mb-1" x-text="t('common.projects')"></span>
                     <span class="text-lg font-normal text-gray-900">{{ $provider->providerProjects()->where('client_id', Auth::id())->count() }}</span>
+                </div>
+                <div class="w-px h-8 bg-gray-200"></div>
+                <div class="text-center flex-1">
+                    <span class="block text-[10px] font-normal text-gray-400 uppercase tracking-widest mb-1" x-text="t('common.chats')"></span>
+                    <span class="text-lg font-normal text-gray-900">{{ $provider->pre_sale_chats_count }}</span>
                 </div>
             </div>
 

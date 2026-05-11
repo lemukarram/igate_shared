@@ -47,6 +47,28 @@ class MarketplaceController extends Controller
         return view('client.explore.index', compact('categories', 'services'));
     }
 
+    public function dashboard()
+    {
+        $user = Auth::user();
+        
+        $ongoingProjects = $user->projects()
+            ->whereIn('status', ['active', 'in_progress', 'pending'])
+            ->with(['service', 'provider.providerProfile', 'tasks'])
+            ->get();
+
+        $preSaleChats = \App\Models\PreSaleMessage::where('client_id', $user->id)
+            ->with(['service', 'provider.providerProfile'])
+            ->get()
+            ->groupBy(function($msg) {
+                return $msg->service_id . '-' . $msg->provider_id;
+            })
+            ->map(function($group) {
+                return $group->last();
+            });
+
+        return view('client.dashboard', compact('ongoingProjects', 'preSaleChats'));
+    }
+
     public function show($id, \App\Settings\GeneralSettings $settings)
     {
         $service = Service::findOrFail($id);
@@ -83,7 +105,19 @@ class MarketplaceController extends Controller
 
     public function portfolio()
     {
-        $companies = Auth::user()->companies()->withCount('projects')->get();
+        $companies = Auth::user()->companies()
+            ->withCount('projects')
+            ->get();
+            
+        foreach ($companies as $company) {
+            $company->pre_sale_chats_count = \App\Models\PreSaleMessage::where('company_id', $company->id)
+                ->get()
+                ->unique(function ($item) {
+                    return $item->provider_id . '-' . $item->service_id;
+                })
+                ->count();
+        }
+            
         return view('client.portfolio', compact('companies'));
     }
 
@@ -106,6 +140,16 @@ class MarketplaceController extends Controller
         $providers = User::whereIn('id', $allProviderIds)
             ->with(['providerProfile', 'providerServices.service'])
             ->get();
+            
+        foreach ($providers as $provider) {
+            $provider->pre_sale_chats_count = \App\Models\PreSaleMessage::where('client_id', $user->id)
+                ->where('provider_id', $provider->id)
+                ->get()
+                ->unique(function ($item) {
+                    return $item->service_id;
+                })
+                ->count();
+        }
 
         return view('client.my_providers', compact('providers'));
     }
@@ -133,6 +177,7 @@ class MarketplaceController extends Controller
         $company = Auth::user()->companies()->with(['projects.service', 'projects.provider'])->findOrFail($id);
         
         $preSaleChats = \App\Models\PreSaleMessage::where('client_id', Auth::id())
+            ->where('company_id', $id)
             ->with(['service', 'provider.providerProfile'])
             ->get()
             ->groupBy(function($msg) {

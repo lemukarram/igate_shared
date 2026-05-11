@@ -30,14 +30,21 @@
             <p class="text-sm text-gray-400 font-normal mb-6" x-text="'{{ $company->industry }}' ? '{{ $company->industry }}' : t('common.general_business')"></p>
             
             <div class="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100 mb-6">
-                <div class="text-center">
-                    <span class="block text-xs font-normal text-gray-400 uppercase tracking-widest mb-1" x-text="t('common.projects')"></span>
+                <div class="text-center flex-1">
+                    <span class="block text-[10px] font-normal text-gray-400 uppercase tracking-widest mb-1" x-text="t('common.projects')"></span>
                     <span class="text-lg font-normal text-gray-900">{{ $company->projects_count }}</span>
                 </div>
                 <div class="w-px h-8 bg-gray-200"></div>
-                <div class="text-center">
-                    <span class="block text-xs font-normal text-gray-400 uppercase tracking-widest mb-1" x-text="t('common.status')"></span>
-                    <span class="text-[10px] font-normal uppercase px-2 py-0.5 rounded-md {{ $company->is_active ? 'text-green-500 bg-green-50' : 'text-red-500 bg-red-50' }}" x-text="{{ $company->is_active ? 'true' : 'false' }} ? t('common.active') : t('common.inactive')"></span>
+                <div class="text-center flex-1">
+                    <span class="block text-[10px] font-normal text-gray-400 uppercase tracking-widest mb-1" x-text="t('common.chats')"></span>
+                    <span class="text-lg font-normal text-gray-900">{{ $company->pre_sale_chats_count }}</span>
+                </div>
+                <div class="w-px h-8 bg-gray-200"></div>
+                <div class="text-center flex-1">
+                    <span class="block text-[10px] font-normal text-gray-400 uppercase tracking-widest mb-1" x-text="t('common.status')"></span>
+                    <div class="flex justify-center">
+                        <span class="text-[10px] font-normal uppercase px-2 py-0.5 rounded-md {{ $company->is_active ? 'text-green-500 bg-green-50' : 'text-red-500 bg-red-50' }}" x-text="{{ $company->is_active ? 'true' : 'false' }} ? t('common.active') : t('common.inactive')"></span>
+                    </div>
                 </div>
             </div>
 

@@ -68,9 +68,9 @@
                     <div class="text-end">
                         <div class="flex items-center gap-2 mb-1">
                             <div class="w-24 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                                <div class="h-full bg-primary w-2/3"></div>
+                                <div class="h-full bg-primary" style="width: {{ $p->progress }}%"></div>
                             </div>
-                            <span class="text-[10px] font-normal text-gray-400">65%</span>
+                            <span class="text-[10px] font-normal text-gray-400">{{ $p->progress }}%</span>
                         </div>
                         <a href="{{ route('projects.show', $p->id) }}" class="text-xs font-normal text-primary hover:underline" x-text="t('common.track_progress')"></a>
                     </div>
@@ -135,7 +135,7 @@
         <!-- Team Task Manager -->
         <div class="bg-white border border-gray-100 rounded-[2.5rem] p-8 shadow-sm">
             <div class="flex items-center justify-between mb-8">
-                <h3 class="text-lg font-normal"  x-text="t('common.messages')></h3>
+                <h3 class="text-lg font-normal" x-text="t('common.messages')"></h3>
             </div>
             <div class="space-y-4">
                 <a href="{{ route('internal-messages.index') }}" class="block p-4 bg-gray-50 rounded-2xl border border-gray-100 hover:border-primary/20 hover:bg-primary-light transition-all group">

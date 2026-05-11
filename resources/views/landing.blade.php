@@ -52,11 +52,12 @@
             left: auto;
             right: 0;
         }
+        [x-cloak] { display: none !important; }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800 overflow-x-hidden selection:bg-[#3da9e4] selection:text-white">
     <!-- Navbar -->
-    <nav class="fixed w-full z-50 glass-card">
+    <nav class="fixed w-full z-50 glass-card" x-data="{ mobileMenuOpen: false }">
         <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
             <div class="flex items-center">
                 <img src="/images/logo/logo.png" alt="iGate Shared Services" class="h-10 object-contain">
@@ -70,12 +71,43 @@
             </div>
 
             <div class="flex items-center space-x-4 {{ app()->getLocale() == 'ar' ? 'space-x-reverse' : '' }}">
-                <div class="flex items-center gap-1 bg-gray-100 p-1 rounded-lg mr-2">
+                <div class="hidden sm:flex items-center gap-1 bg-gray-100 p-1 rounded-lg mr-2">
                     <button onclick="setLang('ar')" class="{{ app()->getLocale() === 'ar' ? 'bg-[#3da9e4] text-white' : 'text-gray-400 hover:text-gray-600' }} px-3 py-1 text-[10px] font-normal uppercase transition-all rounded-md">ar</button>
                     <button onclick="setLang('en')" class="{{ app()->getLocale() === 'en' ? 'bg-[#3da9e4] text-white' : 'text-gray-400 hover:text-gray-600' }} px-3 py-1 text-[10px] font-normal uppercase transition-all rounded-md">en</button>
                 </div>
-                <a href="/login" class="text-sm font-normal text-gray-700 hover:theme-text transition-colors">{{ __('common.signin') }}</a>
-                <a href="/login" class="theme-bg text-white px-6 py-2.5 rounded-lg font-normal text-sm theme-hover-bg transition-all shadow-md active:scale-95">{{ __('common.get_started') }}</a>
+                <a href="/login" class="theme-bg text-white px-6 py-2.5 rounded-lg font-normal text-sm theme-hover-bg transition-all shadow-md active:scale-95 whitespace-nowrap">{{ __('common.get_started') }}</a>
+                
+                <!-- Mobile Menu Toggle -->
+                <button @click="mobileMenuOpen = !mobileMenuOpen" class="lg:hidden p-2 text-gray-600 hover:theme-text transition-colors">
+                    <i data-lucide="menu" x-show="!mobileMenuOpen" class="w-6 h-6"></i>
+                    <i data-lucide="x" x-show="mobileMenuOpen" class="w-6 h-6" x-cloak></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div x-show="mobileMenuOpen" 
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 -translate-y-4"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100 translate-y-0"
+             x-transition:leave-end="opacity-0 -translate-y-4"
+             class="lg:hidden bg-white border-t border-gray-100 shadow-xl absolute w-full left-0 px-6 py-8 space-y-6"
+             @click.away="mobileMenuOpen = false">
+            <div class="flex flex-col space-y-4 text-sm font-normal text-gray-600 {{ app()->getLocale() == 'ar' ? 'text-right' : '' }}">
+                <a href="#about" @click="mobileMenuOpen = false" class="hover:theme-text transition-all">{{ __('common.about') }}</a>
+                <a href="#services" @click="mobileMenuOpen = false" class="hover:theme-text transition-all">{{ __('common.services') }}</a>
+                <a href="#why-us" @click="mobileMenuOpen = false" class="hover:theme-text transition-all">{{ __('common.why_igate') }}</a>
+                <a href="/terms" @click="mobileMenuOpen = false" class="hover:theme-text transition-all">{{ __('common.terms') }}</a>
+            </div>
+            
+            <div class="flex items-center justify-between pt-6 border-t border-gray-100 {{ app()->getLocale() == 'ar' ? 'flex-row-reverse' : '' }}">
+                <span class="text-xs text-gray-400 uppercase tracking-wider">{{ app()->getLocale() == 'ar' ? 'اللغة' : 'Language' }}</span>
+                <div class="flex items-center gap-1 bg-gray-100 p-1 rounded-lg">
+                    <button onclick="setLang('ar')" class="{{ app()->getLocale() === 'ar' ? 'bg-[#3da9e4] text-white' : 'text-gray-400 hover:text-gray-600' }} px-3 py-1 text-[10px] font-normal uppercase transition-all rounded-md">ar</button>
+                    <button onclick="setLang('en')" class="{{ app()->getLocale() === 'en' ? 'bg-[#3da9e4] text-white' : 'text-gray-400 hover:text-gray-600' }} px-3 py-1 text-[10px] font-normal uppercase transition-all rounded-md">en</button>
+                </div>
             </div>
         </div>
     </nav>
@@ -158,7 +190,7 @@
     </section>
 
     <!-- Why iGate Shared Services Section -->
-    <section id="why-us" class="py-24 bg-white relative">
+    <section id="why-us" class="py-12 lg:py-24 bg-white relative">
         <div class="max-w-7xl mx-auto px-6">
             <div class="text-center mb-16">
                 <h2 class="text-3xl lg:text-4xl font-normal text-gray-900 mb-4">{{ __('common.why_igate_title') }}</h2>
@@ -258,9 +290,9 @@
     </section>
 
     <!-- Subscription Plans -->
-    <section id="pricing" class="py-24 bg-white px-6" x-data="{ role: 'client', billing: 'monthly' }">
+    <section id="pricing" class="py-12 lg:py-24 bg-white px-6" x-data="{ role: 'client', billing: 'monthly' }">
         <div class="max-w-7xl mx-auto">
-            <div class="text-center mb-16">
+            <div class="text-center mb-10 lg:mb-16">
                 <h2 class="text-3xl lg:text-4xl font-normal text-gray-900 mb-4">{{ __('common.subscription_plans') }}</h2>
                 <p class="text-gray-500 font-normal max-w-2xl mx-auto">{{ __('common.subscription_subtitle') }}</p>
                 
@@ -413,4 +445,6 @@
         lucide.createIcons();
     </script>
 </body>
+</html>
+
 </html>

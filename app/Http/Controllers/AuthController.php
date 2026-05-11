@@ -28,11 +28,14 @@ class AuthController extends Controller
         if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
             
-            if (Auth::user()->role === 'provider' && (!Auth::user()->providerProfile || !Auth::user()->providerProfile->onboarding_completed)) {
-                return redirect()->route('provider.onboarding');
+            if (Auth::user()->role === 'provider') {
+                if (!Auth::user()->providerProfile || !Auth::user()->providerProfile->onboarding_completed) {
+                    return redirect()->route('provider.onboarding');
+                }
+                return redirect()->intended('/provider/dashboard');
             }
 
-            return redirect()->intended('/explore');
+            return redirect()->intended('/dashboard');
         }
 
         return back()->withErrors([
@@ -78,7 +81,7 @@ class AuthController extends Controller
             return redirect()->route('provider.onboarding');
         }
         
-        return redirect()->intended('/explore');
+        return redirect()->intended('/dashboard');
     }
 
     public function showForgot()

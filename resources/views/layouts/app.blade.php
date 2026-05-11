@@ -115,7 +115,7 @@
                         <span x-show="!sidebarCollapsed" class="text-sm font-normal whitespace-nowrap" x-text="t('common.explore')"></span>
                     </a>
 
-                    <a href="/provider/dashboard" class="sidebar-item {{ request()->routeIs('provider.dashboard') ? 'active' : '' }} flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 transition-all">
+                    <a href="{{ route('provider.dashboard') }}" class="sidebar-item {{ request()->routeIs('provider.dashboard') ? 'active' : '' }} flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 transition-all">
                         <i data-lucide="layout-dashboard" class="w-4 h-4 flex-shrink-0"></i>
                         <span x-show="!sidebarCollapsed" class="text-sm font-normal whitespace-nowrap" x-text="t('common.dashboard')"></span>
                     </a>
@@ -134,7 +134,7 @@
                         <span x-show="!sidebarCollapsed" class="text-sm font-normal whitespace-nowrap" x-text="t('common.explore')"></span>
                     </a>
 
-                    <a href="/" class="sidebar-item {{ request()->is('/') ? 'active' : '' }} flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 transition-all">
+                    <a href="{{ route('client.dashboard') }}" class="sidebar-item {{ request()->routeIs('client.dashboard') ? 'active' : '' }} flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 transition-all">
                         <i data-lucide="home" class="w-4 h-4 flex-shrink-0"></i>
                         <span x-show="!sidebarCollapsed" class="text-sm font-normal whitespace-nowrap" x-text="t('common.dashboard')"></span>
                     </a>

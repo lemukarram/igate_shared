@@ -147,20 +147,35 @@
 
             <!-- Chat Input -->
             <div class="p-6 bg-gray-50 border-t border-gray-100">
-                <form action="{{ route('explore.chat.send', [$service->id, $provider->id]) }}" method="POST" class="relative flex items-center space-x-4">
+                <form action="{{ route('explore.chat.send', [$service->id, $provider->id]) }}" method="POST" class="flex flex-col space-y-4">
                     @csrf
                     @if(Auth::user()->role === 'provider')
                         <input type="hidden" name="client_id" value="{{ request('client_id') }}">
                     @endif
-                    <div class="flex-1 relative">
-                        <textarea name="message" required :placeholder="t('project.type_message')" rows="1" class="w-full pl-4 pr-12 py-4 bg-white border border-gray-200 rounded-lg focus:ring-4 focus:ring-primary/10 focus:border-primary/20 outline-none transition-all font-normal text-sm resize-none"></textarea>
-                        <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-300 hover:text-primary transition-colors">
-                            <i data-lucide="paperclip" class="w-5 h-5"></i>
+
+                    @if(Auth::user()->role === 'client' && $companies->count() > 0)
+                    <div class="flex items-center space-x-2">
+                        <span class="text-[10px] font-normal uppercase tracking-widest text-gray-400">Regarding:</span>
+                        <select name="company_id" class="text-[10px] font-normal uppercase tracking-widest bg-transparent border-none focus:ring-0 text-primary cursor-pointer">
+                            <option value="">General Inquiry</option>
+                            @foreach($companies as $company)
+                                <option value="{{ $company->id }}" {{ ($messages->where('company_id', $company->id)->count() > 0) ? 'selected' : '' }}>{{ $company->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    @endif
+
+                    <div class="flex items-center space-x-4">
+                        <div class="flex-1 relative">
+                            <textarea name="message" required :placeholder="t('project.type_message')" rows="1" class="w-full pl-4 pr-12 py-4 bg-white border border-gray-200 rounded-lg focus:ring-4 focus:ring-primary/10 focus:border-primary/20 outline-none transition-all font-normal text-sm resize-none"></textarea>
+                            <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-300 hover:text-primary transition-colors">
+                                <i data-lucide="paperclip" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                        <button type="submit" class="w-12 h-12 bg-primary text-white rounded-lg flex items-center justify-center hover:bg-primary-dark transition-all shadow-lg shadow-primary/20">
+                            <i data-lucide="send" class="w-5 h-5"></i>
                         </button>
                     </div>
-                    <button type="submit" class="w-12 h-12 bg-primary text-white rounded-lg flex items-center justify-center hover:bg-primary-dark transition-all shadow-lg shadow-primary/20">
-                        <i data-lucide="send" class="w-5 h-5"></i>
-                    </button>
                 </form>
             </div>
         </div>

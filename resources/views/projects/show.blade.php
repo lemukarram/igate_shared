@@ -143,16 +143,28 @@
                 </div>
             </div>
 
-            <!-- Team -->
-            <a href="{{ route('provider.team_tasks') }}" class="block bg-white border border-gray-100 rounded-lg shadow-sm overflow-hidden hover:bg-gray-50 transition-colors group">
-                <div class="p-4 flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <i data-lucide="check-square" class="w-4 h-4 text-primary group-hover:scale-110 transition-transform"></i>
-                        <h3 class="text-xs font-normal text-gray-900 uppercase tracking-widest" x-text="t('common.team')"></h3>
+            <!-- Team/Internal Messaging -->
+            @if(Auth::user()->role === 'provider')
+                <a href="{{ route('provider.team_tasks') }}" class="block bg-white border border-gray-100 rounded-lg shadow-sm overflow-hidden hover:bg-gray-50 transition-colors group">
+                    <div class="p-4 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="check-square" class="w-4 h-4 text-primary group-hover:scale-110 transition-transform"></i>
+                            <h3 class="text-xs font-normal text-gray-900 uppercase tracking-widest" x-text="t('common.team')"></h3>
+                        </div>
+                        <i data-lucide="external-link" class="w-4 h-4 text-gray-400 group-hover:text-primary transition-colors"></i>
                     </div>
-                    <i data-lucide="external-link" class="w-4 h-4 text-gray-400 group-hover:text-primary transition-colors"></i>
-                </div>
-            </a>
+                </a>
+            @elseif(Auth::user()->role === 'client')
+                <a href="{{ route('internal-messages.index') }}" class="block bg-white border border-gray-100 rounded-lg shadow-sm overflow-hidden hover:bg-gray-50 transition-colors group">
+                    <div class="p-4 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="message-square" class="w-4 h-4 text-primary group-hover:scale-110 transition-transform"></i>
+                            <h3 class="text-xs font-normal text-gray-900 uppercase tracking-widest" x-text="t('common.internal_communication')"></h3>
+                        </div>
+                        <i data-lucide="external-link" class="w-4 h-4 text-gray-400 group-hover:text-primary transition-colors"></i>
+                    </div>
+                </a>
+            @endif
 
             <!-- Service Tasks -->
             <div class="bg-white border border-gray-100 rounded-lg shadow-sm overflow-hidden">

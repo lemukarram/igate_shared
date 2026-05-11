@@ -41,6 +41,7 @@ return [
     'projects_count' => 'المشاريع',
     'my_services' => 'خدماتي',
     'messages' => 'الرسائل',
+    'chats' => 'الاستشارات',
     'portfolio' => 'المحفظة',
     'analytics' => 'التحليلات',
     'manage_pricing_scope' => 'إدارة الأسعار ونطاق التسليم لكل خدمة موحدة تقدمها.',
@@ -363,4 +364,6 @@ return [
     'yr' => 'سنوياً',
     'up_to' => 'حتى',
     'users' => 'مستخدمين',
+    'service_catalog' => 'كتالوج الخدمات',
+    'verified_providers' => 'مزودون موثقون',
 ];

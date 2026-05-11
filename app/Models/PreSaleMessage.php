@@ -13,6 +13,7 @@ class PreSaleMessage extends Model
         'client_id',
         'provider_id',
         'service_id',
+        'company_id',
         'sender_id',
         'message',
     ];
@@ -20,6 +21,11 @@ class PreSaleMessage extends Model
     public function client()
     {
         return $this->belongsTo(User::class, 'client_id');
+    }
+
+    public function company()
+    {
+        return $this->belongsTo(Company::class);
     }
 
     public function provider()

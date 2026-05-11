@@ -98,4 +98,20 @@ class Project extends Model
     {
         return $this->belongsTo(ProviderService::class);
     }
+
+    public function getProgressAttribute()
+    {
+        $tasks = $this->relationLoaded('tasks') ? $this->tasks : $this->tasks();
+        
+        $totalTasks = $tasks instanceof \Illuminate\Database\Eloquent\Collection ? $tasks->count() : $tasks->count();
+        if ($totalTasks === 0) {
+            return 0;
+        }
+
+        $completedTasks = $tasks instanceof \Illuminate\Database\Eloquent\Collection 
+            ? $tasks->where('status', 'done')->count() 
+            : $this->tasks()->where('status', 'done')->count();
+            
+        return round(($completedTasks / $totalTasks) * 100);
+    }
 }

@@ -41,6 +41,7 @@ return [
     'projects_count' => 'Projects',
     'my_services' => 'My Services',
     'messages' => 'Messages',
+    'chats' => 'Consultations',
     'portfolio' => 'Portfolio',
     'analytics' => 'Analytics',
     'manage_pricing_scope' => 'Manage pricing and delivery scope for each standardized service you provide.',
@@ -363,4 +364,6 @@ return [
     'yr' => 'yr',
     'up_to' => 'Up to',
     'users' => 'Users',
+    'service_catalog' => 'Service Catalog',
+    'verified_providers' => 'Verified Providers',
 ];
