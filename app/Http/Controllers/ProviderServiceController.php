@@ -13,7 +13,28 @@ class ProviderServiceController extends Controller
     public function index()
     {
         $allServices = Service::all();
-        $myServices = ProviderService::where('provider_id', Auth::id())->with('service')->withCount('projects')->get();
+        $providerId = Auth::id();
+        
+        $myServices = ProviderService::where('provider_id', $providerId)
+            ->with(['service'])
+            ->get();
+
+        // Manually load projects and pre-sale messages to handle multi-column matching correctly
+        foreach ($myServices as $ps) {
+            $ps->projects = \App\Models\Project::where('provider_id', $providerId)
+                ->where('service_id', $ps->service_id)
+                ->with('client')
+                ->get();
+            
+            $ps->projects_count = $ps->projects->count();
+
+            $ps->preSaleMessages = \App\Models\PreSaleMessage::where('provider_id', $providerId)
+                ->where('service_id', $ps->service_id)
+                ->with('client')
+                ->latest()
+                ->get();
+        }
+
         return view('provider.services.index', compact('allServices', 'myServices'));
     }
 

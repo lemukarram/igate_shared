@@ -156,17 +156,21 @@ class DatabaseSeeder extends Seeder
 
         foreach ($demoProjects as $dp) {
             if (!$dp['service']) continue;
-            
+
+            $ps = ProviderService::where('provider_id', $hrUser->id)
+                ->where('service_id', $dp['service']->id)
+                ->first();
+
             $project = Project::create([
                 'client_id' => $clientUser->id,
                 'company_id' => $clientCompany->id,
                 'provider_id' => $hrUser->id,
                 'service_id' => $dp['service']->id,
+                'provider_service_id' => $ps ? $ps->id : null,
                 'status' => 'active',
                 'total_amount' => $dp['amount'],
                 'start_date' => now(),
             ]);
-
             Payment::create([
                 'project_id' => $project->id,
                 'user_id' => $clientUser->id,

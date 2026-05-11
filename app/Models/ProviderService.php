@@ -31,6 +31,12 @@ class ProviderService extends Model
     public function projects()
     {
         return $this->hasMany(Project::class, 'service_id', 'service_id')
-                    ->whereColumn('provider_id', 'provider_services.provider_id');
+            ->whereColumn('projects.provider_id', 'provider_services.provider_id');
+    }
+
+    public function preSaleMessages()
+    {
+        return $this->hasMany(PreSaleMessage::class, 'service_id', 'service_id')
+            ->whereColumn('pre_sale_messages.provider_id', 'provider_services.provider_id');
     }
 }

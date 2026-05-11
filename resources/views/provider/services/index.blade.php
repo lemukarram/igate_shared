@@ -21,9 +21,9 @@
                 <span x-text="t('common.active_offerings')"></span>
             </h2>
             
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 @forelse($myServices as $ps)
-                <div class="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all">
+                <div class="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all flex flex-col" x-data="{ activeTab: null }">
                     <div class="flex items-center justify-between mb-6">
                         <div class="flex items-center gap-4">
                             <div class="w-12 h-12 bg-primary-light rounded-xl flex items-center justify-center text-primary">
@@ -47,7 +47,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                    <div class="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-2xl border border-gray-100 mb-6">
                         <div>
                             <span class="block text-[10px] font-normal text-gray-400 uppercase tracking-widest mb-1" x-text="t('common.status')"></span>
                             <span class="text-xs font-normal uppercase {{ $ps->is_active ? 'text-emerald-600' : 'text-red-600' }}" x-text="{{ $ps->is_active ? 'true' : 'false' }} ? t('common.active') : t('common.inactive')"></span>
@@ -66,6 +66,82 @@
                                 <i data-lucide="star" class="w-3 h-3 fill-current mr-1"></i> 5.0
                             </span>
                         </div>
+                    </div>
+
+                    <!-- Action Tabs -->
+                    <div class="flex border-t border-gray-50 pt-4 gap-2 mt-auto">
+                        <button @click="activeTab = activeTab === 'projects' ? null : 'projects'" 
+                                :class="activeTab === 'projects' ? 'bg-primary text-white' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'"
+                                class="flex-1 px-4 py-2.5 rounded-xl text-xs font-normal transition-all flex items-center justify-center gap-2">
+                            <i data-lucide="layers" class="w-4 h-4"></i>
+                            <span x-text="t('common.projects')"></span>
+                        </button>
+                        <button @click="activeTab = activeTab === 'chats' ? null : 'chats'" 
+                                :class="activeTab === 'chats' ? 'bg-primary text-white' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'"
+                                class="flex-1 px-4 py-2.5 rounded-xl text-xs font-normal transition-all flex items-center justify-center gap-2">
+                            <i data-lucide="message-square" class="w-4 h-4"></i>
+                            <span x-text="t('common.pre_sale_chats')"></span>
+                        </button>
+                    </div>
+
+                    <!-- Dropdown Content -->
+                    <div x-show="activeTab" 
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 -translate-y-2"
+                         x-transition:enter-end="opacity-100 translate-y-0"
+                         class="mt-4 space-y-3 pt-4 border-t border-dashed border-gray-100">
+                        
+                        <!-- Projects List -->
+                        <template x-if="activeTab === 'projects'">
+                            <div class="space-y-2">
+                                @forelse($ps->projects as $p)
+                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100 hover:border-primary/20 transition-all group">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 bg-white rounded-lg flex items-center justify-center text-primary shadow-sm group-hover:scale-105 transition-transform">
+                                            <i data-lucide="briefcase" class="w-4 h-4"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs font-normal text-gray-900">{{ $p->client->name }}</p>
+                                            <p class="text-[9px] font-normal text-gray-400 uppercase tracking-widest">{{ $p->status }}</p>
+                                        </div>
+                                    </div>
+                                    <a href="{{ route('projects.show', $p->id) }}" class="p-1.5 bg-white text-gray-400 hover:text-primary rounded-lg transition-colors">
+                                        <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                                    </a>
+                                </div>
+                                @empty
+                                <p class="text-center text-gray-400 text-[10px] font-normal uppercase tracking-widest italic py-4" x-text="t('common.no_active_projects')"></p>
+                                @endforelse
+                            </div>
+                        </template>
+
+                        <!-- Pre-sale Chats List -->
+                        <template x-if="activeTab === 'chats'">
+                            <div class="space-y-2">
+                                @php
+                                    $uniqueChats = $ps->preSaleMessages->unique('client_id');
+                                @endphp
+                                @forelse($uniqueChats as $chat)
+                                <a href="{{ route('explore.chat', ['serviceId' => $chat->service_id, 'providerId' => $chat->provider_id, 'client_id' => $chat->client_id]) }}" 
+                                   class="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100 hover:border-primary/20 transition-all group">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 bg-white rounded-lg flex items-center justify-center text-primary shadow-sm group-hover:scale-105 transition-transform">
+                                            <i data-lucide="user" class="w-4 h-4"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs font-normal text-gray-900">{{ $chat->client->name }}</p>
+                                            <p class="text-[9px] font-normal text-gray-400 uppercase tracking-widest">{{ $chat->created_at->diffForHumans() }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="p-1.5 bg-white text-gray-400 group-hover:text-primary rounded-lg transition-colors">
+                                        <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
+                                    </div>
+                                </a>
+                                @empty
+                                <p class="text-center text-gray-400 text-[10px] font-normal uppercase tracking-widest italic py-4" x-text="t('common.no_pre_sale_chats_yet')"></p>
+                                @endforelse
+                            </div>
+                        </template>
                     </div>
                 </div>
                 @empty

@@ -229,7 +229,7 @@
                         </template>
                     </div>
                 </div>
-                <div class="flex-1 p-10 flex flex-col">
+                <div class="flex-1 p-8 flex flex-col">
                     <div class="flex items-center justify-between mb-8">
                         <h2 class="text-2xl font-normal text-gray-900 capitalize" x-text="settingsTab"></h2>
                         <button @click="settingsOpen = false" class="text-gray-400 hover:text-gray-900"><i data-lucide="x" class="w-5 h-5"></i></button>

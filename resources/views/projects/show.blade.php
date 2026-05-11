@@ -115,233 +115,270 @@
         </div>
 
         <!-- Right Side: Tasks & Progress -->
-        <div class="lg:col-span-1 space-y-6 overflow-y-auto custom-scrollbar pe-1">
+        <div class="lg:col-span-1 space-y-4 overflow-y-auto custom-scrollbar pe-1">
             
             <!-- Progress -->
-            <div class="bg-white border border-gray-100 rounded-lg p-5 shadow-sm">
-                <div class="flex justify-between items-end mb-3">
-                    <div>
-                        <p class="text-xs font-normal text-gray-500 uppercase tracking-wider mb-1" x-text="t('project.progress')"></p>
-                        @php
-                            $totalTasks = $project->tasks->count();
-                            $completedTasks = $project->tasks->where('status', 'done')->count();
-                            $progress = $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100) : 0;
-                        @endphp
-                        <h3 class="text-2xl font-normal text-gray-900">{{ $progress }}%</h3>
-                    </div>
-                    <div class="w-10 h-10 rounded-full border-4 border-primary-light flex items-center justify-center">
+            <div class="bg-white border border-gray-100 rounded-lg shadow-sm overflow-hidden">
+                <button @click="sectionsOpen.progress = !sectionsOpen.progress" class="w-full p-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
+                    <div class="flex items-center gap-2">
                         <i data-lucide="activity" class="w-4 h-4 text-primary"></i>
+                        <h3 class="text-xs font-normal text-gray-900 uppercase tracking-widest" x-text="t('project.progress')"></h3>
                     </div>
-                </div>
-                <div class="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
-                    <div class="h-full bg-primary transition-all duration-1000" style="width: {{ $progress }}%"></div>
+                    <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400 transition-transform" :class="sectionsOpen.progress ? 'rotate-180' : ''"></i>
+                </button>
+                <div x-show="sectionsOpen.progress" x-collapse class="px-4 pb-4 pt-0">
+                    <div class="flex justify-between items-end mb-3">
+                        <div>
+                            @php
+                                $totalTasks = $project->tasks->count();
+                                $completedTasks = $project->tasks->where('status', 'done')->count();
+                                $progress = $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100) : 0;
+                            @endphp
+                            <h3 class="text-2xl font-normal text-gray-900">{{ $progress }}%</h3>
+                        </div>
+                    </div>
+                    <div class="h-2 w-full bg-gray-100 rounded-lg overflow-hidden">
+                        <div class="h-full bg-primary transition-all duration-1000" style="width: {{ $progress }}%"></div>
+                    </div>
                 </div>
             </div>
 
+            <!-- Team -->
+            <a href="{{ route('provider.team_tasks') }}" class="block bg-white border border-gray-100 rounded-lg shadow-sm overflow-hidden hover:bg-gray-50 transition-colors group">
+                <div class="p-4 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="check-square" class="w-4 h-4 text-primary group-hover:scale-110 transition-transform"></i>
+                        <h3 class="text-xs font-normal text-gray-900 uppercase tracking-widest" x-text="t('common.team')"></h3>
+                    </div>
+                    <i data-lucide="external-link" class="w-4 h-4 text-gray-400 group-hover:text-primary transition-colors"></i>
+                </div>
+            </a>
+
             <!-- Service Tasks -->
-            <div class="bg-white border border-gray-100 rounded-lg p-5 shadow-sm flex flex-col">
-                <h3 class="text-sm font-normal text-gray-900 mb-5" x-text="t('project.service_tasks')"></h3>
-                <div class="space-y-3">
-                    @forelse($project->tasks as $task)
-                    <div class="p-3 rounded-lg border {{ $task->status === 'done' ? 'bg-gray-50 border-gray-200' : 'bg-white border-gray-100 hover:border-primary/20' }} transition-colors cursor-pointer group" @click="openTaskModal({{ json_encode($task) }})">
-                        <div class="flex items-start gap-3">
-                            <div class="flex-shrink-0 w-5 h-5 rounded {{ $task->status === 'done' ? 'bg-primary border-primary text-white' : 'bg-white border-gray-300 text-transparent group-hover:border-primary' }} border flex items-center justify-center transition-colors">
-                                <i data-lucide="check" class="w-3 h-3"></i>
-                            </div>
-                            <div class="flex-1">
-                                <div class="flex items-center justify-between">
-                                    <p class="text-sm font-normal {{ $task->status === 'done' ? 'text-gray-500 line-through' : 'text-gray-800' }}">{{ $task->title }}</p>
-                                    @if($task->status === 'done')
-                                        @if($task->is_verified)
-                                            <span class="text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded font-normal" x-text="t('project.verified')"></span>
-                                        @else
-                                            <span class="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-normal" x-text="t('project.not_verified')"></span>
+            <div class="bg-white border border-gray-100 rounded-lg shadow-sm overflow-hidden">
+                <button @click="sectionsOpen.tasks = !sectionsOpen.tasks" class="w-full p-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="list-checks" class="w-4 h-4 text-primary"></i>
+                        <h3 class="text-xs font-normal text-gray-900 uppercase tracking-widest" x-text="t('project.service_tasks')"></h3>
+                    </div>
+                    <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400 transition-transform" :class="sectionsOpen.tasks ? 'rotate-180' : ''"></i>
+                </button>
+                <div x-show="sectionsOpen.tasks" x-collapse class="px-4 py-4">
+                    <div class="space-y-2">
+                        @forelse($project->tasks as $task)
+                        <div class="p-2.5 rounded border {{ $task->status === 'done' ? 'bg-gray-50 border-gray-200' : 'bg-white border-gray-100 hover:border-primary/20' }} transition-colors cursor-pointer group" @click="openTaskModal({{ json_encode($task) }})">
+                            <div class="flex items-start gap-3">
+                                <div class="flex-shrink-0 w-4 h-4 rounded {{ $task->status === 'done' ? 'bg-primary border-primary text-white' : 'bg-white border-gray-300 text-transparent group-hover:border-primary' }} border flex items-center justify-center transition-colors">
+                                    <i data-lucide="check" class="w-2.5 h-2.5"></i>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center justify-between gap-2">
+                                        <p class="text-xs font-normal truncate {{ $task->status === 'done' ? 'text-gray-500 line-through' : 'text-gray-800' }}">{{ $task->title }}</p>
+                                        @if($task->status === 'done')
+                                            @if($task->is_verified)
+                                                <span class="text-[8px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded uppercase font-normal shrink-0" x-text="t('project.verified')"></span>
+                                            @else
+                                                <span class="text-[8px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded uppercase font-normal shrink-0" x-text="t('project.not_verified')"></span>
+                                            @endif
                                         @endif
+                                    </div>
+                                    @if($task->status === 'done' && !$task->is_verified && Auth::user()->role === 'client')
+                                    <form action="{{ route('tasks.verify', $task->id) }}" method="POST" @click.stop class="mt-2">
+                                        @csrf
+                                        <button type="submit" class="text-[9px] bg-primary text-white px-2 py-1 rounded hover:bg-primary-dark transition-colors font-normal uppercase tracking-widest">
+                                            <span x-text="t('project.verify_task')"></span>
+                                        </button>
+                                    </form>
                                     @endif
                                 </div>
-                                @if($task->status === 'done' && !$task->is_verified && Auth::user()->role === 'client')
-                                <form action="{{ route('tasks.verify', $task->id) }}" method="POST" @click.stop class="mt-2">
-                                    @csrf
-                                    <button type="submit" class="text-[10px] bg-primary text-white px-2 py-1 rounded hover:bg-primary-dark transition-colors font-normal">
-                                        <i data-lucide="shield-check" class="w-3 h-3 inline me-1"></i>
-                                        <span x-text="t('project.verify_task')"></span>
-                                    </button>
-                                </form>
-                                @endif
                             </div>
                         </div>
+                        @empty
+                        <p class="text-[10px] text-gray-500 italic p-3 text-center uppercase tracking-widest" x-text="t('project.no_tasks')"></p>
+                        @endforelse
                     </div>
-                    @empty
-                    <p class="text-sm text-gray-500 italic p-3 text-center" x-text="t('project.no_tasks')"></p>
-                    @endforelse
                 </div>
             </div>
 
             <!-- Vault -->
-            <div class="bg-white border border-gray-100 rounded-lg p-5 shadow-sm">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-sm font-normal text-gray-900" x-text="t('project.vault')"></h3>
-                    <i data-lucide="folder" class="w-4 h-4 text-gray-400"></i>
-                </div>
-                <div class="space-y-2">
-                    @forelse($project->documents as $doc)
-                    <div class="flex items-center justify-between p-2 rounded hover:bg-gray-50 transition-all border border-transparent hover:border-gray-100">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded bg-primary-light flex items-center justify-center text-primary">
-                                <i data-lucide="file-text" class="w-4 h-4"></i>
-                            </div>
-                            <div class="overflow-hidden">
-                                <p class="text-xs font-normal text-gray-800 truncate max-w-[120px]">{{ $doc->name }}</p>
-                                <p class="text-[10px] text-gray-400">{{ $doc->created_at->diffForHumans() }}</p>
-                            </div>
-                        </div>
-                        <a href="{{ asset('storage/' . $doc->file_path) }}" target="_blank" class="text-gray-400 hover:text-primary">
-                            <i data-lucide="download" class="w-3 h-3"></i>
-                        </a>
+            <div class="bg-white border border-gray-100 rounded-lg shadow-sm overflow-hidden">
+                <button @click="sectionsOpen.vault = !sectionsOpen.vault" class="w-full p-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="folder" class="w-4 h-4 text-primary"></i>
+                        <h3 class="text-xs font-normal text-gray-900 uppercase tracking-widest" x-text="t('project.vault')"></h3>
                     </div>
-                    @empty
-                    <p class="text-[10px] text-gray-400 italic text-center py-4" x-text="t('project.no_files')"></p>
-                    @endforelse
-                </div>
-                @if(Auth::user()->role === 'provider')
-                <button @click="fileUploadModalOpen = true" class="w-full mt-3 py-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 border-dashed rounded-lg text-xs font-normal text-gray-600 transition-all flex items-center justify-center gap-2">
-                    <i data-lucide="upload" class="w-3 h-3"></i>
-                    <span x-text="t('project.upload_file')"></span>
+                    <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400 transition-transform" :class="sectionsOpen.vault ? 'rotate-180' : ''"></i>
                 </button>
-                @endif
+                <div x-show="sectionsOpen.vault" x-collapse class="px-4 pb-4 pt-0">
+                    <div class="space-y-1.5">
+                        @forelse($project->documents as $doc)
+                        <div class="flex items-center justify-between p-2 rounded hover:bg-gray-50 transition-all border border-transparent hover:border-gray-100">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <div class="w-7 h-7 rounded bg-primary-light flex items-center justify-center text-primary shrink-0">
+                                    <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="text-[10px] font-normal text-gray-800 truncate max-w-[100px]">{{ $doc->name }}</p>
+                                    <p class="text-[8px] text-gray-400">{{ $doc->created_at->diffForHumans() }}</p>
+                                </div>
+                            </div>
+                            <a href="{{ asset('storage/' . $doc->file_path) }}" target="_blank" class="text-gray-400 hover:text-primary shrink-0">
+                                <i data-lucide="download" class="w-3 h-3"></i>
+                            </a>
+                        </div>
+                        @empty
+                        <p class="text-[10px] text-gray-400 italic text-center py-4 uppercase tracking-widest" x-text="t('project.no_files')"></p>
+                        @endforelse
+                    </div>
+                    @if(Auth::user()->role === 'provider')
+                    <button @click="fileUploadModalOpen = true" class="w-full mt-2 py-1.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 border-dashed rounded text-[10px] font-normal text-gray-600 transition-all flex items-center justify-center gap-2 uppercase tracking-widest">
+                        <i data-lucide="upload" class="w-3 h-3"></i>
+                        <span x-text="t('project.upload_file')"></span>
+                    </button>
+                    @endif
+                </div>
             </div>
 
             <!-- Project Management -->
-            <div class="bg-white border border-gray-100 rounded-lg p-5 shadow-sm">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-sm font-normal text-gray-900" x-text="t('project.project_management')"></h3>
-                    <button @click="openHistory()" class="text-[10px] font-normal text-primary hover:underline" x-text="t('project.history')"></button>
-                </div>
-                
-                <div class="space-y-2">
-                    <!-- Scenario 1: Successful Completion -->
-                    @if(Auth::user()->role === 'provider' && $project->status === 'active' && !$project->provider_marked_complete)
-                    <form action="{{ route('projects.complete', $project->id) }}" method="POST">
-                        @csrf
-                        <button type="submit" class="w-full py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs font-normal transition-all flex items-center justify-center gap-2">
-                            <i data-lucide="check-circle" class="w-3 h-3"></i>
-                            <span x-text="t('project.mark_complete')"></span>
-                        </button>
-                    </form>
-                    @endif
-
-                    @if(Auth::user()->role === 'client' && $project->provider_marked_complete && $project->status !== 'completed')
-                    <div class="flex gap-2">
-                        <form action="{{ route('projects.approve', $project->id) }}" method="POST" class="flex-1">
-                            @csrf
-                            <button type="submit" class="w-full py-2 bg-primary text-white rounded-lg text-xs font-normal transition-all flex items-center justify-center gap-2">
-                                <i data-lucide="award" class="w-3 h-3"></i>
-                                <span x-text="t('common.approve')"></span>
-                            </button>
-                        </form>
-                        <button @click="rejectModalOpen = true" class="px-3 py-2 bg-red-50 text-red-600 rounded-lg text-xs font-normal hover:bg-red-100 transition-all">
-                            <i data-lucide="x" class="w-3 h-3"></i>
-                        </button>
+            <div class="bg-white border border-gray-100 rounded-lg shadow-sm overflow-hidden">
+                <button @click="sectionsOpen.management = !sectionsOpen.management" class="w-full p-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="settings-2" class="w-4 h-4 text-primary"></i>
+                        <h3 class="text-xs font-normal text-gray-900 uppercase tracking-widest" x-text="t('project.project_management')"></h3>
                     </div>
-                    @endif
-
-                    <!-- Scenario 3: Mutual Cancellation -->
-                    @if($project->status === 'active' || $project->status === 'pending')
-                        @if(!$project->mutual_cancellation_requested)
-                        <form action="{{ route('projects.cancel-request', $project->id) }}" method="POST">
+                    <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400 transition-transform" :class="sectionsOpen.management ? 'rotate-180' : ''"></i>
+                </button>
+                <div x-show="sectionsOpen.management" x-collapse class="px-4 pb-4 pt-0">
+                    <div class="flex items-center justify-between mb-3">
+                        <p class="text-[10px] font-normal text-gray-400 uppercase tracking-widest" x-text="t('project.actions')"></p>
+                        <button @click="openHistory()" class="text-[10px] font-normal text-primary hover:underline uppercase tracking-widest" x-text="t('project.history')"></button>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <!-- Scenario 1: Successful Completion -->
+                        @if(Auth::user()->role === 'provider' && $project->status === 'active' && !$project->provider_marked_complete)
+                        <form action="{{ route('projects.complete', $project->id) }}" method="POST">
                             @csrf
-                            <button type="submit" class="w-full py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-xs font-normal transition-all flex items-center justify-center gap-2">
-                                <i data-lucide="x-circle" class="w-3 h-3"></i>
-                                <span x-text="t('project.request_cancellation')"></span>
+                            <button type="submit" class="w-full py-2 bg-green-600 hover:bg-green-700 text-white rounded text-xs font-normal transition-all flex items-center justify-center gap-2 uppercase tracking-widest">
+                                <i data-lucide="check-circle" class="w-3 h-3"></i>
+                                <span x-text="t('project.mark_complete')"></span>
                             </button>
                         </form>
-                        @else
-                            @if(($project->cancellation_requested_by === 'client' && Auth::user()->role === 'provider') || ($project->cancellation_requested_by === 'provider' && Auth::user()->role === 'client'))
-                            <div class="flex gap-2">
-                                <form action="{{ route('projects.confirm-cancellation', $project->id) }}" method="POST" class="flex-1">
-                                    @csrf
-                                    <button type="submit" class="w-full py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-normal transition-all flex items-center justify-center gap-2">
-                                        <i data-lucide="alert-triangle" class="w-3 h-3"></i>
-                                        <span x-text="t('common.confirm')"></span>
-                                    </button>
-                                </form>
-                                <button @click="rejectModalOpen = true" class="px-3 py-2 bg-red-50 text-red-600 rounded-lg text-xs font-normal hover:bg-red-100 transition-all">
-                                    <i data-lucide="x" class="w-3 h-3"></i>
+                        @endif
+
+                        @if(Auth::user()->role === 'client' && $project->provider_marked_complete && $project->status !== 'completed')
+                        <div class="flex gap-2">
+                            <form action="{{ route('projects.approve', $project->id) }}" method="POST" class="flex-1">
+                                @csrf
+                                <button type="submit" class="w-full py-2 bg-primary text-white rounded text-xs font-normal transition-all flex items-center justify-center gap-2 uppercase tracking-widest">
+                                    <i data-lucide="award" class="w-3 h-3"></i>
+                                    <span x-text="t('common.approve')"></span>
                                 </button>
-                            </div>
+                            </form>
+                            <button @click="rejectModalOpen = true" class="px-3 py-2 bg-red-50 text-red-600 rounded text-xs font-normal hover:bg-red-100 transition-all uppercase tracking-widest">
+                                <i data-lucide="x" class="w-3 h-3"></i>
+                            </button>
+                        </div>
+                        @endif
+
+                        <!-- Scenario 3: Mutual Cancellation -->
+                        @if($project->status === 'active' || $project->status === 'pending')
+                            @if(!$project->mutual_cancellation_requested)
+                            <form action="{{ route('projects.cancel-request', $project->id) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="w-full py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded text-xs font-normal transition-all flex items-center justify-center gap-2 uppercase tracking-widest">
+                                    <i data-lucide="x-circle" class="w-3 h-3"></i>
+                                    <span x-text="t('project.request_cancellation')"></span>
+                                </button>
+                            </form>
                             @else
-                            <div class="p-2 bg-amber-50 text-amber-700 rounded text-[10px] font-normal text-center">
-                                <span x-text="t('project.cancellation_requested')"></span>
-                            </div>
+                                @if(($project->cancellation_requested_by === 'client' && Auth::user()->role === 'provider') || ($project->cancellation_requested_by === 'provider' && Auth::user()->role === 'client'))
+                                <div class="flex gap-2">
+                                    <form action="{{ route('projects.confirm-cancellation', $project->id) }}" method="POST" class="flex-1">
+                                        @csrf
+                                        <button type="submit" class="w-full py-2 bg-amber-600 hover:bg-amber-700 text-white rounded text-xs font-normal transition-all flex items-center justify-center gap-2 uppercase tracking-widest">
+                                            <i data-lucide="alert-triangle" class="w-3 h-3"></i>
+                                            <span x-text="t('common.confirm')"></span>
+                                        </button>
+                                    </form>
+                                    <button @click="rejectModalOpen = true" class="px-3 py-2 bg-red-50 text-red-600 rounded text-xs font-normal hover:bg-red-100 transition-all uppercase tracking-widest">
+                                        <i data-lucide="x" class="w-3 h-3"></i>
+                                    </button>
+                                </div>
+                                @else
+                                <div class="p-2 bg-amber-50 text-amber-700 rounded text-[10px] font-normal text-center uppercase tracking-widest">
+                                    <span x-text="t('project.cancellation_requested')"></span>
+                                </div>
+                                @endif
                             @endif
                         @endif
-                    @endif
 
-                    <!-- Scenario 5: Termination Request (2-sided) -->
-                    @if($project->status === 'active' && !$project->termination_requested && Auth::user()->role === 'provider')
-                    <button @click="terminateModalOpen = true" class="w-full py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg text-xs font-normal transition-all flex items-center justify-center gap-2">
-                        <i data-lucide="user-x" class="w-3 h-3"></i>
-                        <span x-text="t('project.terminate_project')"></span>
-                    </button>
-                    @endif
-
-                    @if($project->termination_requested && Auth::user()->role === 'client')
-                    <div class="flex gap-2">
-                        <form action="{{ route('projects.approve', $project->id) }}" method="POST" class="flex-1">
-                            @csrf
-                            <button type="submit" class="w-full py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-normal transition-all flex items-center justify-center gap-2">
-                                <i data-lucide="check" class="w-3 h-3"></i>
-                                <span x-text="t('common.approve')"></span>
-                            </button>
-                        </form>
-                        <button @click="rejectModalOpen = true" class="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg text-xs font-normal hover:bg-gray-200 transition-all">
-                            <i data-lucide="x" class="w-3 h-3"></i>
+                        <!-- Scenario 5: Termination Request (2-sided) -->
+                        @if($project->status === 'active' && !$project->termination_requested && Auth::user()->role === 'provider')
+                        <button @click="terminateModalOpen = true" class="w-full py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded text-xs font-normal transition-all flex items-center justify-center gap-2 uppercase tracking-widest">
+                            <i data-lucide="user-x" class="w-3 h-3"></i>
+                            <span x-text="t('project.terminate_project')"></span>
                         </button>
-                    </div>
-                    @endif
+                        @endif
 
-                    @if($project->status === 'completed')
-                    <div class="p-3 bg-green-50 text-green-700 rounded-lg text-xs font-normal flex items-center gap-2 justify-center">
-                        <i data-lucide="check-check" class="w-4 h-4"></i>
-                        <span x-text="t('project.status_completed')"></span>
-                    </div>
-                    @endif
-
-                    @if($project->status === 'disputed')
-                    <div class="p-3 bg-red-50 text-red-700 rounded-lg text-xs font-normal flex flex-col gap-1 items-center">
-                        <div class="flex items-center gap-2">
-                            <i data-lucide="alert-octagon" class="w-4 h-4"></i>
-                            <span x-text="t('project.status_disputed')"></span>
+                        @if($project->termination_requested && Auth::user()->role === 'client')
+                        <div class="flex gap-2">
+                            <form action="{{ route('projects.approve', $project->id) }}" method="POST" class="flex-1">
+                                @csrf
+                                <button type="submit" class="w-full py-2 bg-red-600 hover:bg-red-700 text-white rounded text-xs font-normal transition-all flex items-center justify-center gap-2 uppercase tracking-widest">
+                                    <i data-lucide="check" class="w-3 h-3"></i>
+                                    <span x-text="t('common.approve')"></span>
+                                </button>
+                            </form>
+                            <button @click="rejectModalOpen = true" class="px-3 py-2 bg-gray-100 text-gray-700 rounded text-xs font-normal hover:bg-gray-200 transition-all uppercase tracking-widest">
+                                <i data-lucide="x" class="w-3 h-3"></i>
+                            </button>
                         </div>
-                        <p class="text-[10px] opacity-75 font-normal text-center">{{ $project->dispute_reason }}</p>
-                    </div>
-                    @endif
+                        @endif
 
-                    @if($project->status === 'terminated')
-                    <div class="p-3 bg-red-50 text-red-700 rounded-lg text-xs font-normal flex flex-col gap-1 items-center">
-                        <div class="flex items-center gap-2">
-                            <i data-lucide="slash" class="w-4 h-4"></i>
-                            <span x-text="t('project.status_terminated')"></span>
+                        @if($project->status === 'completed')
+                        <div class="p-2 bg-green-50 text-green-700 rounded text-xs font-normal flex items-center gap-2 justify-center uppercase tracking-widest">
+                            <i data-lucide="check-check" class="w-4 h-4"></i>
+                            <span x-text="t('project.status_completed')"></span>
                         </div>
-                        <p class="text-[10px] opacity-75 font-normal text-center">{{ $project->termination_reason }}</p>
-                    </div>
-                    @endif
+                        @endif
 
-                    @if($project->status === 'sla_breached')
-                    <div class="p-3 bg-amber-50 text-amber-700 rounded-lg text-xs font-normal flex flex-col gap-1 items-center animate-pulse">
-                        <div class="flex items-center gap-2">
-                            <i data-lucide="clock" class="w-4 h-4"></i>
-                            <span x-text="t('project.status_sla_breached')"></span>
+                        @if($project->status === 'disputed')
+                        <div class="p-2 bg-red-50 text-red-700 rounded text-xs font-normal flex flex-col gap-1 items-center uppercase tracking-widest">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+                                <span x-text="t('project.status_disputed')"></span>
+                            </div>
+                            <p class="text-[9px] opacity-75 font-normal text-center normal-case">{{ $project->dispute_reason }}</p>
                         </div>
-                    </div>
-                    @endif
+                        @endif
 
-                    @if($project->status === 'completed' && !$userReview)
-                    <button @click="reviewModalOpen = true" class="w-full py-2 bg-primary text-white rounded-lg text-xs font-normal transition-all flex items-center justify-center gap-2">
-                        <i data-lucide="star" class="w-3 h-3"></i>
-                        <span x-text="t('project.add_review')"></span>
-                    </button>
-                    @endif
+                        @if($project->status === 'terminated')
+                        <div class="p-2 bg-red-50 text-red-700 rounded text-xs font-normal flex flex-col gap-1 items-center uppercase tracking-widest">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="slash" class="w-4 h-4"></i>
+                                <span x-text="t('project.status_terminated')"></span>
+                            </div>
+                            <p class="text-[9px] opacity-75 font-normal text-center normal-case">{{ $project->termination_reason }}</p>
+                        </div>
+                        @endif
+
+                        @if($project->status === 'sla_breached')
+                        <div class="p-2 bg-amber-50 text-amber-700 rounded text-xs font-normal flex flex-col gap-1 items-center animate-pulse uppercase tracking-widest">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="clock" class="w-4 h-4"></i>
+                                <span x-text="t('project.status_sla_breached')"></span>
+                            </div>
+                        </div>
+                        @endif
+
+                        @if($project->status === 'completed' && !$userReview)
+                        <button @click="reviewModalOpen = true" class="w-full py-2 bg-primary text-white rounded text-xs font-normal transition-all flex items-center justify-center gap-2 uppercase tracking-widest">
+                            <i data-lucide="star" class="w-3 h-3"></i>
+                            <span x-text="t('project.add_review')"></span>
+                        </button>
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>
@@ -600,6 +637,12 @@
             historyModalOpen: false,
             reviewModalOpen: false,
             rating: 5,
+            sectionsOpen: {
+                progress: true,
+                tasks: false,
+                vault: false,
+                management: false
+            },
             histories: [],
             selectedTask: {id: null, title: '', status: ''},
             openHistory() {
