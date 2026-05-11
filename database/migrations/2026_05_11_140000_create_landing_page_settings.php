@@ -67,6 +67,8 @@ return new class extends SettingsMigration
 
         $this->migrator->add('landing.footer_description_en', 'The Operating System for B2B transactions in the Kingdom of Saudi Arabia.');
         $this->migrator->add('landing.footer_description_ar', 'نظام التشغيل لمعاملات B2B في المملكة العربية السعودية.');
+        $this->migrator->add('landing.twitter_url', 'https://twitter.com/igate');
+        $this->migrator->add('landing.linkedin_url', 'https://linkedin.com/company/igate');
     }
 
     public function down(): void
