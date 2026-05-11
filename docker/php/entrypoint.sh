@@ -8,6 +8,13 @@ if [ ! -f "/var/www/public/index.php" ]; then
     exit 1
 fi
 
+# Check if vendor exists
+if [ ! -f "/var/www/vendor/autoload.php" ]; then
+    echo "ERROR: /var/www/vendor/autoload.php not found!"
+    echo "It seems the vendor directory is missing. Ensure you are not overriding /var/www with an empty volume."
+    exit 1
+fi
+
 cd /var/www
 
 # Generate key if not set
@@ -30,6 +37,14 @@ MAX_TRIES=20
 COUNT=0
 until php artisan db:show > /dev/null 2>&1; do
     COUNT=$((COUNT+1))
+    
+    # Check if artisan itself is crashing
+    if ! php artisan --version > /dev/null 2>&1; then
+        echo "ERROR: php artisan is crashing. Checking why..."
+        php artisan --version
+        exit 1
+    fi
+
     if [ $COUNT -gt $MAX_TRIES ]; then
         echo "ERROR: Database connection timed out after $MAX_TRIES attempts."
         php artisan db:show # Run one last time without redirection to show the error
