@@ -21,18 +21,7 @@ Route::middleware('guest')->group(function () {
 });
 
 // Landing Page for guests, Dashboard for auth users
-Route::get('/', function () {
-    if (Auth::check()) {
-        if (Auth::user()->role === 'admin') {
-            return view('welcome'); // Admin view
-        }
-        if (Auth::user()->role === 'provider') {
-            return redirect()->route('provider.dashboard');
-        }
-        return redirect()->route('client.dashboard');
-    }
-    return view('landing');
-});
+Route::get('/', [\App\Http\Controllers\LandingPageController::class, 'index']);
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 

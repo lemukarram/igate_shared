@@ -25,7 +25,11 @@ class ServiceResource extends Resource
             ->schema([
                 Forms\Components\Section::make('Service Details')->schema([
                     Forms\Components\TextInput::make('name')
+                        ->label('Name (EN)')
                         ->required()
+                        ->maxLength(255),
+                    Forms\Components\TextInput::make('name_ar')
+                        ->label('Name (AR)')
                         ->maxLength(255),
                     Forms\Components\Select::make('service_category_id')
                         ->label('Category')
@@ -38,7 +42,11 @@ class ServiceResource extends Resource
                     Forms\Components\Toggle::make('is_active')
                         ->default(true),
                     Forms\Components\RichEditor::make('description')
+                        ->label('Description (EN)')
                         ->required()
+                        ->columnSpanFull(),
+                    Forms\Components\RichEditor::make('description_ar')
+                        ->label('Description (AR)')
                         ->columnSpanFull(),
                 ])->columns(2),
 

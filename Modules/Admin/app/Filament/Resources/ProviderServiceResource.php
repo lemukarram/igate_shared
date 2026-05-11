@@ -17,9 +17,9 @@ class ProviderServiceResource extends Resource
 {
     protected static ?string $model = ProviderService::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-briefcase';
-    protected static ?string $navigationGroup = 'Service Provider';
-    protected static ?int $navigationSort = 2;
+    protected static ?string $navigationIcon = 'heroicon-o-list-bullet';
+    protected static ?string $navigationGroup = 'Marketplace';
+    protected static ?int $navigationSort = 3;
     protected static ?string $modelLabel = 'Marketplace Offering';
     protected static ?string $pluralModelLabel = 'Marketplace Offerings';
 

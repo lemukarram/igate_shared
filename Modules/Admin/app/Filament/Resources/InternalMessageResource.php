@@ -15,9 +15,9 @@ class InternalMessageResource extends Resource
 {
     protected static ?string $model = InternalMessage::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-chat-bubble-bottom-center-text';
-    protected static ?string $navigationGroup = 'Clients';
-    protected static ?int $navigationSort = 4;
+    protected static ?string $navigationIcon = 'heroicon-o-chat-bubble-left-right';
+    protected static ?string $navigationGroup = 'Website Management';
+    protected static ?int $navigationSort = 2;
     protected static ?string $modelLabel = 'Internal Message';
     protected static ?string $pluralModelLabel = 'Internal Messages';
 

@@ -10,7 +10,7 @@ use App\Settings\GeneralSettings as GeneralSettingsModel;
 class GeneralSettings extends SettingsPage
 {
     protected static ?string $navigationIcon = 'heroicon-o-cog-6-tooth';
-    protected static ?string $navigationGroup = 'System Settings & Communications';
+    protected static ?string $navigationGroup = 'System Settings';
     protected static ?int $navigationSort = 2;
     protected static string $settings = GeneralSettingsModel::class;
 
@@ -23,12 +23,32 @@ class GeneralSettings extends SettingsPage
                         ->label('Main Logo')
                         ->directory('settings')
                         ->image()
+                        ->previewable()
                         ->required(),
+                    Forms\Components\Placeholder::make('current_logo')
+                        ->label('Current Main Logo')
+                        ->content(function ($record, $get) {
+                            $logo = $get('logo');
+                            if (is_array($logo)) $logo = collect($logo)->first();
+                            if (!$logo || !is_string($logo)) return 'No logo set';
+                            $url = str_starts_with($logo, 'settings/') ? asset('storage/' . $logo) : asset($logo);
+                            return new \Illuminate\Support\HtmlString("<img src=\"{$url}\" style=\"height: 50px;\" class=\"object-contain\">");
+                        }),
                     Forms\Components\FileUpload::make('collapsed_logo')
                         ->label('Collapsed Logo (Icon)')
                         ->directory('settings')
                         ->image()
+                        ->previewable()
                         ->required(),
+                    Forms\Components\Placeholder::make('current_collapsed_logo')
+                        ->label('Current Collapsed Logo')
+                        ->content(function ($record, $get) {
+                            $logo = $get('collapsed_logo');
+                            if (is_array($logo)) $logo = collect($logo)->first();
+                            if (!$logo || !is_string($logo)) return 'No logo set';
+                            $url = str_starts_with($logo, 'settings/') ? asset('storage/' . $logo) : asset($logo);
+                            return new \Illuminate\Support\HtmlString("<img src=\"{$url}\" style=\"height: 50px;\" class=\"object-contain\">");
+                        }),
                 ])->columns(2),
 
                 Forms\Components\Section::make('General Configuration')->schema([

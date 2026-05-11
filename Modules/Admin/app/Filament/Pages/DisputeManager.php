@@ -15,7 +15,7 @@ class DisputeManager extends Page implements HasTable
     use InteractsWithTable;
 
     protected static ?string $navigationIcon = 'heroicon-o-scale';
-    protected static ?string $navigationGroup = 'Marketplace';
+    protected static ?string $navigationGroup = 'Operations';
     protected static ?int $navigationSort = 4;
     protected static string $view = 'modules.admin.filament.pages.dispute-manager';
 

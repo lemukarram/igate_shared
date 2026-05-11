@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ __('common.landing_title') }}</title>
+    <title>{{ $landingSettings->{"site_title_".app()->getLocale()} }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -60,7 +60,7 @@
     <nav class="fixed w-full z-50 glass-card" x-data="{ mobileMenuOpen: false }">
         <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
             <div class="flex items-center">
-                <img src="/images/logo/logo.png" alt="iGate Shared Services" class="h-10 object-contain">
+                <img src="{{ Storage::url($generalSettings->logo) }}" alt="{{ $generalSettings->site_name }}" class="h-10 object-contain">
             </div>
             
             <div class="hidden lg:flex items-center space-x-10 text-sm font-normal text-gray-600 {{ app()->getLocale() == 'ar' ? 'space-x-reverse' : '' }}">
@@ -132,27 +132,28 @@
                       <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#3da9e4] opacity-75"></span>
                       <span class="relative inline-flex rounded-full h-2 w-2 bg-[#3da9e4]"></span>
                     </span>
-                    <span>{{ __('common.operating_system_ksa') }}</span>
+                    <span>{{ $landingSettings->{"hero_badge_".app()->getLocale()} }}</span>
                 </div>
                 
                 <h1 class="text-5xl lg:text-6xl font-normal text-gray-900 leading-tight mb-6">
-                    {!! str_replace('Absolute Trust.', '<span class="theme-text">' . __('common.absolute_trust') . '</span>', __('common.hero_title')) !!}
-                    @if(app()->getLocale() == 'ar')
-                        <span class="theme-text">{{ __('common.absolute_trust') }}</span>
-                    @endif
+                    @php
+                        $title = $landingSettings->{"hero_title_".app()->getLocale()};
+                        $trust = __('common.absolute_trust');
+                    @endphp
+                    {!! str_replace($trust, '<span class="theme-text">' . $trust . '</span>', $title) !!}
                 </h1>
                 
                 <p class="text-lg text-gray-600 leading-relaxed mb-10 font-normal">
-                    {{ __('common.hero_subtitle') }}
+                    {{ $landingSettings->{"hero_subtitle_".app()->getLocale()} }}
                 </p>
                 
                 <div class="flex flex-col sm:flex-row items-center gap-4">
                     <a href="/login" class="w-full sm:w-auto px-8 py-3.5 theme-bg text-white rounded-lg font-normal hover:bg-[#2b8bc2] transition-all shadow-lg flex items-center justify-center space-x-2 {{ app()->getLocale() == 'ar' ? 'space-x-reverse' : '' }}">
-                        <span>{{ __('common.join_as_client') }}</span>
+                        <span>{{ $landingSettings->{"hero_cta_client_".app()->getLocale()} }}</span>
                         <i data-lucide="{{ app()->getLocale() == 'ar' ? 'arrow-left' : 'arrow-right' }}" class="w-5 h-5"></i>
                     </a>
                     <a href="/login" class="w-full sm:w-auto px-8 py-3.5 bg-white text-gray-800 border border-gray-200 rounded-lg font-normal hover:bg-gray-50 transition-all flex items-center justify-center space-x-2 shadow-sm">
-                        <span>{{ __('common.join_as_provider') }}</span>
+                        <span>{{ $landingSettings->{"hero_cta_provider_".app()->getLocale()} }}</span>
                     </a>
                 </div>
             </div>
@@ -193,54 +194,32 @@
     <section id="why-us" class="py-12 lg:py-24 bg-white relative">
         <div class="max-w-7xl mx-auto px-6">
             <div class="text-center mb-16">
-                <h2 class="text-3xl lg:text-4xl font-normal text-gray-900 mb-4">{{ __('common.why_igate_title') }}</h2>
-                <p class="text-gray-500 font-normal max-w-2xl mx-auto">{{ __('common.why_igate_subtitle') }}</p>
+                <h2 class="text-3xl lg:text-4xl font-normal text-gray-900 mb-4">{{ $landingSettings->{"why_title_".app()->getLocale()} }}</h2>
+                <p class="text-gray-500 font-normal max-w-2xl mx-auto">{{ $landingSettings->{"why_subtitle_".app()->getLocale()} }}</p>
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                <!-- Card 1 -->
-                <div class="p-8 rounded-lg border border-gray-100 bg-gray-50 hover:bg-white hover:shadow-xl transition-all duration-300 group cursor-pointer {{ app()->getLocale() == 'ar' ? 'text-right' : '' }}">
+                @foreach($landingSettings->why_features as $index => $feature)
+                <!-- Card {{ $index + 1 }} -->
+                <div class="p-8 rounded-lg border border-gray-100 bg-gray-50 hover:bg-white hover:shadow-xl transition-all duration-300 group cursor-pointer {{ $index % 2 != 0 ? 'mt-0 lg:mt-8' : '' }} {{ app()->getLocale() == 'ar' ? 'text-right' : '' }}">
                     <div class="w-14 h-14 bg-[#e6f4fd] rounded-lg flex items-center justify-center theme-text mb-6 group-hover:bg-[#3da9e4] group-hover:text-white transition-colors mx-auto lg:mx-0">
-                        <i data-lucide="lock" class="w-7 h-7"></i>
+                        <i data-lucide="{{ $feature['icon'] }}" class="w-7 h-7"></i>
                     </div>
-                    <h3 class="text-xl font-normal mb-3 text-gray-800">{{ __('common.escrow_security') }}</h3>
-                    <p class="text-sm text-gray-500 leading-relaxed font-normal">{{ __('common.escrow_description') }}</p>
+                    <h3 class="text-xl font-normal mb-3 text-gray-800">{{ $feature['title_'.app()->getLocale()] }}</h3>
+                    <p class="text-sm text-gray-500 leading-relaxed font-normal">{{ $feature['desc_'.app()->getLocale()] }}</p>
                 </div>
-                <!-- Card 2 -->
-                <div class="p-8 rounded-lg border border-gray-100 bg-gray-50 hover:bg-white hover:shadow-xl transition-all duration-300 group cursor-pointer mt-0 lg:mt-8 {{ app()->getLocale() == 'ar' ? 'text-right' : '' }}">
-                    <div class="w-14 h-14 bg-[#e6f4fd] rounded-lg flex items-center justify-center theme-text mb-6 group-hover:bg-[#3da9e4] group-hover:text-white transition-colors mx-auto lg:mx-0">
-                        <i data-lucide="layout-grid" class="w-7 h-7"></i>
-                    </div>
-                    <h3 class="text-xl font-normal mb-3 text-gray-800">{{ __('common.fixed_scopes') }}</h3>
-                    <p class="text-sm text-gray-500 leading-relaxed font-normal">{{ __('common.fixed_scopes_description') }}</p>
-                </div>
-                <!-- Card 3 -->
-                <div class="p-8 rounded-lg border border-gray-100 bg-gray-50 hover:bg-white hover:shadow-xl transition-all duration-300 group cursor-pointer {{ app()->getLocale() == 'ar' ? 'text-right' : '' }}">
-                    <div class="w-14 h-14 bg-[#e6f4fd] rounded-lg flex items-center justify-center theme-text mb-6 group-hover:bg-[#3da9e4] group-hover:text-white transition-colors mx-auto lg:mx-0">
-                        <i data-lucide="check-square" class="w-7 h-7"></i>
-                    </div>
-                    <h3 class="text-xl font-normal mb-3 text-gray-800">{{ __('common.verified_providers') }}</h3>
-                    <p class="text-sm text-gray-500 leading-relaxed font-normal">{{ __('common.verified_providers_description') }}</p>
-                </div>
-                <!-- Card 4 -->
-                <div class="p-8 rounded-lg border border-gray-100 bg-gray-50 hover:bg-white hover:shadow-xl transition-all duration-300 group cursor-pointer mt-0 lg:mt-8 {{ app()->getLocale() == 'ar' ? 'text-right' : '' }}">
-                    <div class="w-14 h-14 bg-[#e6f4fd] rounded-lg flex items-center justify-center theme-text mb-6 group-hover:bg-[#3da9e4] group-hover:text-white transition-colors mx-auto lg:mx-0">
-                        <i data-lucide="activity" class="w-7 h-7"></i>
-                    </div>
-                    <h3 class="text-xl font-normal mb-3 text-gray-800">{{ __('common.sla_tracking') }}</h3>
-                    <p class="text-sm text-gray-500 leading-relaxed font-normal">{{ __('common.sla_tracking_description') }}</p>
-                </div>
+                @endforeach
             </div>
         </div>
     </section>
 
     <!-- Services Grid -->
-    <section id="services" class="py-24 bg-gray-50 px-6">
+    <section id="services" class="py-12 lg:py-24 bg-gray-50 px-6">
         <div class="max-w-7xl mx-auto">
-            <div class="flex flex-col md:flex-row justify-between items-end mb-12 border-b border-gray-200 pb-6">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-8 lg:mb-12 border-b border-gray-200 pb-6">
                 <div class="max-w-2xl {{ app()->getLocale() == 'ar' ? 'text-right' : '' }}">
-                    <h2 class="text-3xl font-normal text-gray-900 mb-3">{{ __('common.core_services_catalog') }}</h2>
-                    <p class="text-gray-500 font-normal">{{ __('common.core_services_subtitle') }}</p>
+                    <h2 class="text-3xl font-normal text-gray-900 mb-3">{{ $landingSettings->{"services_title_".app()->getLocale()} }}</h2>
+                    <p class="text-gray-500 font-normal">{{ $landingSettings->{"services_subtitle_".app()->getLocale()} }}</p>
                 </div>
                 <a href="/login" class="theme-text font-normal flex items-center space-x-2 {{ app()->getLocale() == 'ar' ? 'space-x-reverse' : '' }} hover:text-[#2b8bc2] transition-colors mt-4 md:mt-0">
                     <span>{{ __('common.view_all_services') }}</span>
@@ -249,42 +228,20 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                @foreach($services as $service)
                 <div class="bg-white p-8 rounded-lg border border-gray-100 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group {{ app()->getLocale() == 'ar' ? 'text-right' : '' }}">
                     <div class="absolute top-0 {{ app()->getLocale() == 'ar' ? 'left-0 rounded-br-full -ml-12' : 'right-0 rounded-bl-full -mr-12' }} w-24 h-24 bg-[#e6f4fd] -mt-12 transition-transform group-hover:scale-110"></div>
                     <div class="w-12 h-12 bg-[#e6f4fd] rounded-md flex items-center justify-center theme-text mb-6 relative z-10 group-hover:bg-[#3da9e4] group-hover:text-white transition-colors {{ app()->getLocale() == 'ar' ? 'mr-0 ml-auto' : '' }}">
-                        <i data-lucide="landmark" class="w-6 h-6"></i>
+                        <i data-lucide="{{ $service->icon ?? 'layers' }}" class="w-6 h-6"></i>
                     </div>
-                    <h3 class="text-xl font-normal mb-3 text-gray-800">{{ __('common.zatca_vat') }}</h3>
-                    <p class="text-sm text-gray-500 leading-relaxed font-normal mb-6">{{ __('common.zatca_vat_description') }}</p>
+                    <h3 class="text-xl font-normal mb-3 text-gray-800">{{ $service->localized_name }}</h3>
+                    <div class="text-sm text-gray-500 leading-relaxed font-normal mb-6 line-clamp-3">{!! $service->localized_description !!}</div>
                     <a href="/login" class="text-sm theme-text font-normal flex items-center space-x-1 {{ app()->getLocale() == 'ar' ? 'space-x-reverse' : '' }} group-hover:underline">
                         <span>{{ __('common.learn_more') }}</span>
                         <i data-lucide="{{ app()->getLocale() == 'ar' ? 'chevron-left' : 'chevron-right' }}" class="w-4 h-4"></i>
                     </a>
                 </div>
-                <div class="bg-white p-8 rounded-lg border border-gray-100 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group {{ app()->getLocale() == 'ar' ? 'text-right' : '' }}">
-                    <div class="absolute top-0 {{ app()->getLocale() == 'ar' ? 'left-0 rounded-br-full -ml-12' : 'right-0 rounded-bl-full -mr-12' }} w-24 h-24 bg-[#e6f4fd] -mt-12 transition-transform group-hover:scale-110"></div>
-                    <div class="w-12 h-12 bg-[#e6f4fd] rounded-md flex items-center justify-center theme-text mb-6 relative z-10 group-hover:bg-[#3da9e4] group-hover:text-white transition-colors {{ app()->getLocale() == 'ar' ? 'mr-0 ml-auto' : '' }}">
-                        <i data-lucide="users" class="w-6 h-6"></i>
-                    </div>
-                    <h3 class="text-xl font-normal mb-3 text-gray-800">{{ __('common.human_capital') }}</h3>
-                    <p class="text-sm text-gray-500 leading-relaxed font-normal mb-6">{{ __('common.human_capital_description') }}</p>
-                    <a href="/login" class="text-sm theme-text font-normal flex items-center space-x-1 {{ app()->getLocale() == 'ar' ? 'space-x-reverse' : '' }} group-hover:underline">
-                        <span>{{ __('common.learn_more') }}</span>
-                        <i data-lucide="{{ app()->getLocale() == 'ar' ? 'chevron-left' : 'chevron-right' }}" class="w-4 h-4"></i>
-                    </a>
-                </div>
-                <div class="bg-white p-8 rounded-lg border border-gray-100 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group {{ app()->getLocale() == 'ar' ? 'text-right' : '' }}">
-                    <div class="absolute top-0 {{ app()->getLocale() == 'ar' ? 'left-0 rounded-br-full -ml-12' : 'right-0 rounded-bl-full -mr-12' }} w-24 h-24 bg-[#e6f4fd] -mt-12 transition-transform group-hover:scale-110"></div>
-                    <div class="w-12 h-12 bg-[#e6f4fd] rounded-md flex items-center justify-center theme-text mb-6 relative z-10 group-hover:bg-[#3da9e4] group-hover:text-white transition-colors {{ app()->getLocale() == 'ar' ? 'mr-0 ml-auto' : '' }}">
-                        <i data-lucide="scale" class="w-6 h-6"></i>
-                    </div>
-                    <h3 class="text-xl font-normal mb-3 text-gray-800">{{ __('common.legal_advisory') }}</h3>
-                    <p class="text-sm text-gray-500 leading-relaxed font-normal mb-6">{{ __('common.legal_advisory_description') }}</p>
-                    <a href="/login" class="text-sm theme-text font-normal flex items-center space-x-1 {{ app()->getLocale() == 'ar' ? 'space-x-reverse' : '' }} group-hover:underline">
-                        <span>{{ __('common.learn_more') }}</span>
-                        <i data-lucide="{{ app()->getLocale() == 'ar' ? 'chevron-left' : 'chevron-right' }}" class="w-4 h-4"></i>
-                    </a>
-                </div>
+                @endforeach
             </div>
         </div>
     </section>
@@ -293,8 +250,8 @@
     <section id="pricing" class="py-12 lg:py-24 bg-white px-6" x-data="{ role: 'client', billing: 'monthly' }">
         <div class="max-w-7xl mx-auto">
             <div class="text-center mb-10 lg:mb-16">
-                <h2 class="text-3xl lg:text-4xl font-normal text-gray-900 mb-4">{{ __('common.subscription_plans') }}</h2>
-                <p class="text-gray-500 font-normal max-w-2xl mx-auto">{{ __('common.subscription_subtitle') }}</p>
+                <h2 class="text-3xl lg:text-4xl font-normal text-gray-900 mb-4">{{ $landingSettings->{"pricing_title_".app()->getLocale()} }}</h2>
+                <p class="text-gray-500 font-normal max-w-2xl mx-auto">{{ $landingSettings->{"pricing_subtitle_".app()->getLocale()} }}</p>
                 
                 <div class="mt-10 flex flex-col items-center gap-6">
                     <!-- Role Switcher -->
@@ -316,7 +273,6 @@
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 @php
-                    $plans = \App\Models\Plan::all();
                     $clientPlans = $plans->where('type', 'client')->values();
                     $providerPlans = $plans->where('type', 'provider')->values();
                 @endphp
@@ -401,11 +357,15 @@
     </section>
 
     <!-- Footer -->
-    <footer class="bg-white border-t border-gray-200 py-16 px-6">
+    <footer class="bg-white border-t border-gray-200 py-10 lg:py-16 px-6">
         <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
             <div class="col-span-1 md:col-span-1 space-y-6 {{ app()->getLocale() == 'ar' ? 'text-right' : '' }}">
-                <img src="/images/logo/logo.png" class="h-8 object-contain {{ app()->getLocale() == 'ar' ? 'mr-0 ml-auto' : '' }}" alt="iGate Shared Services">
-                <p class="text-gray-500 font-normal text-sm leading-relaxed">{{ __('common.footer_description') }}</p>
+                @php
+                    $logoPath = $generalSettings->logo;
+                    $logoUrl = str_starts_with($logoPath, 'settings/') ? asset('storage/' . $logoPath) : asset($logoPath);
+                @endphp
+                <img src="{{ $logoUrl }}" class="h-8 object-contain {{ app()->getLocale() == 'ar' ? 'mr-0 ml-auto' : '' }}" alt="{{ $generalSettings->site_name }}">
+                <p class="text-gray-500 font-normal text-sm leading-relaxed">{{ $landingSettings->{"footer_description_".app()->getLocale()} }}</p>
             </div>
             <div class="{{ app()->getLocale() == 'ar' ? 'text-right' : '' }}">
                 <h4 class="font-normal text-gray-800 mb-6 text-sm uppercase tracking-wide">{{ __('common.marketplace') }}</h4>
@@ -435,8 +395,12 @@
         <div class="max-w-7xl mx-auto pt-8 mt-12 border-t border-gray-100 flex flex-col md:flex-row justify-between items-center text-gray-400 text-xs font-normal">
             <span>{{ __('common.copyright') }}</span>
             <div class="flex space-x-4 mt-4 md:mt-0 {{ app()->getLocale() == 'ar' ? 'space-x-reverse' : '' }}">
-                <a href="#" class="hover:theme-text"><i data-lucide="twitter" class="w-4 h-4"></i></a>
-                <a href="#" class="hover:theme-text"><i data-lucide="linkedin" class="w-4 h-4"></i></a>
+                @if($landingSettings->twitter_url)
+                    <a href="{{ $landingSettings->twitter_url }}" class="hover:theme-text"><i data-lucide="twitter" class="w-4 h-4"></i></a>
+                @endif
+                @if($landingSettings->linkedin_url)
+                    <a href="{{ $landingSettings->linkedin_url }}" class="hover:theme-text"><i data-lucide="linkedin" class="w-4 h-4"></i></a>
+                @endif
             </div>
         </div>
     </footer>

@@ -19,6 +19,8 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
+use Filament\Navigation\NavigationGroup;
+
 class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
@@ -38,6 +40,26 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->darkMode(false)
             ->font('Poppins')
+            ->navigationGroups([
+                NavigationGroup::make()
+                    ->label('Operations'),
+                NavigationGroup::make()
+                    ->label('Marketplace'),
+                NavigationGroup::make()
+                    ->label('Financials'),
+                NavigationGroup::make()
+                    ->label('Clients'),
+                NavigationGroup::make()
+                    ->label('Service Provider'),
+                NavigationGroup::make()
+                    ->label('Audit Logs'),
+                NavigationGroup::make()
+                    ->label('System Settings'),
+                NavigationGroup::make()
+                    ->label('Website Management'),
+                NavigationGroup::make()
+                    ->label('Identity'),
+            ])
             ->discoverResources(in: base_path('Modules/Admin/app/Filament/Resources'), for: 'Modules\\Admin\\Filament\\Resources')
             ->discoverPages(in: base_path('Modules/Admin/app/Filament/Pages'), for: 'Modules\\Admin\\Filament\\Pages')
             ->pages([

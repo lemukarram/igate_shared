@@ -17,7 +17,7 @@ class GlobalBroadcast extends Page implements HasForms
     use InteractsWithForms;
 
     protected static ?string $navigationIcon = 'heroicon-o-megaphone';
-    protected static ?string $navigationGroup = 'System Settings & Communications';
+    protected static ?string $navigationGroup = 'System Settings';
     protected static ?int $navigationSort = 1;
     protected static string $view = 'modules.admin.filament.pages.global-broadcast';
 

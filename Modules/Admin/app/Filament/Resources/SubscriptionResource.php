@@ -16,8 +16,8 @@ class SubscriptionResource extends Resource
     protected static ?string $model = Subscription::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-credit-card';
-    protected static ?string $navigationGroup = 'Operations';
-    protected static ?int $navigationSort = 2;
+    protected static ?string $navigationGroup = 'Financials';
+    protected static ?int $navigationSort = 4;
 
     public static function form(Form $form): Form
     {

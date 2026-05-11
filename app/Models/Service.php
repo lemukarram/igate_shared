@@ -9,11 +9,22 @@ class Service extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'description', 'subtasks', 'category', 'service_category_id', 'icon'];
+    protected $fillable = ['name', 'name_ar', 'description', 'description_ar', 'subtasks', 'category', 'service_category_id', 'icon', 'is_active', 'protection_block'];
 
     protected $casts = [
         'subtasks' => 'array',
+        'is_active' => 'boolean',
     ];
+
+    public function getLocalizedNameAttribute()
+    {
+        return app()->getLocale() === 'ar' && $this->name_ar ? $this->name_ar : $this->name;
+    }
+
+    public function getLocalizedDescriptionAttribute()
+    {
+        return app()->getLocale() === 'ar' && $this->description_ar ? $this->description_ar : $this->description;
+    }
 
     public function serviceCategory()
     {

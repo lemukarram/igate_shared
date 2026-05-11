@@ -16,8 +16,8 @@ class TaskResource extends Resource
     protected static ?string $model = Task::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-check-circle';
-    protected static ?string $navigationGroup = 'Service Provider';
-    protected static ?int $navigationSort = 4;
+    protected static ?string $navigationGroup = 'Operations';
+    protected static ?int $navigationSort = 2;
     protected static ?string $modelLabel = 'Task Manager';
     protected static ?string $pluralModelLabel = 'Task Manager';
 
