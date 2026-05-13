@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Modules\Payments\Services\TapPaymentService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Models\Payment;
 
 class TapWebhookController extends Controller
 {
@@ -92,15 +93,13 @@ class TapWebhookController extends Controller
                         ]);
 
                         // Record in payments table for application logic
-                        DB::table('payments')->insert([
+                        Payment::create([
                             'project_id' => $transaction->project_id,
                             'user_id' => $transaction->user_id,
                             'amount' => $transaction->amount,
                             'payment_method' => 'tap',
                             'transaction_id' => $tapChargeId,
                             'status' => $status === 'captured' ? 'released' : 'held_in_escrow',
-                            'created_at' => now(),
-                            'updated_at' => now(),
                         ]);
 
                         // Record history
@@ -121,14 +120,13 @@ class TapWebhookController extends Controller
                             $user->enforcePlanLimits();
 
                             // Record in payments table (optional, but good for record keeping)
-                            DB::table('payments')->insert([
+                            Payment::create([
+                                'plan_id' => $transaction->plan_id,
                                 'user_id' => $transaction->user_id,
                                 'amount' => $transaction->amount,
                                 'payment_method' => 'tap',
                                 'transaction_id' => $tapChargeId,
                                 'status' => 'released',
-                                'created_at' => now(),
-                                'updated_at' => now(),
                             ]);
                         }
                     }

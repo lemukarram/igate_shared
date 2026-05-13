@@ -377,4 +377,12 @@ return [
     'plan_features' => 'Plan Features',
     'plan' => 'Plan',
     'update_plan' => 'Update Plan',
+    'payment_successful' => 'Payment Successful!',
+    'payment_failed' => 'Payment Failed',
+    'transaction_processed_success' => 'Your transaction has been processed successfully.',
+    'payment_processing_issue' => 'There was an issue processing your payment. Please try again.',
+    'transaction_id' => 'Transaction ID',
+    'tap_reference' => 'Tap Reference',
+    'view_project' => 'View Project',
+    'return_dashboard' => 'Return to Dashboard',
 ];

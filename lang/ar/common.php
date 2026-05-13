@@ -377,4 +377,12 @@ return [
     'plan_features' => 'ميزات الخطة',
     'plan' => 'الخطة',
     'update_plan' => 'تحديث الخطة',
+    'payment_successful' => 'تمت عملية الدفع بنجاح!',
+    'payment_failed' => 'فشلت عملية الدفع',
+    'transaction_processed_success' => 'تمت معالجة معاملتك بنجاح.',
+    'payment_processing_issue' => 'حدثت مشكلة أثناء معالجة الدفع. يرجى المحاولة مرة أخرى.',
+    'transaction_id' => 'رقم المعاملة',
+    'tap_reference' => 'مرجع Tap',
+    'view_project' => 'عرض المشروع',
+    'return_dashboard' => 'العودة إلى لوحة التحكم',
 ];

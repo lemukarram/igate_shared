@@ -277,15 +277,14 @@ class CheckoutController extends Controller
                         $user->enforcePlanLimits();
                             
                         // Record payment entry for billing history
-                        DB::table('payments')->insert([
+                        Payment::create([
                             'user_id' => $user->id,
                             'amount' => $transaction->amount,
                             'payment_method' => 'tap',
                             'transaction_id' => $tapChargeId,
                             'status' => 'released',
-                            'created_at' => now(),
-                            'updated_at' => now(),
-                            'project_id' => 0,
+                            'project_id' => null,
+                            'plan_id' => $transaction->plan_id,
                         ]);
 
                         $message = 'Plan upgraded to ' . ($user->plan->name ?? 'new plan') . ' successfully!';
@@ -301,15 +300,13 @@ class CheckoutController extends Controller
                     ]);
 
                     // Record payment entry
-                    DB::table('payments')->insert([
+                    Payment::create([
                         'project_id' => $transaction->project_id,
                         'user_id' => $transaction->user_id,
                         'amount' => $transaction->amount,
                         'payment_method' => 'tap',
                         'transaction_id' => $tapChargeId,
                         'status' => $mappedStatus === 'captured' ? 'released' : 'held_in_escrow',
-                        'created_at' => now(),
-                        'updated_at' => now(),
                     ]);
 
                     // Record history
