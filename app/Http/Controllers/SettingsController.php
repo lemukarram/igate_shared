@@ -223,14 +223,35 @@ class SettingsController extends Controller
             'plan_id' => 'required|exists:plans,id',
         ]);
 
-        $plan = Plan::findOrFail($validated['plan_id']);
+        $user = Auth::user();
+        $newPlan = Plan::findOrFail($validated['plan_id']);
+        $currentPlan = $user->plan;
         
-        if ($plan->type !== Auth::user()->role) {
+        if ($newPlan->type !== $user->role) {
             return redirect()->back()->withErrors(['error' => 'Invalid plan type.']);
         }
 
-        Auth::user()->update(['plan_id' => $plan->id]);
-        Auth::user()->enforcePlanLimits();
+        // If same plan, just return
+        if ($currentPlan && $currentPlan->id == $newPlan->id) {
+            return redirect()->back();
+        }
+
+        // Upgrade logic: new price > current price (or no current plan and new price > 0)
+        $isUpgrade = false;
+        if (!$currentPlan) {
+            $isUpgrade = $newPlan->price > 0;
+        } else {
+            $isUpgrade = $newPlan->price > $currentPlan->price;
+        }
+
+        if ($isUpgrade) {
+            // Redirect to plan checkout review
+            return redirect()->route('checkout.plan', $newPlan->id);
+        }
+
+        // Downgrade or Free plan: update directly
+        $user->update(['plan_id' => $newPlan->id]);
+        $user->enforcePlanLimits();
 
         return redirect()->back()->with('success', 'Subscription plan updated successfully.');
     }

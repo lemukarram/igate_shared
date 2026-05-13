@@ -369,4 +369,12 @@ return [
     'secure_checkout' => 'Secure Checkout',
     'tap_redirect_notice' => 'You will be redirected to Tap Payments to complete your transaction securely.',
     'password' => 'Password',
+    'upgrade_notice' => 'You are upgrading to a higher plan. You will be redirected to the checkout page to complete the payment.',
+    'downgrade_notice' => 'You are downgrading your plan. Changes will be applied immediately, and some features may be limited according to the new plan.',
+    'review_plan_upgrade' => 'Review & Upgrade Plan',
+    'confirm_plan_subscription' => 'Confirm your subscription upgrade.',
+    'subscription_fee' => 'Subscription Fee',
+    'plan_features' => 'Plan Features',
+    'plan' => 'Plan',
+    'update_plan' => 'Update Plan',
 ];

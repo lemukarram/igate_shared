@@ -113,6 +113,25 @@ class TapWebhookController extends Controller
                             'updated_at' => now(),
                         ]);
                     }
+
+                    if ($transaction->plan_id && $event === 'charge.succeeded') {
+                        $user = \App\Models\User::find($transaction->user_id);
+                        if ($user) {
+                            $user->update(['plan_id' => $transaction->plan_id]);
+                            $user->enforcePlanLimits();
+
+                            // Record in payments table (optional, but good for record keeping)
+                            DB::table('payments')->insert([
+                                'user_id' => $transaction->user_id,
+                                'amount' => $transaction->amount,
+                                'payment_method' => 'tap',
+                                'transaction_id' => $tapChargeId,
+                                'status' => 'released',
+                                'created_at' => now(),
+                                'updated_at' => now(),
+                            ]);
+                        }
+                    }
                     break;
 
                 case 'charge.failed':

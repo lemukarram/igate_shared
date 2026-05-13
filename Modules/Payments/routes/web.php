@@ -19,4 +19,4 @@ Route::middleware(['auth'])->group(function () {
 });
 
 // The callback doesn't need auth, as it's returning from a 3rd party.
-Route::get('/payments/callback', [CheckoutController::class, 'callback'])->name('payments.callback');
+Route::get('/payments/callback', [\App\Http\Controllers\CheckoutController::class, 'callback'])->name('payments.callback');

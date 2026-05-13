@@ -544,7 +544,22 @@
                         </div>
 
                         <!-- Plans Tab -->
-                        <div x-show="settingsTab === 'plans'" class="space-y-4 animate-in fade-in duration-300">
+                        <div x-show="settingsTab === 'plans'" 
+                             x-data="{ 
+                                selectedPlanId: {{ Auth::user()->plan_id ?? 'null' }},
+                                currentPlanId: {{ Auth::user()->plan_id ?? 'null' }},
+                                plans: {{ \App\Models\Plan::where('type', Auth::user()->role)->get()->mapWithKeys(fn($p) => [$p->id => (float)$p->price])->toJson() }},
+                                currentPrice: {{ Auth::user()->plan->price ?? 0 }},
+                                get isUpgrade() {
+                                    if (!this.selectedPlanId || this.selectedPlanId == this.currentPlanId) return false;
+                                    return this.plans[this.selectedPlanId] > this.currentPrice;
+                                },
+                                get isDowngrade() {
+                                    if (!this.selectedPlanId || this.selectedPlanId == this.currentPlanId) return false;
+                                    return this.plans[this.selectedPlanId] < this.currentPrice;
+                                }
+                             }"
+                             class="space-y-4 animate-in fade-in duration-300">
                             <div class="p-6 border border-primary/20 bg-primary-light rounded-xl">
                                 <div class="flex items-center justify-between mb-4">
                                     <div><p class="text-[10px] font-normal text-primary uppercase tracking-widest mb-1" x-text="t('common.current_plan')"></p><h3 class="text-2xl font-normal text-gray-900">{{ Auth::user()->plan->name ?? '-' }}</h3></div>
@@ -555,14 +570,32 @@
                                     <button type="button" class="text-primary font-normal uppercase tracking-widest text-xs" x-text="t('common.view_invoices')"></button>
                                 </div>
                             </div>
+
+                            <div x-show="isUpgrade" class="p-4 bg-blue-50 border border-blue-100 rounded-xl flex items-start space-x-3 animate-in slide-in-from-top duration-300">
+                                <i data-lucide="info" class="w-5 h-5 text-blue-600 mt-0.5"></i>
+                                <div>
+                                    <p class="text-xs text-blue-800 font-normal" x-text="t('common.upgrade_notice')"></p>
+                                </div>
+                            </div>
+
+                            <div x-show="isDowngrade" class="p-4 bg-amber-50 border border-amber-100 rounded-xl flex items-start space-x-3 animate-in slide-in-from-top duration-300">
+                                <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-600 mt-0.5"></i>
+                                <div>
+                                    <p class="text-xs text-amber-800 font-normal" x-text="t('common.downgrade_notice')"></p>
+                                </div>
+                            </div>
+
                             <form id="settings-plans-form" action="{{ route('settings.plan') }}" method="POST" class="space-y-4 mt-6">
                                 @csrf
                                 <h4 class="text-sm font-normal" x-text="t('common.upgrade_plan')"></h4>
                                 <div class="grid grid-cols-1 gap-3">
                                     @foreach(\App\Models\Plan::where('type', Auth::user()->role)->get() as $plan)
-                                    <label class="flex items-center justify-between p-4 border rounded-lg cursor-pointer transition-all hover:bg-gray-50 {{ Auth::user()->plan_id == $plan->id ? 'border-primary bg-primary-light' : 'border-gray-200' }}">
+                                    <label class="flex items-center justify-between p-4 border rounded-lg cursor-pointer transition-all hover:bg-gray-50"
+                                           :class="selectedPlanId == {{ $plan->id }} ? 'border-primary bg-primary-light' : 'border-gray-200'">
                                         <div class="flex items-center space-x-3 w-full">
-                                            <input type="radio" name="plan_id" value="{{ $plan->id }}" {{ Auth::user()->plan_id == $plan->id ? 'checked' : '' }} class="w-4 h-4 text-primary focus:ring-primary">
+                                            <input type="radio" name="plan_id" value="{{ $plan->id }}" 
+                                                   x-model="selectedPlanId"
+                                                   {{ Auth::user()->plan_id == $plan->id ? 'checked' : '' }} class="w-4 h-4 text-primary focus:ring-primary">
                                             <div class="flex-1">
                                                 <div class="flex items-center justify-between">
                                                     <p class="font-normal text-sm">{{ $plan->name }}</p>
@@ -594,6 +627,14 @@
                                         </div>
                                     </label>
                                     @endforeach
+                                </div>
+                                <div class="pt-6">
+                                    <button type="submit" 
+                                            x-show="selectedPlanId != currentPlanId"
+                                            class="w-full py-4 bg-primary text-white rounded-xl font-normal hover:bg-primary-dark transition-all shadow-xl shadow-primary/10 flex items-center justify-center space-x-2">
+                                        <span x-text="t('common.update_plan')"></span>
+                                        <i data-lucide="arrow-right" class="w-5 h-5 ml-2"></i>
+                                    </button>
                                 </div>
                             </form>
                         </div>

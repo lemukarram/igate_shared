@@ -75,6 +75,8 @@ Route::middleware(['auth', 'App\Http\Middleware\EnsureProviderIsOnboarded'])->gr
     // Checkout
     Route::get('/checkout/{providerServiceId}', [CheckoutController::class, 'review'])->name('checkout.review');
     Route::post('/checkout/process', [CheckoutController::class, 'process'])->name('checkout.process');
+    Route::get('/checkout/plan/{planId}', [CheckoutController::class, 'planReview'])->name('checkout.plan');
+    Route::post('/checkout/plan/process', [CheckoutController::class, 'processPlan'])->name('checkout.plan.process');
 
     // Project Workspace
     Route::get('/projects/{id}', [ProjectController::class, 'show'])->name('projects.show');
