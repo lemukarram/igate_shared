@@ -68,17 +68,45 @@ class CheckoutController extends Controller
         }
     }
 
-    public function callback(Request $request)
+    public function callback(Request $request, \App\Settings\PaymentSettings $settings)
     {
         $transactionId = $request->query('transaction_id');
         $tapChargeId = $request->query('tap_id');
 
-        // Here we can simply show a verifying screen. The actual status update happens via Webhook.
-        // But we could also optimistically fetch the Tap charge status here if needed.
-        
+        if (!$tapChargeId) {
+            return redirect()->route('client.portfolio')->with('error', 'Invalid payment response.');
+        }
+
+        try {
+            $charge = $this->tapService->getCharge($tapChargeId);
+            $status = $charge['status'] ?? 'UNKNOWN';
+
+            // Check for failed statuses
+            if (in_array($status, ['DECLINED', 'FAILED', 'CANCELLED', 'ABANDONED', 'RESTRICTED', 'TIMEDOUT', 'VOID'])) {
+                $transaction = DB::table('transactions')->where('id', $transactionId)->first();
+                if ($transaction && $transaction->project_id) {
+                    $project = DB::table('projects')->where('id', $transaction->project_id)->first();
+                    if ($project) {
+                        return redirect()->route('checkout.review', $project->provider_service_id)
+                            ->with('error', 'Payment ' . strtolower($status) . '. Please try again.');
+                    }
+                }
+                return redirect()->route('client.portfolio')->with('error', 'Payment failed.');
+            }
+        } catch (\Exception $e) {
+            // Log it but continue to show verifying if we can't fetch it right now
+            \Illuminate\Support\Facades\Log::error('Tap Verification Error on Callback: ' . $e->getMessage());
+        }
+
+        // Fetch transaction to find related project for success/processing
+        $transaction = DB::table('transactions')->where('id', $transactionId)->first();
+
         return view('payments::callback', [
             'transaction_id' => $transactionId,
             'tap_charge_id' => $tapChargeId,
+            'status' => 'success',
+            'project_id' => $transaction->project_id ?? null,
+            'settings' => $settings,
         ]);
     }
 }

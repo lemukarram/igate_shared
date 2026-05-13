@@ -47,4 +47,6 @@ return [
     'comment' => 'Comment',
     'submit_review' => 'Submit Review',
     'how_was_your_experience' => 'How was your experience?',
+    'status_pending_payment' => 'Pending Payment',
+    'status_awaiting_approval' => 'Awaiting Approval',
 ];

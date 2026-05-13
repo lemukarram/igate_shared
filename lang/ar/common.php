@@ -366,4 +366,7 @@ return [
     'users' => 'مستخدمين',
     'service_catalog' => 'كتالوج الخدمات',
     'verified_providers' => 'مزودون موثقون',
+    'secure_checkout' => 'دفع آمن',
+    'tap_redirect_notice' => 'سيتم توجيهك إلى بوابة Tap لإكمال عملية الدفع بشكل آمن.',
+    'password' => 'كلمة المرور',
 ];

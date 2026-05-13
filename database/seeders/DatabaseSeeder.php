@@ -11,11 +11,15 @@ use App\Models\Project;
 use App\Models\Payment;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Artisan;
 
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        // 0. Initialize Shield Permissions
+        Artisan::call('shield:generate', ['--all' => true, '--panel' => 'admin']);
+
         // Seed Service Categories
         $categories = [
             ['name' => 'HR & Recruitment', 'slug' => 'hr-recruitment'],
@@ -58,7 +62,7 @@ class DatabaseSeeder extends Seeder
         $enterpriseProviderPlan = \App\Models\Plan::where('name', 'Enterprise')->where('type', 'provider')->first();
 
         // 2. Seed Super Admin
-        User::updateOrCreate(
+        $admin = User::updateOrCreate(
             ['email' => 'admin@igate.com'],
             [
                 'name' => 'iGate Admin',
@@ -66,6 +70,18 @@ class DatabaseSeeder extends Seeder
                 'role' => 'admin',
             ]
         );
+
+        // Ensure Super Admin role exists and is assigned (Filament Shield)
+        $superAdminRole = \Spatie\Permission\Models\Role::firstOrCreate(['name' => config('filament-shield.super_admin.name', 'super_admin')]);
+        $admin->assignRole($superAdminRole);
+
+        // Seed Payment Settings from .env if available
+        $paymentSettings = app(\App\Settings\PaymentSettings::class);
+        $paymentSettings->environment = env('TAP_PAYMENT_MODE', 'sandbox');
+        $paymentSettings->sandbox_secret_key = env('TAP_SANDBOX_SECRET_KEY', $paymentSettings->sandbox_secret_key);
+        $paymentSettings->live_secret_key = env('TAP_LIVE_SECRET_KEY', $paymentSettings->live_secret_key);
+        $paymentSettings->merchant_id = env('TAP_MERCHANT_ID', $paymentSettings->merchant_id);
+        $paymentSettings->save();
 
         // 3. Seed Providers
         $hrUser = User::updateOrCreate(

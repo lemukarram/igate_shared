@@ -366,4 +366,7 @@ return [
     'users' => 'Users',
     'service_catalog' => 'Service Catalog',
     'verified_providers' => 'Verified Providers',
+    'secure_checkout' => 'Secure Checkout',
+    'tap_redirect_notice' => 'You will be redirected to Tap Payments to complete your transaction securely.',
+    'password' => 'Password',
 ];

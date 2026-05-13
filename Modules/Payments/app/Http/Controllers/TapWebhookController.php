@@ -19,9 +19,22 @@ class TapWebhookController extends Controller
 
     public function handle(Request $request)
     {
+        $payload = $request->getContent();
+        $data = $request->all();
+        $event = $request->input('event');
+
+        // Log the incoming webhook
+        \App\Models\PaymentLog::create([
+            'type' => 'webhook_received',
+            'event' => $event,
+            'endpoint' => $request->fullUrl(),
+            'method' => 'POST',
+            'payload' => $data,
+            'ip_address' => $request->ip(),
+        ]);
+
         // 1. Verify Signature
         $signatureHeader = $request->header('Tap-Signature');
-        $payload = $request->getContent();
 
         if (!$this->tapService->verifyWebhookSignature($payload, $signatureHeader ?? '')) {
             Log::warning('Tap Webhook Signature Verification Failed', [
@@ -67,19 +80,60 @@ class TapWebhookController extends Controller
             // 2. Handle Events
             switch ($event) {
                 case 'charge.succeeded':
-                    DB::table('transactions')->where('id', $transactionId)->update(['status' => 'captured']);
-                    // Here you would also dispatch events to activate subscription, release escrow, etc.
-                    // event(new PaymentCaptured($transactionId));
-                    break;
-                
                 case 'authorize.succeeded':
-                    DB::table('transactions')->where('id', $transactionId)->update(['status' => 'authorized']);
-                    // event(new PaymentAuthorized($transactionId));
+                    $status = ($event === 'charge.succeeded') ? 'captured' : 'authorized';
+                    DB::table('transactions')->where('id', $transactionId)->update(['status' => $status]);
+                    
+                    if ($transaction->project_id) {
+                        // Set project to awaiting approval
+                        DB::table('projects')->where('id', $transaction->project_id)->update([
+                            'status' => 'awaiting_approval',
+                            'updated_at' => now(),
+                        ]);
+
+                        // Record in payments table for application logic
+                        DB::table('payments')->insert([
+                            'project_id' => $transaction->project_id,
+                            'user_id' => $transaction->user_id,
+                            'amount' => $transaction->amount,
+                            'payment_method' => 'tap',
+                            'transaction_id' => $tapChargeId,
+                            'status' => 'held_in_escrow',
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+
+                        // Record history
+                        DB::table('project_histories')->insert([
+                            'project_id' => $transaction->project_id,
+                            'user_id' => $transaction->user_id,
+                            'action' => 'payment_confirmed',
+                            'description' => 'Payment confirmed via Tap. Project is now awaiting internal approval.',
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+                    }
                     break;
 
                 case 'charge.failed':
                 case 'charge.declined':
                     DB::table('transactions')->where('id', $transactionId)->update(['status' => 'failed']);
+                    
+                    if ($transaction->project_id) {
+                        DB::table('projects')->where('id', $transaction->project_id)->update([
+                            'status' => 'cancelled',
+                            'updated_at' => now(),
+                        ]);
+
+                        DB::table('project_histories')->insert([
+                            'project_id' => $transaction->project_id,
+                            'user_id' => $transaction->user_id,
+                            'action' => 'payment_failed',
+                            'description' => 'Payment failed via Tap. Project cancelled.',
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+                    }
                     break;
 
                 case 'refund.succeeded':

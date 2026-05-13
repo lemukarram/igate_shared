@@ -170,7 +170,11 @@
                 </div>
                 <div class="space-y-1">
                     <label class="text-[10px] font-normal uppercase tracking-widest text-gray-400" x-text="t('common.industry')"></label>
-                    <input type="text" name="industry" value="{{ $company->industry }}" class="w-full px-5 py-3 border border-gray-100 bg-gray-50 rounded-2xl outline-none focus:ring-4 focus:ring-primary/10 transition-all font-normal text-sm">
+                    <select name="industry" class="w-full px-5 py-3 border border-gray-100 bg-gray-50 rounded-2xl outline-none focus:ring-4 focus:ring-primary/10 transition-all font-normal text-sm">
+                        @foreach($industries as $industry)
+                            <option value="{{ $industry->name }}" {{ $company->industry === $industry->name ? 'selected' : '' }} x-text="lang === 'ar' ? '{{ $industry->name_ar }}' : '{{ $industry->name }}'"></option>
+                        @endforeach
+                    </select>
                 </div>
             </div>
 

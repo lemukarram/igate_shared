@@ -42,7 +42,7 @@
         </div>
     </div>
 
-    <!-- Right: Payment Simulation -->
+    <!-- Right: Payment Method -->
     <div class="flex-1 space-y-6">
         <h3 class="text-xl font-normal text-gray-900" x-text="t('common.payment_method')"></h3>
         
@@ -61,6 +61,10 @@
                 <select name="company_id" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-700 focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all">
                     @if($companies->count() == 0)
                         <option value="" disabled selected x-text="t('common.no_companies_found')"></option>
+                    @elseif($companies->count() == 1)
+                        @foreach($companies as $company)
+                            <option value="{{ $company->id }}" selected>{{ $company->name }}</option>
+                        @endforeach
                     @else
                         <option value="" disabled selected x-text="t('common.choose_company_hint')"></option>
                         @foreach($companies as $company)
@@ -74,31 +78,28 @@
             </div>
 
             <div class="space-y-4 pt-4">
-                <div class="p-4 border-2 border-blue-600 bg-blue-50/30 rounded-2xl flex items-center justify-between">
-                    <div class="flex items-center space-x-3">
-                        <i data-lucide="credit-card" class="w-6 h-6 text-blue-600"></i>
-                        <span class="font-normal" x-text="t('common.credit_mada_card')"></span>
+                <div class="p-6 border-2 border-blue-600 bg-blue-50/30 rounded-2xl flex flex-col space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <i data-lucide="shield-check" class="w-6 h-6 text-blue-600"></i>
+                            <span class="font-normal" x-text="t('common.secure_checkout')"></span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <img src="/images/logo/tap-pay.png" alt="Tap" class="h-6">
+                        </div>
                     </div>
-                    <div class="flex space-x-1">
-                        <div class="w-8 h-5 bg-gray-200 rounded"></div>
-                        <div class="w-8 h-5 bg-gray-200 rounded"></div>
-                    </div>
-                </div>
-
-                <div class="space-y-3">
-                    <input type="text" placeholder="Card Number" value="4242 4242 4242 4242" disabled
-                           class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-400">
-                    <div class="flex gap-4">
-                        <input type="text" placeholder="MM/YY" value="12/26" disabled
-                               class="flex-1 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-400">
-                        <input type="text" placeholder="CVC" value="123" disabled
-                               class="flex-1 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-400">
+                    <p class="text-sm text-gray-500" x-text="t('common.tap_redirect_notice')"></p>
+                    <div class="flex space-x-2">
+                        <img src="/images/logo/visa-card.png" alt="Visa" class="h-5">
+                        <img src="/images/logo/master-card.png" alt="Mastercard" class="h-5">
+                        <img src="/images/logo/mada-card.png" alt="Mada" class="h-5">
                     </div>
                 </div>
             </div>
 
             <button type="submit" class="w-full py-4 bg-blue-600 text-white rounded-xl font-normal hover:bg-blue-700 transition-all shadow-xl shadow-blue-100 flex items-center justify-center space-x-2">
                 <span x-text="t('common.confirm_pay').replace(':amount', '{{ number_format($ps->price, 0) }}')"></span>
+                <i data-lucide="arrow-right" class="w-5 h-5 ml-2"></i>
             </button>
             <p class="text-center text-xs text-gray-400" x-text="t('common.secure_transaction_notice')"></p>
         </form>

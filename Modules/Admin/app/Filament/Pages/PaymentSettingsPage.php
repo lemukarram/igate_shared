@@ -54,6 +54,38 @@ class PaymentSettingsPage extends SettingsPage
                         ->revealable()
                         ->required(fn (Forms\Get $get) => $get('environment') === 'live'),
                 ])->columns(2),
+
+                Forms\Components\Section::make('Automated Workflows')
+                    ->description('Configure how the system handles payment captures and automation.')
+                    ->schema([
+                        Forms\Components\Select::make('auto_capture_days')
+                            ->label('Auto-Capture Delay')
+                            ->options([
+                                1 => '1 Day',
+                                2 => '2 Days',
+                                3 => '3 Days',
+                                4 => '4 Days',
+                                5 => '5 Days',
+                                6 => '6 Days',
+                                7 => '7 Days',
+                            ])
+                            ->helperText('For Service Escrow: Number of days to wait before automatically capturing authorized funds.')
+                            ->required(),
+                    ]),
+
+                Forms\Components\Section::make('Success Page Content')
+                    ->description('Customize the message shown to clients after a successful payment.')
+                    ->schema([
+                        Forms\Components\TextInput::make('success_title')
+                            ->label('Success Title')
+                            ->placeholder('Payment Successful!')
+                            ->required(),
+                        Forms\Components\Textarea::make('success_message')
+                            ->label('Success Message')
+                            ->placeholder('Your transaction has been confirmed. Our team is now reviewing the request. Once approved, your project workspace will become active shortly.')
+                            ->rows(4)
+                            ->required(),
+                    ]),
             ]);
     }
 }

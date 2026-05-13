@@ -52,9 +52,18 @@ class MarketplaceController extends Controller
         $user = Auth::user();
         
         $ongoingProjects = $user->projects()
-            ->whereIn('status', ['active', 'in_progress', 'pending'])
+            ->whereIn('status', ['active', 'in_progress', 'pending', 'pending_payment'])
             ->with(['service', 'provider.providerProfile', 'tasks'])
             ->get();
+
+        $totalSpent = \App\Models\Transaction::where('user_id', $user->id)
+            ->whereIn('status', ['captured', 'authorized'])
+            ->sum('amount');
+
+        $subscribedServicesCount = $user->projects()
+            ->whereIn('status', ['active', 'in_progress', 'completed'])
+            ->distinct('service_id')
+            ->count('service_id');
 
         $preSaleChats = \App\Models\PreSaleMessage::where('client_id', $user->id)
             ->with(['service', 'provider.providerProfile'])
@@ -66,7 +75,7 @@ class MarketplaceController extends Controller
                 return $group->last();
             });
 
-        return view('client.dashboard', compact('ongoingProjects', 'preSaleChats'));
+        return view('client.dashboard', compact('ongoingProjects', 'preSaleChats', 'totalSpent', 'subscribedServicesCount'));
     }
 
     public function show($id, \App\Settings\GeneralSettings $settings)
@@ -117,8 +126,10 @@ class MarketplaceController extends Controller
                 })
                 ->count();
         }
+
+        $industries = \App\Models\Industry::where('is_active', true)->get();
             
-        return view('client.portfolio', compact('companies'));
+        return view('client.portfolio', compact('companies', 'industries'));
     }
 
     public function myProviders()
@@ -187,7 +198,9 @@ class MarketplaceController extends Controller
                 return $group->last();
             });
 
-        return view('client.company_show', compact('company', 'preSaleChats'));
+        $industries = \App\Models\Industry::where('is_active', true)->get();
+
+        return view('client.company_show', compact('company', 'preSaleChats', 'industries'));
     }
 
     public function updateCompany(Request $request, $id)

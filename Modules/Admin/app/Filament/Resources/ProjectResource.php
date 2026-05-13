@@ -58,6 +58,8 @@ class ProjectResource extends Resource
                                             ->schema([
                                                 Forms\Components\Select::make('status')
                                                     ->options([
+                                                        'pending_payment' => 'Pending Payment',
+                                                        'awaiting_approval' => 'Awaiting Admin Approval',
                                                         'pending' => 'Pending Initialization',
                                                         'active' => 'Active / In-Progress',
                                                         'completed' => 'Successfully Completed',
@@ -185,6 +187,8 @@ class ProjectResource extends Resource
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
+                        'pending_payment' => 'gray',
+                        'awaiting_approval' => 'warning',
                         'pending' => 'gray',
                         'active' => 'info',
                         'completed' => 'success',
@@ -192,7 +196,7 @@ class ProjectResource extends Resource
                         'cancelled' => 'warning',
                         default => 'gray',
                     })
-                    ->formatStateUsing(fn (string $state) => strtoupper($state)),
+                    ->formatStateUsing(fn (string $state) => strtoupper(str_replace('_', ' ', $state))),
                 Tables\Columns\TextColumn::make('total_amount')
                     ->label('Budget')
                     ->money('SAR')
@@ -200,7 +204,7 @@ class ProjectResource extends Resource
                 Tables\Columns\TextColumn::make('end_date')
                     ->label('Due Date')
                     ->dateTime('M d, Y')
-                    ->color(fn ($state) => now()->gt($state) ? 'danger' : 'gray')
+                    ->color(fn ($state) => ($state && now()->gt($state)) ? 'danger' : 'gray')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('progress')
                     ->label('Task Progress')
@@ -221,6 +225,8 @@ class ProjectResource extends Resource
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
                     ->options([
+                        'pending_payment' => 'Pending Payment',
+                        'awaiting_approval' => 'Awaiting Approval',
                         'pending' => 'Pending',
                         'active' => 'Active',
                         'completed' => 'Completed',
@@ -244,6 +250,27 @@ class ProjectResource extends Resource
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make('approve')
+                    ->label('Approve')
+                    ->icon('heroicon-o-check-badge')
+                    ->color('success')
+                    ->requiresConfirmation()
+                    ->visible(fn (Project $record) => $record->status === 'awaiting_approval')
+                    ->action(function (Project $record) {
+                        $record->update(['status' => 'active']);
+                        
+                        \App\Models\ProjectHistory::create([
+                            'project_id' => $record->id,
+                            'user_id' => auth()->id(),
+                            'action' => 'project_approved',
+                            'description' => 'Project manually approved by admin. Now active.',
+                        ]);
+
+                        \Filament\Notifications\Notification::make()
+                            ->title('Project Approved')
+                            ->success()
+                            ->send();
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

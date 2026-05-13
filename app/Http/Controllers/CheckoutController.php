@@ -10,8 +10,18 @@ use App\Models\Company;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
+use Modules\Payments\Services\TapPaymentService;
+use Illuminate\Support\Facades\DB;
+
 class CheckoutController extends Controller
 {
+    protected TapPaymentService $tapService;
+
+    public function __construct(TapPaymentService $tapService)
+    {
+        $this->tapService = $tapService;
+    }
+
     public function review($providerServiceId)
     {
         $ps = ProviderService::with(['service', 'provider.providerProfile'])->findOrFail($providerServiceId);
@@ -33,14 +43,14 @@ class CheckoutController extends Controller
 
         $ps = ProviderService::findOrFail($request->provider_service_id);
 
-        // 1. Create Project
+        // 1. Create Project as Pending
         $project = Project::create([
             'client_id' => $user->id,
             'company_id' => $request->company_id,
             'provider_id' => $ps->provider_id,
             'service_id' => $ps->service_id,
             'provider_service_id' => $ps->id,
-            'status' => 'active',
+            'status' => 'pending_payment',
             'total_amount' => $ps->price,
             'start_date' => now(),
         ]);
@@ -48,20 +58,54 @@ class CheckoutController extends Controller
         \App\Models\ProjectHistory::create([
             'project_id' => $project->id,
             'user_id' => $user->id,
-            'action' => 'project_created',
-            'description' => 'Project created and funds held in escrow.',
+            'action' => 'project_initiated',
+            'description' => 'Project initiated, awaiting payment confirmation.',
         ]);
 
-        // 2. Record Payment (Simulation)
-        Payment::create([
-            'project_id' => $project->id,
-            'user_id' => $user->id,
-            'amount' => $ps->price,
-            'payment_method' => 'card',
-            'transaction_id' => 'TXN-' . strtoupper(Str::random(10)),
-            'status' => 'held_in_escrow',
-        ]);
+        // 2. Initialize Tap Payment
+        $transactionId = (string) Str::ulid();
+        $redirectUrl = route('payments.callback', ['transaction_id' => $transactionId]);
 
-        return redirect()->route('projects.show', $project->id)->with('success', 'Subscription active! Funds held in escrow.');
+        // Basic customer data extraction
+        $customer = [
+            'first_name' => $user->name,
+            'email' => $user->email,
+            'phone' => [
+                'country_code' => '966',
+                'number' => '500000000' // Placeholder if not in user model
+            ]
+        ];
+
+        try {
+            // Logic: Subscriptions are Instant Capture. Services are Escrow (Authorize).
+            // This is a simple check, usually subscriptions might come from a different flow,
+            // but we've implemented it here to be robust.
+            $isEscrow = !str_contains(strtolower($ps->service->name), 'subscription');
+            $type = $isEscrow ? 'service_escrow' : 'subscription';
+
+            $tapResponse = $this->tapService->createCharge($ps->price, $customer, $redirectUrl, $isEscrow);
+            $checkoutUrl = $tapResponse['url'];
+            $tapChargeId = $tapResponse['id'];
+
+            // Record pending transaction in DB
+            DB::table('transactions')->insert([
+                'id' => $transactionId,
+                'user_id' => $user->id,
+                'provider_id' => $ps->provider_id,
+                'project_id' => $project->id,
+                'tap_charge_id' => $tapChargeId,
+                'amount' => $ps->price,
+                'currency' => 'SAR',
+                'status' => 'pending',
+                'type' => $type,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            return redirect()->away($checkoutUrl);
+        } catch (\Exception $e) {
+            $project->delete(); // Clean up if payment init fails
+            return back()->with('error', 'Payment initialization failed. Please try again later.');
+        }
     }
 }

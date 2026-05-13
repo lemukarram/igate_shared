@@ -32,10 +32,9 @@ class AuthController extends Controller
                 if (!Auth::user()->providerProfile || !Auth::user()->providerProfile->onboarding_completed) {
                     return redirect()->route('provider.onboarding');
                 }
-                return redirect()->intended('/provider/dashboard');
             }
 
-            return redirect()->intended('/dashboard');
+            return redirect()->intended(route('explore.index'));
         }
 
         return back()->withErrors([
@@ -81,7 +80,7 @@ class AuthController extends Controller
             return redirect()->route('provider.onboarding');
         }
         
-        return redirect()->intended('/dashboard');
+        return redirect()->route('explore.index');
     }
 
     public function showForgot()

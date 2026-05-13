@@ -47,4 +47,6 @@ return [
     'comment' => 'التعليق',
     'submit_review' => 'إرسال التقييم',
     'how_was_your_experience' => 'كيف كانت تجربتك؟',
+    'status_pending_payment' => 'في انتظار الدفع',
+    'status_awaiting_approval' => 'في انتظار الاعتماد',
 ];

@@ -23,8 +23,8 @@
         @php
             $stats = [
                 ['label' => 'common.active_projects', 'value' => $ongoingProjects->count(), 'icon' => 'activity', 'color' => 'text-blue-600', 'bg' => 'bg-blue-50'],
-                ['label' => 'common.total_spent', 'value' => 'SAR 42,000', 'icon' => 'credit-card', 'color' => 'text-emerald-600', 'bg' => 'bg-emerald-50'],
-                ['label' => 'common.subscribed_services', 'value' => '5', 'icon' => 'package', 'color' => 'text-purple-600', 'bg' => 'bg-purple-50'],
+                ['label' => 'common.total_spent', 'value' => number_format($totalSpent, 2), 'icon' => 'credit-card', 'color' => 'text-emerald-600', 'bg' => 'bg-emerald-50'],
+                ['label' => 'common.subscribed_services', 'value' => $subscribedServicesCount, 'icon' => 'package', 'color' => 'text-purple-600', 'bg' => 'bg-purple-50'],
             ];
         @endphp
 
@@ -34,11 +34,7 @@
                 <i data-lucide="{{ $stat['icon'] }}" class="w-6 h-6"></i>
             </div>
             <h3 class="text-3xl font-normal text-gray-900">
-                @if($stat['label'] === 'common.total_spent')
-                    {{ number_format(42000) }} <span class="text-sm" x-text="t('common.sar')"></span>
-                @else
-                    {{ $stat['value'] }}
-                @endif
+                {{ $stat['value'] }} @if($stat['label'] === 'common.total_spent') <span class="text-sm" x-text="t('common.sar')"></span> @endif
             </h3>
             <p class="text-gray-400 text-sm font-normal mt-1 uppercase tracking-wider" x-text="t('{{ $stat['label'] }}')"></p>
         </div>

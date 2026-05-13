@@ -81,9 +81,9 @@
             <div class="space-y-1">
                 <label class="text-[10px] font-normal uppercase tracking-widest text-gray-400" x-text="t('common.industry')"></label>
                 <select name="industry" class="w-full px-5 py-4 border border-gray-100 bg-gray-50 rounded-2xl outline-none focus:ring-4 focus:ring-primary/10 transition-all font-normal">
-                    <option value="Technology" x-text="t('common.technology')"></option>
-                    <option value="Retail" x-text="t('common.retail')"></option>
-                    <option value="Manufacturing" x-text="t('common.manufacturing')"></option>
+                    @foreach($industries as $industry)
+                        <option value="{{ $industry->name }}" x-text="lang === 'ar' ? '{{ $industry->name_ar }}' : '{{ $industry->name }}'"></option>
+                    @endforeach
                 </select>
             </div>
             <button type="submit" class="w-full py-5 bg-primary text-white rounded-2xl font-normal text-lg hover:bg-primary-dark transition-all shadow-xl shadow-primary/20">
