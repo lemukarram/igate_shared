@@ -25,23 +25,60 @@ class CheckoutController extends Controller
     public function review($providerServiceId)
     {
         $ps = ProviderService::with(['service', 'provider.providerProfile'])->findOrFail($providerServiceId);
-        $companies = Auth::user()->companies;
+        $user = Auth::user();
+        $companies = $user->companies;
+        
+        // If client has only one company, check it. If multiple, check the first one by default for early redirect.
+        $targetCompany = $companies->first();
+
+        if ($targetCompany) {
+            $existingProject = Project::where('client_id', $user->id)
+                ->where('company_id', $targetCompany->id)
+                ->where('provider_id', $ps->provider_id)
+                ->where('service_id', $ps->service_id)
+                ->whereHas('transactions', function($q) {
+                    $q->whereIn('status', ['authorized', 'captured']);
+                })
+                ->first();
+
+            if ($existingProject) {
+                return redirect()->route('projects.show', $existingProject->id)
+                    ->with('info', 'You already have an active project for this service with this provider for your company ' . $targetCompany->name . '.');
+            }
+        }
+
         return view('client.checkout.review', compact('ps', 'companies'));
     }
 
     public function process(Request $request)
     {
         $user = Auth::user();
-        if ($user->plan && $user->projects()->where('status', 'active')->count() >= $user->plan->max_projects) {
-            return redirect()->route('settings.plan.upgrade')->with('error', 'You have reached the maximum number of active projects allowed by your client plan.');
-        }
-
+        
         $validated = $request->validate([
             'provider_service_id' => 'required|exists:provider_services,id',
             'company_id' => 'required|exists:companies,id',
         ]);
 
         $ps = ProviderService::findOrFail($request->provider_service_id);
+
+        // Duplicate Check for the specific selected company
+        $existingProject = Project::where('client_id', $user->id)
+            ->where('company_id', $request->company_id)
+            ->where('provider_id', $ps->provider_id)
+            ->where('service_id', $ps->service_id)
+            ->whereHas('transactions', function($q) {
+                $q->whereIn('status', ['authorized', 'captured']);
+            })
+            ->first();
+
+        if ($existingProject) {
+            return redirect()->route('projects.show', $existingProject->id)
+                ->with('info', 'An active project for this service already exists for the selected company.');
+        }
+
+        if ($user->plan && $user->projects()->where('status', 'active')->count() >= $user->plan->max_projects) {
+            return redirect()->route('settings.plan.upgrade')->with('error', 'You have reached the maximum number of active projects allowed by your client plan.');
+        }
 
         // 1. Create Project as Pending
         $project = Project::create([

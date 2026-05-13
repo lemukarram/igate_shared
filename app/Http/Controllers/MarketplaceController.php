@@ -99,6 +99,25 @@ class MarketplaceController extends Controller
                 $clientCount = \App\Models\Project::where('provider_service_id', $providerService->id)->count();
             }
         }
+
+        // Identify existing valid projects for the client's first company
+        if ($user && $user->role === 'client') {
+            $firstCompany = $user->companies()->first();
+            if ($firstCompany) {
+                $existingProjectIds = \App\Models\Project::where('client_id', $user->id)
+                    ->where('company_id', $firstCompany->id)
+                    ->where('service_id', $id)
+                    ->whereHas('transactions', function($q) {
+                        $q->whereIn('status', ['authorized', 'captured']);
+                    })
+                    ->pluck('id', 'provider_id')
+                    ->toArray();
+                
+                foreach ($providers as $ps) {
+                    $ps->existing_project_id = $existingProjectIds[$ps->provider_id] ?? null;
+                }
+            }
+        }
             
         return view('client.explore.show', compact('service', 'providers', 'providerService', 'clientCount', 'settings'));
     }

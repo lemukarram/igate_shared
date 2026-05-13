@@ -132,9 +132,15 @@
                                class="flex-1 md:flex-none px-6 py-3 bg-gray-50 text-gray-700 rounded-xl font-normal hover:bg-gray-100 transition-all border border-gray-100 text-center">
                                 <span x-text="t('common.chat')"></span>
                             </a>
-                            <a href="{{ route('checkout.review', $ps->id) }}" class="flex-1 md:flex-none px-8 py-3 bg-primary text-white rounded-lg font-normal hover:bg-primary-dark transition-all shadow-sm text-center">
-                                <span x-text="t('common.request')"></span>
-                            </a>
+                            @if($ps->existing_project_id)
+                                <a href="{{ route('projects.show', $ps->existing_project_id) }}" class="flex-1 md:flex-none px-8 py-3 bg-gray-900 text-white rounded-lg font-normal hover:bg-black transition-all shadow-sm text-center">
+                                    <span>View Project</span>
+                                </a>
+                            @else
+                                <a href="{{ route('checkout.review', $ps->id) }}" class="flex-1 md:flex-none px-8 py-3 bg-primary text-white rounded-lg font-normal hover:bg-primary-dark transition-all shadow-sm text-center">
+                                    <span x-text="t('common.request')"></span>
+                                </a>
+                            @endif
                         </div>
                     </div>
                     @empty

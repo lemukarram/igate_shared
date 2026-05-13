@@ -74,6 +74,11 @@ class Project extends Model
         return $this->hasMany(Payment::class);
     }
 
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class);
+    }
+
     public function documents()
     {
         return $this->hasMany(Document::class);

@@ -58,6 +58,8 @@ class AdminPanelProvider extends PanelProvider
                 NavigationGroup::make()
                     ->label('Website Management'),
                 NavigationGroup::make()
+                    ->label('Support Management'),
+                NavigationGroup::make()
                     ->label('Identity'),
             ])
             ->discoverResources(in: base_path('Modules/Admin/app/Filament/Resources'), for: 'Modules\\Admin\\Filament\\Resources')

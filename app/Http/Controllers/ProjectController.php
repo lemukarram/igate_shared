@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Project;
 use App\Models\Message;
 use Illuminate\Support\Facades\Auth;
+use Modules\Payments\Services\TapPaymentService;
 
 class ProjectController extends Controller
 {
@@ -21,6 +22,45 @@ class ProjectController extends Controller
         }
 
         $project = $query->findOrFail($id);
+
+        // Payment Status Check for Clients and Providers
+        if (Auth::user()->role !== 'admin') {
+            $transaction = \App\Models\Transaction::where('project_id', $project->id)->first();
+            
+            if ($transaction) {
+                $authorizedStatuses = ['authorized', 'captured'];
+                
+                if (!in_array(strtolower($transaction->status), $authorizedStatuses)) {
+                    // Try to sync with Tap
+                    if ($transaction->tap_charge_id) {
+                        try {
+                            $tapService = app(TapPaymentService::class);
+                            $charge = $tapService->getCharge($transaction->tap_charge_id);
+                            $tapStatus = strtolower($charge['status'] ?? '');
+                            
+                            $mappedStatus = match ($tapStatus) {
+                                'captured' => 'captured',
+                                'authorized' => 'authorized',
+                                'declined', 'failed', 'cancelled' => 'failed',
+                                'refunded' => 'refunded',
+                                default => $transaction->status,
+                            };
+
+                            if ($mappedStatus !== $transaction->status) {
+                                $transaction->update(['status' => $mappedStatus]);
+                            }
+                        } catch (\Exception $e) {
+                            \Illuminate\Support\Facades\Log::error('Tap Sync Error in Project Show: ' . $e->getMessage());
+                        }
+                    }
+
+                    // Re-check after sync
+                    if (!in_array(strtolower($transaction->status), $authorizedStatuses)) {
+                        return redirect()->route('projects.payment-review', $project->id);
+                    }
+                }
+            }
+        }
 
         // Auto-populate tasks from service subtasks if none exist
         if ($project->tasks->isEmpty() && $project->service && $project->service->subtasks) {
@@ -323,5 +363,49 @@ class ProjectController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Message sent.');
+    }
+
+    public function paymentReview($id)
+    {
+        $project = Project::findOrFail($id);
+        
+        if (Auth::id() !== $project->client_id && Auth::id() !== $project->provider_id && Auth::user()->role !== 'admin') {
+            abort(403);
+        }
+
+        $transaction = \App\Models\Transaction::where('project_id', $project->id)->first();
+
+        return view('projects.payment_review', compact('project', 'transaction'));
+    }
+
+    public function contactSupport(Request $request)
+    {
+        $projectId = $request->query('project_id');
+        $transactionId = $request->query('transaction_id');
+        
+        $project = $projectId ? Project::find($projectId) : null;
+        
+        $sampleMessage = "Hello Support,\n\nI am having an issue with my payment for project " . ($project ? $project->id : 'N/A') . ". The transaction ID is " . ($transactionId ?? 'N/A') . ". The status is currently showing as pending/under review. Please assist.\n\nThank you.";
+
+        return view('support.contact', compact('project', 'transactionId', 'sampleMessage'));
+    }
+
+    public function submitSupport(Request $request)
+    {
+        $request->validate([
+            'message' => 'required|string',
+            'project_id' => 'nullable|exists:projects,id',
+            'transaction_id' => 'nullable|string',
+        ]);
+
+        \App\Models\SupportTicket::create([
+            'user_id' => Auth::id(),
+            'project_id' => $request->project_id,
+            'transaction_id' => $request->transaction_id,
+            'message' => $request->message,
+            'status' => 'open',
+        ]);
+
+        return redirect()->route(Auth::user()->role . '.dashboard')->with('success', 'Support ticket submitted successfully. We will get back to you soon.');
     }
 }

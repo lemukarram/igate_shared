@@ -78,6 +78,9 @@ Route::middleware(['auth', 'App\Http\Middleware\EnsureProviderIsOnboarded'])->gr
 
     // Project Workspace
     Route::get('/projects/{id}', [ProjectController::class, 'show'])->name('projects.show');
+    Route::get('/projects/{id}/payment-review', [ProjectController::class, 'paymentReview'])->name('projects.payment-review');
+    Route::get('/contact-support', [ProjectController::class, 'contactSupport'])->name('support.contact');
+    Route::post('/contact-support', [ProjectController::class, 'submitSupport'])->name('support.submit');
     Route::patch('/projects/{id}/status', [ProjectController::class, 'updateStatus'])->name('projects.update-status');
     Route::post('/projects/{id}/messages', [ProjectController::class, 'sendMessage'])->name('projects.messages.send');
     Route::post('/projects/{id}/complete', [ProjectController::class, 'complete'])->name('projects.complete');
