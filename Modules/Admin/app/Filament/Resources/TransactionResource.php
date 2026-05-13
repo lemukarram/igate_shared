@@ -11,9 +11,13 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Modules\Payments\Services\TapPaymentService;
 use Filament\Notifications\Notification;
+use App\Settings\PaymentSettings;
+use App\Traits\SyncsProjectPayment;
 
 class TransactionResource extends Resource
 {
+    use SyncsProjectPayment;
+
     protected static ?string $model = Transaction::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-arrows-right-left';
@@ -37,6 +41,19 @@ class TransactionResource extends Resource
                                     ->label('Tap Gateway ID')
                                     ->disabled(),
                                 Forms\Components\TextInput::make('status')
+                                    ->formatStateUsing(function ($state) {
+                                        $settings = app(PaymentSettings::class);
+                                        return match ($state) {
+                                            'pending' => $settings->status_pending_label,
+                                            'authorized' => $settings->status_authorized_label,
+                                            'captured' => $settings->status_captured_label,
+                                            'failed' => $settings->status_failed_label,
+                                            'refunded' => $settings->status_refunded_label,
+                                            'void' => $settings->status_void_label,
+                                            'cancelled' => $settings->status_cancelled_label,
+                                            default => ucfirst($state),
+                                        };
+                                    })
                                     ->disabled(),
                                 Forms\Components\TextInput::make('amount')
                                     ->suffix('SAR')
@@ -114,6 +131,19 @@ class TransactionResource extends Resource
                     ->alignment('right'),
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
+                    ->formatStateUsing(function ($state) {
+                        $settings = app(PaymentSettings::class);
+                        return match ($state) {
+                            'pending' => $settings->status_pending_label,
+                            'authorized' => $settings->status_authorized_label,
+                            'captured' => $settings->status_captured_label,
+                            'failed' => $settings->status_failed_label,
+                            'refunded' => $settings->status_refunded_label,
+                            'void' => $settings->status_void_label,
+                            'cancelled' => $settings->status_cancelled_label,
+                            default => ucfirst($state),
+                        };
+                    })
                     ->color(fn (string $state): string => match ($state) {
                         'pending' => 'gray',
                         'authorized' => 'warning',
@@ -125,13 +155,18 @@ class TransactionResource extends Resource
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
-                    ->options([
-                        'pending' => 'Pending',
-                        'authorized' => 'Authorized (Escrow)',
-                        'captured' => 'Captured',
-                        'failed' => 'Failed',
-                        'refunded' => 'Refunded',
-                    ]),
+                    ->options(function () {
+                        $settings = app(PaymentSettings::class);
+                        return [
+                            'pending' => $settings->status_pending_label,
+                            'authorized' => $settings->status_authorized_label,
+                            'captured' => $settings->status_captured_label,
+                            'failed' => $settings->status_failed_label,
+                            'refunded' => $settings->status_refunded_label,
+                            'void' => $settings->status_void_label,
+                            'cancelled' => $settings->status_cancelled_label,
+                        ];
+                    }),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
@@ -144,49 +179,28 @@ class TransactionResource extends Resource
                             $tapService = app(TapPaymentService::class);
                             $charge = $tapService->getCharge($record->tap_charge_id);
                             $tapStatus = strtolower($charge['status'] ?? '');
-                            $newTapId = $charge['id'] ?? $record->tap_charge_id;
+                            
+                            if ($record->project) {
+                                // Use the trait logic to ensure consistency across the platform
+                                (new self())->syncProjectPayment($record->project);
+                            } else {
+                                // Fallback for transactions without direct project links
+                                $newTapId = $charge['id'] ?? $record->tap_charge_id;
+                                $mappedStatus = match ($tapStatus) {
+                                    'captured' => 'captured',
+                                    'authorized' => 'authorized',
+                                    'declined', 'failed', 'cancelled' => 'failed',
+                                    'refunded' => 'refunded',
+                                    default => $record->status,
+                                };
 
-                            $mappedStatus = match ($tapStatus) {
-                                'captured' => 'captured',
-                                'authorized' => 'authorized',
-                                'declined', 'failed', 'cancelled' => 'failed',
-                                'refunded' => 'refunded',
-                                default => $record->status,
-                            };
+                                $updateData = ['status' => $mappedStatus];
+                                if ($newTapId !== $record->tap_charge_id) {
+                                    $updateData['tap_charge_id'] = $newTapId;
+                                }
 
-                            $updateData = ['status' => $mappedStatus];
-                            if ($newTapId !== $record->tap_charge_id) {
-                                $updateData['tap_charge_id'] = $newTapId;
-                            }
-
-                            if ($mappedStatus !== $record->status || isset($updateData['tap_charge_id'])) {
-                                $record->update($updateData);
-
-                                // Handle project activation if it was pending
-                                if ($record->project_id && in_array($mappedStatus, ['captured', 'authorized'])) {
-                                    $project = $record->project;
-                                    if ($project->status === 'pending_payment') {
-                                        $project->update(['status' => 'awaiting_approval']);
-                                        
-                                        \App\Models\ProjectHistory::create([
-                                            'project_id' => $project->id,
-                                            'user_id' => auth()->id(),
-                                            'action' => 'payment_synced',
-                                            'description' => "Payment status synced manually from Tap: {$tapStatus}. Project awaiting approval.",
-                                        ]);
-
-                                        // Ensure payment record exists
-                                        \App\Models\Payment::updateOrCreate(
-                                            ['transaction_id' => $record->tap_charge_id],
-                                            [
-                                                'project_id' => $project->id,
-                                                'user_id' => $record->user_id,
-                                                'amount' => $record->amount,
-                                                'payment_method' => 'tap',
-                                                'status' => 'held_in_escrow',
-                                            ]
-                                        );
-                                    }
+                                if ($mappedStatus !== $record->status || isset($updateData['tap_charge_id'])) {
+                                    $record->update($updateData);
                                 }
                             }
 

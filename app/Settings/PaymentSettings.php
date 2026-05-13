@@ -15,6 +15,14 @@ class PaymentSettings extends Settings
     public ?string $success_message;
     public int $auto_capture_days = 3;
 
+    public ?string $status_pending_label;
+    public ?string $status_authorized_label;
+    public ?string $status_captured_label;
+    public ?string $status_failed_label;
+    public ?string $status_refunded_label;
+    public ?string $status_void_label;
+    public ?string $status_cancelled_label;
+
     public static function group(): string
     {
         return 'payment';

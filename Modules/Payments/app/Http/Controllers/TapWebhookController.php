@@ -85,9 +85,9 @@ class TapWebhookController extends Controller
                     DB::table('transactions')->where('id', $transactionId)->update(['status' => $status]);
                     
                     if ($transaction->project_id) {
-                        // Set project to awaiting approval
+                        // Set project to active as per latest requirement
                         DB::table('projects')->where('id', $transaction->project_id)->update([
-                            'status' => 'awaiting_approval',
+                            'status' => 'active',
                             'updated_at' => now(),
                         ]);
 
@@ -98,7 +98,7 @@ class TapWebhookController extends Controller
                             'amount' => $transaction->amount,
                             'payment_method' => 'tap',
                             'transaction_id' => $tapChargeId,
-                            'status' => 'held_in_escrow',
+                            'status' => $status === 'captured' ? 'released' : 'held_in_escrow',
                             'created_at' => now(),
                             'updated_at' => now(),
                         ]);
@@ -108,7 +108,7 @@ class TapWebhookController extends Controller
                             'project_id' => $transaction->project_id,
                             'user_id' => $transaction->user_id,
                             'action' => 'payment_confirmed',
-                            'description' => 'Payment confirmed via Tap. Project is now awaiting internal approval.',
+                            'description' => 'Payment confirmed via Tap. Project is now active.',
                             'created_at' => now(),
                             'updated_at' => now(),
                         ]);

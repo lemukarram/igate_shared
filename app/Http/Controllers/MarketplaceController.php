@@ -8,9 +8,12 @@ use App\Models\ProviderService;
 use App\Models\User;
 use App\Models\Company;
 use Illuminate\Support\Facades\Auth;
+use App\Traits\SyncsProjectPayment;
 
 class MarketplaceController extends Controller
 {
+    use SyncsProjectPayment;
+
     public function index(Request $request)
     {
         $categories = \App\Models\ServiceCategory::all();
@@ -52,9 +55,16 @@ class MarketplaceController extends Controller
         $user = Auth::user();
         
         $ongoingProjects = $user->projects()
-            ->whereIn('status', ['active', 'in_progress', 'pending', 'pending_payment'])
+            ->whereIn('status', ['active', 'in_progress', 'pending', 'pending_payment', 'inactive'])
             ->with(['service', 'provider.providerProfile', 'tasks'])
             ->get();
+
+        // Sync payment status for pending projects
+        foreach ($ongoingProjects as $project) {
+            if ($project->status === 'pending_payment') {
+                $this->syncProjectPayment($project);
+            }
+        }
 
         $totalSpent = \App\Models\Transaction::where('user_id', $user->id)
             ->whereIn('status', ['captured', 'authorized'])
@@ -206,6 +216,13 @@ class MarketplaceController extends Controller
     {
         $company = Auth::user()->companies()->with(['projects.service', 'projects.provider'])->findOrFail($id);
         
+        // Sync payment status for pending projects
+        foreach ($company->projects as $project) {
+            if ($project->status === 'pending_payment') {
+                $this->syncProjectPayment($project);
+            }
+        }
+
         $preSaleChats = \App\Models\PreSaleMessage::where('client_id', Auth::id())
             ->where('company_id', $id)
             ->with(['service', 'provider.providerProfile'])

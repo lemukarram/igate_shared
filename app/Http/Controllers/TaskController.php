@@ -17,6 +17,11 @@ class TaskController extends Controller
             'files.*' => 'nullable|file|max:10240',
         ]);
 
+        $project = \App\Models\Project::findOrFail($request->project_id);
+        if ($project->status === 'inactive' && Auth::user()->role !== 'admin') {
+            return redirect()->back()->with('error', 'Project is inactive. Actions are restricted.');
+        }
+
         $task = Task::create($validated);
 
         // Record history
@@ -49,6 +54,11 @@ class TaskController extends Controller
     public function updateStatus(Request $request, $id)
     {
         $task = Task::with('project')->findOrFail($id);
+
+        if ($task->project->status === 'inactive' && Auth::user()->role !== 'admin') {
+            return redirect()->back()->with('error', 'Project is inactive. Actions are restricted.');
+        }
+
         $oldStatus = $task->status;
         
         // If status is changed to done, reset verification if it was verified
@@ -88,6 +98,10 @@ class TaskController extends Controller
             abort(403);
         }
 
+        if ($task->project->status === 'inactive' && Auth::user()->role !== 'admin') {
+            return redirect()->back()->with('error', 'Project is inactive. Actions are restricted.');
+        }
+
         if ($task->status !== 'done') {
             return redirect()->back()->with('error', 'Only completed tasks can be verified.');
         }
@@ -108,7 +122,13 @@ class TaskController extends Controller
 
     public function destroy($id)
     {
-        Task::findOrFail($id)->delete();
+        $task = Task::with('project')->findOrFail($id);
+        
+        if ($task->project->status === 'inactive' && Auth::user()->role !== 'admin') {
+            return redirect()->back()->with('error', 'Project is inactive. Actions are restricted.');
+        }
+
+        $task->delete();
         return redirect()->back()->with('success', 'Task deleted.');
     }
 }

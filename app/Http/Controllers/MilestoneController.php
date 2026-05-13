@@ -16,6 +16,11 @@ class MilestoneController extends Controller
             'amount' => 'required|numeric|min:0',
         ]);
 
+        $project = \App\Models\Project::findOrFail($request->project_id);
+        if ($project->status === 'inactive' && Auth::user()->role !== 'admin') {
+            return redirect()->back()->with('error', 'Project is inactive. Actions are restricted.');
+        }
+
         Milestone::create(array_merge($validated, ['status' => 'pending']));
 
         return redirect()->back()->with('success', 'Milestone added.');
@@ -23,8 +28,12 @@ class MilestoneController extends Controller
 
     public function updateStatus(Request $request, $id)
     {
-        $milestone = Milestone::findOrFail($id);
+        $milestone = Milestone::with('project')->findOrFail($id);
         
+        if ($milestone->project->status === 'inactive' && Auth::user()->role !== 'admin') {
+            return redirect()->back()->with('error', 'Project is inactive. Actions are restricted.');
+        }
+
         // Logic: Provider can set to 'completed', Client can set to 'released'
         $milestone->update(['status' => $request->status]);
         

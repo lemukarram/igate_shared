@@ -49,4 +49,14 @@ return [
     'how_was_your_experience' => 'كيف كانت تجربتك؟',
     'status_pending_payment' => 'في انتظار الدفع',
     'status_awaiting_approval' => 'في انتظار الاعتماد',
+    'actions' => [
+        'mark_complete' => 'تحديد كمكتمل',
+        'approve' => 'اعتماد',
+        'reject' => 'رفض',
+        'request_cancellation' => 'طلب إلغاء',
+        'confirm_cancellation' => 'تأكيد الإلغاء',
+        'dispute' => 'رفع نزاع',
+        'terminate' => 'إنهاء المشروع',
+        'send_message' => 'إرسال رسالة',
+    ],
 ];

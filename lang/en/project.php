@@ -49,4 +49,14 @@ return [
     'how_was_your_experience' => 'How was your experience?',
     'status_pending_payment' => 'Pending Payment',
     'status_awaiting_approval' => 'Awaiting Approval',
+    'actions' => [
+        'mark_complete' => 'Mark as Complete',
+        'approve' => 'Approve',
+        'reject' => 'Reject',
+        'request_cancellation' => 'Request Cancellation',
+        'confirm_cancellation' => 'Confirm Cancellation',
+        'dispute' => 'Raise Dispute',
+        'terminate' => 'Terminate Project',
+        'send_message' => 'Send Message',
+    ],
 ];

@@ -10,14 +10,40 @@ use App\Settings\PaymentSettings;
 class PaymentSettingsPage extends SettingsPage
 {
     protected static ?string $navigationIcon = 'heroicon-o-credit-card';
-    protected static ?string $navigationGroup = 'System Settings';
-    protected static ?int $navigationSort = 3;
+    protected static ?string $navigationGroup = 'Financials';
+    protected static ?int $navigationSort = 100;
     protected static string $settings = PaymentSettings::class;
 
     public function form(Form $form): Form
     {
         return $form
             ->schema([
+                Forms\Components\Section::make('Payment Status Customization')
+                    ->description('Manage how payment statuses are named and displayed across the platform.')
+                    ->schema([
+                        Forms\Components\TextInput::make('status_pending_label')
+                            ->label('Pending Status Label')
+                            ->required(),
+                        Forms\Components\TextInput::make('status_authorized_label')
+                            ->label('Authorized (Escrow) Status Label')
+                            ->required(),
+                        Forms\Components\TextInput::make('status_captured_label')
+                            ->label('Captured Status Label')
+                            ->required(),
+                        Forms\Components\TextInput::make('status_failed_label')
+                            ->label('Failed / Declined Status Label')
+                            ->required(),
+                        Forms\Components\TextInput::make('status_refunded_label')
+                            ->label('Refunded Status Label')
+                            ->required(),
+                        Forms\Components\TextInput::make('status_void_label')
+                            ->label('Voided Status Label')
+                            ->required(),
+                        Forms\Components\TextInput::make('status_cancelled_label')
+                            ->label('Cancelled Status Label')
+                            ->required(),
+                    ])->columns(2),
+
                 Forms\Components\Section::make('Tap Payments Configuration')->schema([
                     Forms\Components\Select::make('environment')
                         ->label('Environment')

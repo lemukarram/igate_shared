@@ -7,9 +7,12 @@ use App\Models\Project;
 use App\Models\Message;
 use Illuminate\Support\Facades\Auth;
 use Modules\Payments\Services\TapPaymentService;
+use App\Traits\SyncsProjectPayment;
 
 class ProjectController extends Controller
 {
+    use SyncsProjectPayment;
+
     public function show($id)
     {
         $query = Project::with(['service', 'client', 'provider', 'tasks', 'milestones', 'documents.user']);
@@ -25,39 +28,14 @@ class ProjectController extends Controller
 
         // Payment Status Check for Clients and Providers
         if (Auth::user()->role !== 'admin') {
-            $transaction = \App\Models\Transaction::where('project_id', $project->id)->first();
+            $transaction = $this->syncProjectPayment($project);
+            $project->refresh(); // Ensure the instance has the latest status after sync
             
             if ($transaction) {
                 $authorizedStatuses = ['authorized', 'captured'];
                 
                 if (!in_array(strtolower($transaction->status), $authorizedStatuses)) {
-                    // Try to sync with Tap
-                    if ($transaction->tap_charge_id) {
-                        try {
-                            $tapService = app(TapPaymentService::class);
-                            $charge = $tapService->getCharge($transaction->tap_charge_id);
-                            $tapStatus = strtolower($charge['status'] ?? '');
-                            
-                            $mappedStatus = match ($tapStatus) {
-                                'captured' => 'captured',
-                                'authorized' => 'authorized',
-                                'declined', 'failed', 'cancelled' => 'failed',
-                                'refunded' => 'refunded',
-                                default => $transaction->status,
-                            };
-
-                            if ($mappedStatus !== $transaction->status) {
-                                $transaction->update(['status' => $mappedStatus]);
-                            }
-                        } catch (\Exception $e) {
-                            \Illuminate\Support\Facades\Log::error('Tap Sync Error in Project Show: ' . $e->getMessage());
-                        }
-                    }
-
-                    // Re-check after sync
-                    if (!in_array(strtolower($transaction->status), $authorizedStatuses)) {
-                        return redirect()->route('projects.payment-review', $project->id);
-                    }
+                    return redirect()->route('projects.payment-review', $project->id);
                 }
             }
         }
@@ -93,6 +71,10 @@ class ProjectController extends Controller
             abort(403);
         }
 
+        if ($project->status === 'inactive' && Auth::user()->role !== 'admin') {
+            return redirect()->back()->with('error', 'Project is inactive. Actions are restricted.');
+        }
+
         $request->validate([
             'status' => 'required|in:active,inactive,pending',
         ]);
@@ -119,6 +101,10 @@ class ProjectController extends Controller
             abort(403);
         }
 
+        if ($project->status === 'inactive' && Auth::user()->role !== 'admin') {
+            return redirect()->back()->with('error', 'Project is inactive. Actions are restricted.');
+        }
+
         $project->update([
             'provider_marked_complete' => true,
             'completed_at' => now(),
@@ -142,6 +128,10 @@ class ProjectController extends Controller
         
         if (Auth::id() !== $project->client_id) {
             abort(403);
+        }
+
+        if ($project->status === 'inactive' && Auth::user()->role !== 'admin') {
+            return redirect()->back()->with('error', 'Project is inactive. Actions are restricted.');
         }
 
         $status = 'completed';
@@ -178,6 +168,10 @@ class ProjectController extends Controller
         
         if (Auth::id() !== $project->client_id && Auth::id() !== $project->provider_id) {
             abort(403);
+        }
+
+        if ($project->status === 'inactive' && Auth::user()->role !== 'admin') {
+            return redirect()->back()->with('error', 'Project is inactive. Actions are restricted.');
         }
 
         $role = Auth::user()->role;
@@ -232,6 +226,10 @@ class ProjectController extends Controller
             abort(403);
         }
 
+        if ($project->status === 'inactive' && Auth::user()->role !== 'admin') {
+            return redirect()->back()->with('error', 'Project is inactive. Actions are restricted.');
+        }
+
         $role = Auth::id() === $project->client_id ? 'client' : 'provider';
         $project->update([
             'status' => 'cancelled', // Immediate reflection as requested
@@ -256,6 +254,10 @@ class ProjectController extends Controller
         
         if (Auth::id() !== $project->client_id && Auth::id() !== $project->provider_id) {
             abort(403);
+        }
+
+        if ($project->status === 'inactive' && Auth::user()->role !== 'admin') {
+            return redirect()->back()->with('error', 'Project is inactive. Actions are restricted.');
         }
 
         $requestedBy = $project->cancellation_requested_by;
@@ -289,6 +291,10 @@ class ProjectController extends Controller
             abort(403);
         }
 
+        if ($project->status === 'inactive' && Auth::user()->role !== 'admin') {
+            return redirect()->back()->with('error', 'Project is inactive. Actions are restricted.');
+        }
+
         $project->update([
             'status' => 'disputed',
             'dispute_reason' => $request->reason,
@@ -313,6 +319,10 @@ class ProjectController extends Controller
         
         if (Auth::id() !== $project->provider_id) {
             abort(403);
+        }
+
+        if ($project->status === 'inactive' && Auth::user()->role !== 'admin') {
+            return redirect()->back()->with('error', 'Project is inactive. Actions are restricted.');
         }
 
         $project->update([

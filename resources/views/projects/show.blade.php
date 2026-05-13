@@ -273,7 +273,7 @@
                             @csrf
                             <button type="submit" class="w-full py-2 bg-green-600 hover:bg-green-700 text-white rounded text-xs font-normal transition-all flex items-center justify-center gap-2 uppercase tracking-widest">
                                 <i data-lucide="check-circle" class="w-3 h-3"></i>
-                                <span x-text="t('project.mark_complete')"></span>
+                                <span x-text="t('project.actions.mark_complete')"></span>
                             </button>
                         </form>
                         @endif
@@ -284,7 +284,7 @@
                                 @csrf
                                 <button type="submit" class="w-full py-2 bg-primary text-white rounded text-xs font-normal transition-all flex items-center justify-center gap-2 uppercase tracking-widest">
                                     <i data-lucide="award" class="w-3 h-3"></i>
-                                    <span x-text="t('common.approve')"></span>
+                                    <span x-text="t('project.actions.approve')"></span>
                                 </button>
                             </form>
                             <button @click="rejectModalOpen = true" class="px-3 py-2 bg-red-50 text-red-600 rounded text-xs font-normal hover:bg-red-100 transition-all uppercase tracking-widest">
@@ -300,7 +300,7 @@
                                 @csrf
                                 <button type="submit" class="w-full py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded text-xs font-normal transition-all flex items-center justify-center gap-2 uppercase tracking-widest">
                                     <i data-lucide="x-circle" class="w-3 h-3"></i>
-                                    <span x-text="t('project.request_cancellation')"></span>
+                                    <span x-text="t('project.actions.request_cancellation')"></span>
                                 </button>
                             </form>
                             @else
@@ -310,7 +310,7 @@
                                         @csrf
                                         <button type="submit" class="w-full py-2 bg-amber-600 hover:bg-amber-700 text-white rounded text-xs font-normal transition-all flex items-center justify-center gap-2 uppercase tracking-widest">
                                             <i data-lucide="alert-triangle" class="w-3 h-3"></i>
-                                            <span x-text="t('common.confirm')"></span>
+                                            <span x-text="t('project.actions.confirm_cancellation')"></span>
                                         </button>
                                     </form>
                                     <button @click="rejectModalOpen = true" class="px-3 py-2 bg-red-50 text-red-600 rounded text-xs font-normal hover:bg-red-100 transition-all uppercase tracking-widest">
@@ -329,7 +329,7 @@
                         @if($project->status === 'active' && !$project->termination_requested && Auth::user()->role === 'provider')
                         <button @click="terminateModalOpen = true" class="w-full py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded text-xs font-normal transition-all flex items-center justify-center gap-2 uppercase tracking-widest">
                             <i data-lucide="user-x" class="w-3 h-3"></i>
-                            <span x-text="t('project.terminate_project')"></span>
+                            <span x-text="t('project.actions.terminate')"></span>
                         </button>
                         @endif
 
@@ -339,7 +339,7 @@
                                 @csrf
                                 <button type="submit" class="w-full py-2 bg-red-600 hover:bg-red-700 text-white rounded text-xs font-normal transition-all flex items-center justify-center gap-2 uppercase tracking-widest">
                                     <i data-lucide="check" class="w-3 h-3"></i>
-                                    <span x-text="t('common.approve')"></span>
+                                    <span x-text="t('project.actions.approve')"></span>
                                 </button>
                             </form>
                             <button @click="rejectModalOpen = true" class="px-3 py-2 bg-gray-100 text-gray-700 rounded text-xs font-normal hover:bg-gray-200 transition-all uppercase tracking-widest">
@@ -508,7 +508,7 @@
     <div x-show="disputeModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center" style="display: none;">
         <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="disputeModalOpen = false"></div>
         <div class="bg-white w-full max-w-md rounded-xl shadow-2xl relative z-10 p-8 border border-gray-100">
-            <h2 class="text-2xl font-normal mb-4 text-red-600" x-text="t('project.dispute_project')"></h2>
+            <h2 class="text-2xl font-normal mb-4 text-red-600" x-text="t('project.actions.dispute')"></h2>
             <p class="text-sm text-gray-500 mb-6" x-text="t('project.dispute_notice')"></p>
             <form action="{{ route('projects.dispute', $project->id) }}" method="POST" class="space-y-6">
                 @csrf
@@ -518,7 +518,7 @@
                 </div>
                 <div class="flex gap-4 pt-4">
                     <button type="button" @click="disputeModalOpen = false" class="flex-1 py-4 bg-gray-100 text-gray-700 rounded-xl font-normal" x-text="t('common.cancel')"></button>
-                    <button type="submit" class="flex-1 py-4 bg-red-600 text-white rounded-xl font-normal" x-text="t('project.dispute_project')"></button>
+                    <button type="submit" class="flex-1 py-4 bg-red-600 text-white rounded-xl font-normal" x-text="t('project.actions.dispute')"></button>
                 </div>
             </form>
         </div>
@@ -528,7 +528,7 @@
     <div x-show="terminateModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center" style="display: none;">
         <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="terminateModalOpen = false"></div>
         <div class="bg-white w-full max-w-md rounded-xl shadow-2xl relative z-10 p-8 border border-gray-100">
-            <h2 class="text-2xl font-normal mb-4 text-red-600" x-text="t('project.terminate_project')"></h2>
+            <h2 class="text-2xl font-normal mb-4 text-red-600" x-text="t('project.actions.terminate')"></h2>
             <p class="text-sm text-gray-500 mb-6" x-text="t('project.termination_notice')"></p>
             <form action="{{ route('projects.terminate', $project->id) }}" method="POST" class="space-y-6">
                 @csrf
@@ -538,7 +538,7 @@
                 </div>
                 <div class="flex gap-4 pt-4">
                     <button type="button" @click="terminateModalOpen = false" class="flex-1 py-4 bg-gray-100 text-gray-700 rounded-xl font-normal" x-text="t('common.cancel')"></button>
-                    <button type="submit" class="flex-1 py-4 bg-red-600 text-white rounded-xl font-normal" x-text="t('project.terminate_project')"></button>
+                    <button type="submit" class="flex-1 py-4 bg-red-600 text-white rounded-xl font-normal" x-text="t('project.actions.terminate')"></button>
                 </div>
             </form>
         </div>
