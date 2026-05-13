@@ -11,15 +11,18 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 use Modules\Payments\Services\TapPaymentService;
+use App\Services\InvoiceService;
 use Illuminate\Support\Facades\DB;
 
 class CheckoutController extends Controller
 {
     protected TapPaymentService $tapService;
+    protected InvoiceService $invoiceService;
 
-    public function __construct(TapPaymentService $tapService)
+    public function __construct(TapPaymentService $tapService, InvoiceService $invoiceService)
     {
         $this->tapService = $tapService;
+        $this->invoiceService = $invoiceService;
     }
 
     public function review($providerServiceId)

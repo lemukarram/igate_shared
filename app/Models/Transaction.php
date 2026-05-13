@@ -44,4 +44,9 @@ class Transaction extends Model
     {
         return $this->belongsTo(Plan::class);
     }
+
+    public function invoice()
+    {
+        return $this->hasOne(Invoice::class);
+    }
 }

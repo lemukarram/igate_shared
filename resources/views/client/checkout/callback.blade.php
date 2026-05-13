@@ -34,6 +34,18 @@
     </div>
 
     <div class="flex justify-center space-x-4">
+        @php
+            $transaction = \App\Models\Transaction::with('invoice')->find($transaction_id);
+            $invoice = $transaction ? $transaction->invoice : null;
+        @endphp
+        
+        @if($invoice)
+            <a href="{{ Storage::disk('public')->url($invoice->pdf_path) }}" target="_blank" class="px-6 py-3 border border-gray-200 text-gray-700 rounded-xl font-normal hover:bg-gray-50 transition-all flex items-center gap-2">
+                <i data-lucide="download" class="w-4 h-4"></i>
+                <span>{{ __('common.download_invoice') ?? 'Download Invoice' }}</span>
+            </a>
+        @endif
+
         @if(isset($project_id) && $project_id)
             <a href="{{ route('projects.show', $project_id) }}" class="px-6 py-3 bg-primary text-white rounded-xl font-normal hover:bg-primary-dark transition-all">
                 <span x-text="t('common.view_project')"></span>

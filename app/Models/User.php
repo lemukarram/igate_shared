@@ -125,6 +125,11 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasMany(Review::class, 'reviewee_id');
     }
 
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class);
+    }
+
     public function getCompletedProjectsCountAttribute()
     {
         return $this->providerProjects()->where('status', 'completed')->count();

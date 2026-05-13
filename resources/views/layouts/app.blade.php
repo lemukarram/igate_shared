@@ -221,7 +221,7 @@
                         <img src="{{ $modalLogoUrl }}" alt="{{ $settings->site_name }}" class="h-10 w-auto object-contain min-w-[40px]">
                     </div> -->
                     <div class="space-y-1 flex-1">
-                        <template x-for="t_tab in ['account', 'company', 'preferences', 'permissions', 'plans', 'notifications', 'security']">
+                        <template x-for="t_tab in ['account', 'company', 'preferences', 'permissions', 'plans', 'notifications', 'security', 'payments']">
                             <button @click="settingsTab = t_tab" 
                                     :class="settingsTab === t_tab ? 'bg-primary text-white font-normal' : 'text-gray-500 hover:bg-gray-100'" 
                                     class="w-full text-left px-4 py-2 rounded-md text-xs transition-all capitalize" 
@@ -695,6 +695,60 @@
                                     <p class="text-xs font-normal">Two-factor authentication is currently disabled.</p>
                                 </div>
                             </form>
+                        </div>
+
+                        <!-- Payments Tab -->
+                        <div x-show="settingsTab === 'payments'" class="space-y-6 animate-in fade-in duration-300 overflow-y-auto max-h-[400px] custom-scrollbar pr-2">
+                            <div class="flex items-center justify-between mb-2">
+                                <h3 class="text-xs font-normal text-gray-900 uppercase tracking-widest">{{ __('common.transaction_history') }}</h3>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-xs">
+                                    <thead>
+                                        <tr class="border-b border-gray-100">
+                                            <th class="py-3 px-2 font-normal text-gray-400">{{ __('common.date') }}</th>
+                                            <th class="py-3 px-2 font-normal text-gray-400">{{ __('common.transaction_id') }}</th>
+                                            <th class="py-3 px-2 font-normal text-gray-400">{{ __('common.type') }}</th>
+                                            <th class="py-3 px-2 font-normal text-gray-400">{{ __('common.amount') }}</th>
+                                            <th class="py-3 px-2 font-normal text-gray-400">{{ __('common.status') }}</th>
+                                            <th class="py-3 px-2 font-normal text-gray-400 text-right">{{ __('common.actions') }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-50">
+                                        @foreach(Auth::user()->transactions()->latest()->get() as $transaction)
+                                        <tr>
+                                            <td class="py-3 px-2 text-gray-600">{{ $transaction->created_at->format('M d, Y') }}</td>
+                                            <td class="py-3 px-2 text-gray-900 font-normal uppercase text-[8px]">{{ $transaction->id }}</td>
+                                            <td class="py-3 px-2">
+                                                <span class="px-2 py-0.5 rounded-full text-[9px] capitalize {{ $transaction->type === 'service' ? 'bg-blue-50 text-blue-600' : 'bg-purple-50 text-purple-600' }}">
+                                                    {{ $transaction->type }}
+                                                </span>
+                                            </td>
+                                            <td class="py-3 px-2 text-gray-900 font-normal">{{ number_format($transaction->amount, 2) }} {{ $transaction->currency ?? 'SAR' }}</td>
+                                            <td class="py-3 px-2">
+                                                <span class="px-2 py-0.5 rounded-full text-[9px] capitalize {{ in_array($transaction->status, ['captured', 'success', 'paid']) ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600' }}">
+                                                    {{ $transaction->status }}
+                                                </span>
+                                            </td>
+                                            <td class="py-3 px-2 text-right">
+                                                @if(in_array($transaction->status, ['captured', 'success', 'paid']) && $transaction->invoice)
+                                                <div class="flex items-center justify-end space-x-2">
+                                                    <a href="{{ Storage::disk('public')->url($transaction->invoice->pdf_path) }}" target="_blank" class="p-1 text-gray-400 hover:text-primary transition-colors" title="{{ __('common.download_pdf') }}">
+                                                        <i data-lucide="download" class="w-4 h-4"></i>
+                                                    </a>
+                                                </div>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                                @if(Auth::user()->transactions()->count() === 0)
+                                <div class="py-10 text-center">
+                                    <p class="text-gray-400 text-xs">{{ __('common.no_transactions') }}</p>
+                                </div>
+                                @endif
+                            </div>
                         </div>
                     </div>
                     <div class="pt-6 border-t border-gray-50 flex justify-end">
