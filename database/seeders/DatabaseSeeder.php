@@ -34,28 +34,13 @@ class DatabaseSeeder extends Seeder
 
         // 1. Seed Services (12 Fixed Catalog)
         $this->call(ServiceSeeder::class);
+        $this->call(PlanSeeder::class);
 
         // Link services to categories (Mock)
         $cats = \App\Models\ServiceCategory::all();
         \App\Models\Service::all()->each(function($s) use ($cats) {
             $s->update(['service_category_id' => $cats->random()->id]);
         });
-
-        // Seed Plans
-        $providerPlans = [
-            ['name' => 'Basic', 'type' => 'provider', 'max_services' => 1, 'max_users' => 1, 'max_projects' => 1, 'max_companies' => 0],
-            ['name' => 'Professional', 'type' => 'provider', 'max_services' => 3, 'max_users' => 3, 'max_projects' => 3, 'max_companies' => 0],
-            ['name' => 'Enterprise', 'type' => 'provider', 'max_services' => 999, 'max_users' => 999, 'max_projects' => 999, 'max_companies' => 0],
-        ];
-        $clientPlans = [
-            ['name' => 'Basic', 'type' => 'client', 'max_services' => 1, 'max_users' => 1, 'max_projects' => 1, 'max_companies' => 1],
-            ['name' => 'Professional', 'type' => 'client', 'max_services' => 3, 'max_users' => 3, 'max_projects' => 3, 'max_companies' => 3],
-            ['name' => 'Enterprise', 'type' => 'client', 'max_services' => 999, 'max_users' => 999, 'max_projects' => 999, 'max_companies' => 999],
-        ];
-
-        foreach (array_merge($providerPlans, $clientPlans) as $plan) {
-            \App\Models\Plan::firstOrCreate(['name' => $plan['name'], 'type' => $plan['type']], $plan);
-        }
 
         $basicProviderPlan = \App\Models\Plan::where('name', 'Basic')->where('type', 'provider')->first();
         $basicClientPlan = \App\Models\Plan::where('name', 'Basic')->where('type', 'client')->first();
