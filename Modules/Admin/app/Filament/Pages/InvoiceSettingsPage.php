@@ -32,6 +32,10 @@ class InvoiceSettingsPage extends SettingsPage
                 ])->columns(2),
 
                 Forms\Components\Section::make('Platform Details')->schema([
+                    Forms\Components\TextInput::make('company_name')
+                        ->label('Company Name')
+                        ->placeholder('iGate Shared Services')
+                        ->required(),
                     Forms\Components\Textarea::make('address')
                         ->label('Platform Address')
                         ->required(),

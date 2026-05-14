@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Invoice;
 use App\Models\Transaction;
+use App\Settings\GeneralSettings;
 use App\Settings\InvoiceSettings;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Storage;
@@ -11,7 +12,10 @@ use Illuminate\Support\Str;
 
 class InvoiceService
 {
-    public function __construct(protected InvoiceSettings $settings) {}
+    public function __construct(
+        protected InvoiceSettings $settings,
+        protected GeneralSettings $generalSettings
+    ) {}
 
     /**
      * Generate an invoice for a given transaction.
@@ -69,25 +73,33 @@ class InvoiceService
     protected function prepareBillingDetails(Transaction $transaction): array
     {
         $user = $transaction->user;
+        $project = $transaction->project;
+        $company = $project ? $project->company : ($user->companies()->first() ?? null);
         
         // Basic info
         $details = [
             'client_name' => $user->name,
             'client_email' => $user->email,
+            'company_name' => $company->name ?? ($user->name),
+            'company_address' => $company->address ?? '',
             'amount' => $transaction->amount,
             'currency' => $transaction->currency ?? 'SAR',
             'date' => $transaction->created_at->format('Y-m-d'),
             'type' => $transaction->type,
+            'transaction_id' => $transaction->id,
         ];
 
         // Type specific info
-        if ($transaction->type === 'service' && $transaction->project) {
-            $details['item_name'] = $transaction->project->service->name ?? 'Service Fulfillment';
-            $details['provider_name'] = $transaction->provider->name ?? 'iGate Provider';
+        if (in_array($transaction->type, ['service', 'service_escrow']) && $project) {
+            $details['item_name'] = $project->service->name ?? 'Service Fulfillment';
+            $details['description'] = 'Standardized service: ' . ($project->service->name ?? '') . ' (PJ-' . $project->id . ')';
+            $details['provider_name'] = $transaction->provider->name ?? ($project->provider->name ?? 'iGate Provider');
         } elseif ($transaction->type === 'subscription' && $transaction->plan) {
             $details['item_name'] = 'Subscription: ' . $transaction->plan->name;
+            $details['description'] = 'iGate ' . ucfirst($transaction->plan->type) . ' Plan - ' . $transaction->plan->name;
         } else {
             $details['item_name'] = 'Business Service';
+            $details['description'] = 'Standardized business service fulfillment';
         }
 
         return $details;
@@ -100,9 +112,23 @@ class InvoiceService
     {
         $invoice->load('transaction.user');
         
+        // Freshly resolve settings to ensure latest values from DB
+        $invoiceSettings = app(InvoiceSettings::class);
+        $genSettings = app(GeneralSettings::class);
+
+        // Ensure billing details are somewhat complete for old invoices
+        if (empty($invoice->billing_details['company_name'])) {
+            $details = $invoice->billing_details ?? [];
+            $details['company_name'] = $details['client_name'] ?? 'Client';
+            $details['company_address'] = $details['company_address'] ?? '';
+            $invoice->billing_details = $details;
+            $invoice->save();
+        }
+
         $data = [
             'invoice' => $invoice,
-            'settings' => $this->settings,
+            'invoiceSettings' => $invoiceSettings,
+            'generalSettings' => $genSettings,
         ];
 
         // Use the view we will create in Step 4

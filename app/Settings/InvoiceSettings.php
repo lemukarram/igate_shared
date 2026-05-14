@@ -6,6 +6,7 @@ use Spatie\LaravelSettings\Settings;
 
 class InvoiceSettings extends Settings
 {
+    public ?string $company_name;
     public ?string $logo;
     public ?string $address;
     public ?string $tax_id;

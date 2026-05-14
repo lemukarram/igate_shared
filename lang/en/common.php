@@ -388,6 +388,7 @@ return [
     'type' => 'Type',
     'amount' => 'Amount',
     'actions' => 'Actions',
+    'details' => 'Details',
     'download_pdf' => 'Download PDF',
     'tap_reference' => 'Tap Reference',
     'view_project' => 'View Project',

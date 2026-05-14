@@ -20,13 +20,20 @@ Route::middleware('guest')->group(function () {
     Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
 });
 
+// Public / Signed Routes
+Route::get('/invoices/{invoice}/download', [App\Http\Controllers\InvoiceController::class, 'download'])->name('invoices.download');
+Route::get('/transactions/{transaction}/invoice/download', [App\Http\Controllers\InvoiceController::class, 'downloadFromTransaction'])->name('transactions.invoice.download');
+
 // Landing Page for guests, Dashboard for auth users
 Route::get('/', [\App\Http\Controllers\LandingPageController::class, 'index']);
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 
-Route::middleware(['auth', 'App\Http\Middleware\EnsureProviderIsOnboarded'])->group(function () {
-    Route::get('/dashboard', [MarketplaceController::class, 'dashboard'])->name('client.dashboard');
+Route::middleware(['auth'])->group(function () {
+    // Global Auth Routes
+
+    Route::middleware(['App\Http\Middleware\EnsureProviderIsOnboarded'])->group(function () {
+        Route::get('/dashboard', [MarketplaceController::class, 'dashboard'])->name('client.dashboard');
     Route::get('/provider/dashboard', [App\Http\Controllers\ProviderDashboardController::class, 'index'])->name('provider.dashboard');
 
     // Onboarding
@@ -129,4 +136,5 @@ Route::middleware(['auth', 'App\Http\Middleware\EnsureProviderIsOnboarded'])->gr
 
     // Reviews
     Route::post('/reviews', [App\Http\Controllers\ReviewController::class, 'store'])->name('reviews.store');
+    });
 });

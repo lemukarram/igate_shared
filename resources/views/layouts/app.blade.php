@@ -706,9 +706,7 @@
                                 <table class="w-full text-left text-xs">
                                     <thead>
                                         <tr class="border-b border-gray-100">
-                                            <th class="py-3 px-2 font-normal text-gray-400">{{ __('common.date') }}</th>
-                                            <th class="py-3 px-2 font-normal text-gray-400">{{ __('common.transaction_id') }}</th>
-                                            <th class="py-3 px-2 font-normal text-gray-400">{{ __('common.type') }}</th>
+                                            <th class="py-3 px-2 font-normal text-gray-400">{{ __('common.details') }}</th>
                                             <th class="py-3 px-2 font-normal text-gray-400">{{ __('common.amount') }}</th>
                                             <th class="py-3 px-2 font-normal text-gray-400">{{ __('common.status') }}</th>
                                             <th class="py-3 px-2 font-normal text-gray-400 text-right">{{ __('common.actions') }}</th>
@@ -717,12 +715,16 @@
                                     <tbody class="divide-y divide-gray-50">
                                         @foreach(Auth::user()->transactions()->latest()->get() as $transaction)
                                         <tr>
-                                            <td class="py-3 px-2 text-gray-600">{{ $transaction->created_at->format('M d, Y') }}</td>
-                                            <td class="py-3 px-2 text-gray-900 font-normal uppercase text-[8px]">{{ $transaction->id }}</td>
                                             <td class="py-3 px-2">
-                                                <span class="px-2 py-0.5 rounded-full text-[9px] capitalize {{ $transaction->type === 'service' ? 'bg-blue-50 text-blue-600' : 'bg-purple-50 text-purple-600' }}">
-                                                    {{ $transaction->type }}
-                                                </span>
+                                                <div class="flex flex-col gap-1">
+                                                    <span class="text-[8px] text-gray-400 uppercase font-mono tracking-tighter">...{{ substr($transaction->id, -15) }}</span>
+                                                    <div>
+                                                        <span class="px-2 py-0.5 rounded-full text-[9px] capitalize {{ $transaction->type === 'service' ? 'bg-blue-50 text-blue-600' : 'bg-purple-50 text-purple-600' }}">
+                                                            {{ $transaction->type }}
+                                                        </span>
+                                                    </div>
+                                                    <span class="text-[9px] text-gray-500">{{ $transaction->created_at->format('M d, Y H:i') }}</span>
+                                                </div>
                                             </td>
                                             <td class="py-3 px-2 text-gray-900 font-normal">{{ number_format($transaction->amount, 2) }} {{ $transaction->currency ?? 'SAR' }}</td>
                                             <td class="py-3 px-2">
@@ -731,9 +733,9 @@
                                                 </span>
                                             </td>
                                             <td class="py-3 px-2 text-right">
-                                                @if(in_array($transaction->status, ['captured', 'success', 'paid']) && $transaction->invoice)
+                                                @if(in_array($transaction->status, ['captured', 'success', 'paid', 'authorized']))
                                                 <div class="flex items-center justify-end space-x-2">
-                                                    <a href="{{ Storage::disk('public')->url($transaction->invoice->pdf_path) }}" target="_blank" class="p-1 text-gray-400 hover:text-primary transition-colors" title="{{ __('common.download_pdf') }}">
+                                                    <a href="{{ route('transactions.invoice.download', $transaction->id) }}" class="p-1 text-gray-400 hover:text-primary transition-colors" title="{{ __('common.download_pdf') }}">
                                                         <i data-lucide="download" class="w-4 h-4"></i>
                                                     </a>
                                                 </div>

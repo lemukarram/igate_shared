@@ -35,12 +35,11 @@
 
     <div class="flex justify-center space-x-4">
         @php
-            $transaction = \App\Models\Transaction::with('invoice')->find($transaction_id);
-            $invoice = $transaction ? $transaction->invoice : null;
+            $isSuccess = in_array($status, ['captured', 'authorized', 'success']);
         @endphp
         
-        @if($invoice)
-            <a href="{{ Storage::disk('public')->url($invoice->pdf_path) }}" target="_blank" class="px-6 py-3 border border-gray-200 text-gray-700 rounded-xl font-normal hover:bg-gray-50 transition-all flex items-center gap-2">
+        @if($isSuccess)
+            <a href="{{ URL::temporarySignedRoute('transactions.invoice.download', now()->addHours(24), ['transaction' => $transaction_id]) }}" class="px-6 py-3 border border-gray-200 text-gray-700 rounded-xl font-normal hover:bg-gray-50 transition-all flex items-center gap-2">
                 <i data-lucide="download" class="w-4 h-4"></i>
                 <span>{{ __('common.download_invoice') ?? 'Download Invoice' }}</span>
             </a>

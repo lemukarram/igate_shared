@@ -388,6 +388,7 @@ return [
     'type' => 'النوع',
     'amount' => 'المبلغ',
     'actions' => 'الإجراءات',
+    'details' => 'التفاصيل',
     'download_pdf' => 'تحميل PDF',
     'tap_reference' => 'مرجع Tap',
     'view_project' => 'عرض المشروع',

@@ -247,22 +247,28 @@ class CheckoutController extends Controller
             }
 
             // 3. Update Transaction Record
-            $transaction = DB::table('transactions')->where('id', $transactionId)->first();
+            $transaction = \App\Models\Transaction::find($transactionId);
             if (!$transaction) {
                 \Illuminate\Support\Facades\Log::error('Tap Callback: Transaction not found in DB', ['transaction_id' => $transactionId]);
                 return redirect()->route('client.portfolio')->with('error', 'Transaction not found.');
             }
 
-            DB::table('transactions')->where('id', $transactionId)->update([
+            $transaction->update([
                 'status' => $mappedStatus,
                 'tap_charge_id' => $tapChargeId,
-                'updated_at' => now(),
             ]);
 
-            
+            $invoice = null;
             // 4. Handle Successful Payment Logic
             if ($mappedStatus === 'captured' || $mappedStatus === 'authorized') {
                 $message = 'Payment processed successfully.';
+                
+                // Generate Invoice
+                try {
+                    $invoice = $this->invoiceService->generateForTransaction($transaction);
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error('Invoice Generation Failed', ['error' => $e->getMessage()]);
+                }
                 
                 // CASE A: Subscription Plan Upgrade
                 if ($transaction->plan_id && in_array($transaction->type, ['subscription', 'other']) && $mappedStatus === 'captured') {
@@ -331,6 +337,7 @@ class CheckoutController extends Controller
                     'transaction_id' => $transactionId,
                     'tap_charge_id' => $tapChargeId,
                     'project_id' => $transaction->project_id ?? null,
+                    'invoice' => $invoice,
                 ]);
             }
 
@@ -345,6 +352,7 @@ class CheckoutController extends Controller
                     'transaction_id' => $transactionId,
                     'tap_charge_id' => $tapChargeId,
                     'project_id' => $transaction->project_id ?? null,
+                    'invoice' => $invoice,
                 ]);
             }
 
@@ -355,6 +363,7 @@ class CheckoutController extends Controller
                 'transaction_id' => $transactionId,
                 'tap_charge_id' => $tapChargeId,
                 'project_id' => $transaction->project_id ?? null,
+                'invoice' => $invoice,
             ]);
 
         } catch (\Exception $e) {

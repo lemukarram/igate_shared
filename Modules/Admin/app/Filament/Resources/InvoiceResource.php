@@ -75,8 +75,13 @@ class InvoiceResource extends Resource
                 Tables\Actions\Action::make('download')
                     ->label('Download PDF')
                     ->icon('heroicon-o-arrow-down-tray')
-                    ->url(fn (Invoice $record) => $record->pdf_path ? Storage::disk('public')->url($record->pdf_path) : null)
-                    ->openUrlInNewTab(),
+                    ->action(function (Invoice $record) {
+                        $service = app(\App\Services\InvoiceService::class);
+                        $pdfPath = $service->generatePdf($record);
+                        $record->update(['pdf_path' => $pdfPath]);
+
+                        return Storage::disk('public')->download($record->pdf_path);
+                    }),
                 Tables\Actions\ViewAction::make(),
             ])
             ->bulkActions([
