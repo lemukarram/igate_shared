@@ -73,14 +73,32 @@
                             <span class="font-normal" x-text="t('common.secure_checkout')"></span>
                         </div>
                         <div class="flex items-center space-x-2">
-                            <img src="/images/logo/tap-pay.png" alt="Tap" class="h-6">
+                            @if($paymentSettings->tap_logo)
+                                <img src="{{ asset('storage/' . $paymentSettings->tap_logo) }}" alt="Tap" class="h-6">
+                            @else
+                                <img src="/images/logo/tap-pay.png" alt="Tap" class="h-6">
+                            @endif
                         </div>
                     </div>
                     <p class="text-sm text-gray-500" x-text="t('common.tap_redirect_notice')"></p>
                     <div class="flex space-x-2">
-                        <img src="/images/logo/visa-card.png" alt="Visa" class="h-5">
-                        <img src="/images/logo/master-card.png" alt="Mastercard" class="h-5">
-                        <img src="/images/logo/mada-card.png" alt="Mada" class="h-5">
+                        @if($paymentSettings->visa_logo)
+                            <img src="{{ asset('storage/' . $paymentSettings->visa_logo) }}" alt="Visa" class="h-5">
+                        @else
+                            <img src="/images/logo/visa-card.png" alt="Visa" class="h-5">
+                        @endif
+
+                        @if($paymentSettings->mastercard_logo)
+                            <img src="{{ asset('storage/' . $paymentSettings->mastercard_logo) }}" alt="Mastercard" class="h-5">
+                        @else
+                            <img src="/images/logo/master-card.png" alt="Mastercard" class="h-5">
+                        @endif
+
+                        @if($paymentSettings->mada_logo)
+                            <img src="{{ asset('storage/' . $paymentSettings->mada_logo) }}" alt="Mada" class="h-5">
+                        @else
+                            <img src="/images/logo/mada-card.png" alt="Mada" class="h-5">
+                        @endif
                     </div>
                 </div>
             </div>

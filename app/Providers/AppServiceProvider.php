@@ -9,6 +9,7 @@ use App\Models\Project;
 use App\Models\PreSaleMessage;
 use Illuminate\Support\Facades\Auth;
 use App\Settings\GeneralSettings;
+use App\Settings\PaymentSettings;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -27,7 +28,9 @@ class AppServiceProvider extends ServiceProvider
     {
         View::composer('*', function ($view) {
             $settings = app(GeneralSettings::class);
-            $view->with('settings', $settings);
+            $paymentSettings = app(PaymentSettings::class);
+            $view->with('settings', $settings)
+                 ->with('paymentSettings', $paymentSettings);
 
             if (Auth::check()) {
                 $ongoingProjects = Project::where(function($query) {

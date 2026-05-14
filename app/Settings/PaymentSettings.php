@@ -23,6 +23,12 @@ class PaymentSettings extends Settings
     public ?string $status_void_label;
     public ?string $status_cancelled_label;
 
+    // Payment Logos
+    public ?string $tap_logo;
+    public ?string $visa_logo;
+    public ?string $mastercard_logo;
+    public ?string $mada_logo;
+
     public static function group(): string
     {
         return 'payment';

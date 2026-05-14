@@ -112,6 +112,31 @@ class PaymentSettingsPage extends SettingsPage
                             ->rows(4)
                             ->required(),
                     ]),
+
+                Forms\Components\Section::make('Payment Method Logos')
+                    ->description('Upload logos for different payment methods displayed at checkout.')
+                    ->schema([
+                        Forms\Components\FileUpload::make('tap_logo')
+                            ->label('Tap Pay Logo')
+                            ->directory('settings/payments')
+                            ->image()
+                            ->previewable(),
+                        Forms\Components\FileUpload::make('visa_logo')
+                            ->label('Visa Logo')
+                            ->directory('settings/payments')
+                            ->image()
+                            ->previewable(),
+                        Forms\Components\FileUpload::make('mastercard_logo')
+                            ->label('Mastercard Logo')
+                            ->directory('settings/payments')
+                            ->image()
+                            ->previewable(),
+                        Forms\Components\FileUpload::make('mada_logo')
+                            ->label('Mada Logo')
+                            ->directory('settings/payments')
+                            ->image()
+                            ->previewable(),
+                    ])->columns(3),
             ]);
     }
 }

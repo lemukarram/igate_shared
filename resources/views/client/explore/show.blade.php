@@ -187,13 +187,16 @@
         <!-- Standardized Sidebar -->
         <div class="space-y-6">
             <h2 class="text-lg font-normal text-gray-900" x-text="t('common.standard_catalog')"></h2>
-            <div class="rounded-3xl p-6 text-white shadow-xl shadow-gray-200" style="background-color: {{ $settings->protection_block_bg_color ?? '#111827' }}">
-                <p class="text-xs text-gray-400 font-normal uppercase tracking-widest mb-4">{{ $settings->protection_block_title }}</p>
-                <p class="text-sm text-gray-300 leading-relaxed mb-6">{{ $settings->protection_block_description }}</p>
+            <div class="rounded-3xl p-6 shadow-xl shadow-gray-200" style="background-color: {{ $settings->protection_block_bg_color ?? '#111827' }}">
+                <p class="{{ $settings->protection_block_title_size ?? 'text-xs' }} {{ $settings->protection_block_title_weight ?? 'font-normal' }} uppercase tracking-widest mb-4"
+                   style="color: {{ $settings->protection_block_title_color ?? '#9CA3AF' }}">{{ $settings->protection_block_title }}</p>
+                <p class="{{ $settings->protection_block_description_size ?? 'text-sm' }} leading-relaxed mb-6"
+                   style="color: {{ $settings->protection_block_description_color ?? '#D1D5DB' }}">{{ $settings->protection_block_description }}</p>
                 <ul class="space-y-4">
                     @foreach($settings->protection_block_points as $point)
-                    <li class="flex items-center gap-3 text-xs font-normal">
-                        <i data-lucide="{{ $point['icon'] }}" class="w-4 h-4 text-primary"></i>
+                    <li class="flex items-center gap-3 {{ $settings->protection_block_points_text_size ?? 'text-xs' }} font-normal"
+                        style="color: {{ $settings->protection_block_points_text_color ?? 'white' }}">
+                        <i data-lucide="{{ $point['icon'] }}" class="w-4 h-4" style="color: {{ $settings->protection_block_icon_color ?? 'var(--primary)' }}"></i>
                         <span>{{ $point['text'] }}</span>
                     </li>
                     @endforeach

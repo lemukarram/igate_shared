@@ -113,20 +113,28 @@
         </div>
 
         <!-- Quick Explore Sidebar -->
-        <div class="bg-gray-900 rounded-3xl p-8 text-white">
-            <h3 class="text-xl font-normal mb-6" x-text="t('common.recommended_services')"></h3>
+        @if($settings->recommended_services_enabled)
+        <div class="rounded-3xl p-8 text-white" style="background-color: {{ $settings->recommended_services_bg_color ?? '#111827' }}; color: {{ $settings->recommended_services_text_color ?? 'white' }}">
+            <h3 class="{{ $settings->recommended_services_heading_size ?? 'text-xl' }} {{ $settings->recommended_services_heading_weight ?? 'font-normal' }} mb-6"
+                style="color: {{ $settings->recommended_services_text_color ?? 'white' }}">
+                {{ $settings->recommended_services_title ?? __('common.recommended_services') }}
+            </h3>
             <div class="space-y-4">
-                @foreach(['ZATCA Compliance', 'Legal Review', 'HR Management'] as $rec)
-                <div class="p-4 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all cursor-pointer group">
+                @foreach($settings->recommended_services_items as $item)
+                <a href="{{ $item['link'] ?? '#' }}" class="block p-4 rounded-2xl transition-all cursor-pointer group border border-white/10"
+                   style="background-color: {{ $settings->recommended_services_item_bg_color ?? 'rgba(255,255,255,0.05)' }};">
                     <div class="flex items-center justify-between mb-2">
-                        <span class="text-xs font-normal text-primary uppercase tracking-widest">{{ $rec }}</span>
-                        <i data-lucide="arrow-right" class="w-4 h-4 text-white group-hover:translate-x-1 transition-transform rtl:group-hover:-translate-x-1"></i>
+                        <span class="text-xs font-normal uppercase tracking-widest" style="color: {{ $settings->recommended_services_item_text_color ?? 'var(--primary)' }}">{{ $item['title'] }}</span>
+                        <i data-lucide="{{ $item['icon'] ?? 'arrow-right' }}" 
+                           class="w-{{ $settings->recommended_services_item_icon_size ?? '4' }} h-{{ $settings->recommended_services_item_icon_size ?? '4' }} group-hover:translate-x-1 transition-transform rtl:group-hover:-translate-x-1"
+                           style="color: {{ $settings->recommended_services_item_icon_color ?? 'white' }}"></i>
                     </div>
-                    <p class="text-[10px] text-gray-400 leading-relaxed" x-text="t('common.regulatory_compliance_solution')"></p>
-                </div>
+                    <p class="text-[10px] leading-relaxed" style="color: {{ $settings->recommended_services_item_desc_color ?? '#9CA3AF' }}">{{ $item['description'] }}</p>
+                </a>
                 @endforeach
             </div>
         </div>
+        @endif
 
         <!-- Team Task Manager -->
         <div class="bg-white border border-gray-100 rounded-[2.5rem] p-8 shadow-sm">

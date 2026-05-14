@@ -92,6 +92,39 @@ class GeneralSettings extends SettingsPage
                         ->label('Description')
                         ->columnSpanFull()
                         ->required(),
+
+                    Forms\Components\Grid::make(3)->schema([
+                        Forms\Components\ColorPicker::make('protection_block_title_color')
+                            ->label('Title Color'),
+                        Forms\Components\TextInput::make('protection_block_title_size')
+                            ->label('Title Font Size (e.g., 14px, 1rem)'),
+                        Forms\Components\Select::make('protection_block_title_weight')
+                            ->label('Title Font Weight')
+                            ->options([
+                                'font-light' => 'Light',
+                                'font-normal' => 'Normal',
+                                'font-medium' => 'Medium',
+                                'font-semibold' => 'Semibold',
+                                'font-bold' => 'Bold',
+                            ]),
+                    ]),
+
+                    Forms\Components\Grid::make(2)->schema([
+                        Forms\Components\ColorPicker::make('protection_block_description_color')
+                            ->label('Description Color'),
+                        Forms\Components\TextInput::make('protection_block_description_size')
+                            ->label('Description Font Size'),
+                    ]),
+
+                    Forms\Components\Grid::make(3)->schema([
+                        Forms\Components\ColorPicker::make('protection_block_points_text_color')
+                            ->label('Points Text Color'),
+                        Forms\Components\TextInput::make('protection_block_points_text_size')
+                            ->label('Points Font Size'),
+                        Forms\Components\ColorPicker::make('protection_block_icon_color')
+                            ->label('Icon Color'),
+                    ]),
+
                     Forms\Components\Repeater::make('protection_block_points')
                         ->label('Sub-points')
                         ->schema([
@@ -101,6 +134,67 @@ class GeneralSettings extends SettingsPage
                             Forms\Components\TextInput::make('text')
                                 ->label('Text')
                                 ->required(),
+                        ])
+                        ->grid(2)
+                        ->columnSpanFull(),
+                ])->columns(2),
+
+                Forms\Components\Section::make('Recommended Services Block')->schema([
+                    Forms\Components\Toggle::make('recommended_services_enabled')
+                        ->label('Enable Recommended Services')
+                        ->default(true),
+                    Forms\Components\TextInput::make('recommended_services_title')
+                        ->label('Section Title')
+                        ->default('Recommended Services'),
+                    Forms\Components\ColorPicker::make('recommended_services_bg_color')
+                        ->label('Block Background Color'),
+                    Forms\Components\ColorPicker::make('recommended_services_text_color')
+                        ->label('Block Text Color'),
+                    
+                    Forms\Components\Grid::make(2)->schema([
+                        Forms\Components\TextInput::make('recommended_services_heading_size')
+                            ->label('Heading Font Size'),
+                        Forms\Components\Select::make('recommended_services_heading_weight')
+                            ->label('Heading Font Weight')
+                            ->options([
+                                'font-light' => 'Light',
+                                'font-normal' => 'Normal',
+                                'font-medium' => 'Medium',
+                                'font-semibold' => 'Semibold',
+                                'font-bold' => 'Bold',
+                            ]),
+                    ]),
+
+                    Forms\Components\Grid::make(3)->schema([
+                        Forms\Components\ColorPicker::make('recommended_services_item_bg_color')
+                            ->label('Item Background Color'),
+                        Forms\Components\ColorPicker::make('recommended_services_item_text_color')
+                            ->label('Item Text Color'),
+                        Forms\Components\ColorPicker::make('recommended_services_item_desc_color')
+                            ->label('Item Description Color'),
+                    ]),
+
+                    Forms\Components\Grid::make(2)->schema([
+                        Forms\Components\ColorPicker::make('recommended_services_item_icon_color')
+                            ->label('Item Icon Color'),
+                        Forms\Components\TextInput::make('recommended_services_item_icon_size')
+                            ->label('Item Icon Size (e.g., 4, 5, 6 for w-X h-X)'),
+                    ]),
+
+                    Forms\Components\Repeater::make('recommended_services_items')
+                        ->label('Services')
+                        ->schema([
+                            Forms\Components\TextInput::make('title')
+                                ->label('Service Name')
+                                ->required(),
+                            Forms\Components\TextInput::make('description')
+                                ->label('Description')
+                                ->required(),
+                            Forms\Components\TextInput::make('icon')
+                                ->label('Lucide Icon (Optional)')
+                                ->default('arrow-right'),
+                            Forms\Components\TextInput::make('link')
+                                ->label('Link URL (Optional)'),
                         ])
                         ->grid(2)
                         ->columnSpanFull(),
