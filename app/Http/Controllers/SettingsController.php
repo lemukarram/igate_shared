@@ -221,36 +221,58 @@ class SettingsController extends Controller
     {
         $validated = $request->validate([
             'plan_id' => 'required|exists:plans,id',
+            'billing_cycle' => 'nullable|in:monthly,annually',
         ]);
 
         $user = Auth::user();
         $newPlan = Plan::findOrFail($validated['plan_id']);
         $currentPlan = $user->plan;
+        $billingCycle = $validated['billing_cycle'] ?? 'monthly';
         
         if ($newPlan->type !== $user->role) {
             return redirect()->back()->withErrors(['error' => 'Invalid plan type.']);
         }
 
-        // If same plan, just return
-        if ($currentPlan && $currentPlan->id == $newPlan->id) {
+        // Price to charge
+        $newPrice = ($billingCycle === 'annually') ? $newPlan->annual_price : $newPlan->monthly_price;
+        $currentPrice = 0;
+        
+        $activeSub = \App\Models\Subscription::where('client_id', $user->id)
+            ->where('plan_id', '!=', null)
+            ->where('status', 'active')
+            ->first();
+
+        if ($currentPlan) {
+            if ($activeSub) {
+                $currentPrice = ($activeSub->billing_cycle === 'annually') ? $currentPlan->annual_price : $currentPlan->monthly_price;
+            } else {
+                $currentPrice = $currentPlan->monthly_price; // fallback
+            }
+        }
+
+        // If same plan and same billing cycle, just return
+        if ($currentPlan && $currentPlan->id == $newPlan->id && ($activeSub && $activeSub->billing_cycle === $billingCycle)) {
             return redirect()->back();
         }
 
-        // Upgrade logic: new price > current price (or no current plan and new price > 0)
-        $isUpgrade = false;
-        if (!$currentPlan) {
-            $isUpgrade = $newPlan->price > 0;
-        } else {
-            $isUpgrade = $newPlan->price > $currentPlan->price;
-        }
-
-        if ($isUpgrade) {
-            // Redirect to plan checkout review
-            return redirect()->route('checkout.plan', $newPlan->id);
+        if ($newPrice > $currentPrice || ($newPrice > 0 && !$currentPlan)) {
+            // Upgrade or New Paid Plan: Redirect to checkout
+            return redirect()->route('checkout.plan', [
+                'planId' => $newPlan->id,
+                'billing_cycle' => $billingCycle
+            ]);
         }
 
         // Downgrade or Free plan: update directly
         $user->update(['plan_id' => $newPlan->id]);
+        
+        if ($activeSub) {
+            $activeSub->update([
+                'plan_id' => $newPlan->id,
+                'billing_cycle' => $billingCycle,
+            ]);
+        }
+
         $user->enforcePlanLimits();
 
         return redirect()->back()->with('success', 'Subscription plan updated successfully.');

@@ -35,7 +35,12 @@ class PlanResource extends Resource
                             'provider' => 'Provider',
                         ])
                         ->required(),
-                    Forms\Components\TextInput::make('price')
+                    Forms\Components\TextInput::make('monthly_price')
+                        ->required()
+                        ->numeric()
+                        ->default(0.00)
+                        ->prefix('SAR'),
+                    Forms\Components\TextInput::make('annual_price')
                         ->required()
                         ->numeric()
                         ->default(0.00)
@@ -86,8 +91,11 @@ class PlanResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('type'),
-                Tables\Columns\TextColumn::make('price')
-                    ->money()
+                Tables\Columns\TextColumn::make('monthly_price')
+                    ->money('SAR')
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('annual_price')
+                    ->money('SAR')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('max_services')
                     ->numeric()

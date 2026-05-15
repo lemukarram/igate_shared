@@ -14,19 +14,29 @@ class Subscription extends Model
         'company_id',
         'service_id',
         'provider_id',
+        'plan_id',
         'plan_name',
         'billing_cycle',
         'status',
         'starts_at',
         'ends_at',
+        'next_billing_date',
         'canceled_at',
+        'card_token',
+        'tap_customer_id',
     ];
 
     protected $casts = [
         'starts_at' => 'datetime',
         'ends_at' => 'datetime',
+        'next_billing_date' => 'datetime',
         'canceled_at' => 'datetime',
     ];
+
+    public function plan()
+    {
+        return $this->belongsTo(Plan::class);
+    }
 
     public function client()
     {

@@ -56,6 +56,8 @@ class TapWebhookController extends Controller
         // Tap usually passes our reference in 'reference.transaction'
         $transactionId = $data['reference']['transaction'] ?? null;
         $tapChargeId = $data['id'] ?? null;
+        $tapCustomerId = $data['customer']['id'] ?? null;
+        $cardToken = $data['card']['id'] ?? null; // This is the saved card token if save_card was true
 
         if (!$transactionId || !$tapChargeId) {
             Log::error('Tap Webhook Missing IDs', ['data' => $data]);
@@ -85,6 +87,20 @@ class TapWebhookController extends Controller
                     $status = ($event === 'charge.succeeded') ? 'captured' : 'authorized';
                     DB::table('transactions')->where('id', $transactionId)->update(['status' => $status]);
                     
+                    $nextBillingDate = ($transaction->billing_cycle === 'annually') ? now()->addYear() : now()->addMonth();
+                    $billingPeriod = now()->format('M Y') . ' - ' . $nextBillingDate->format('M Y');
+
+                    // Save card details if available
+                    if ($tapCustomerId || $cardToken) {
+                        $user = \App\Models\User::find($transaction->user_id);
+                        if ($user) {
+                            $user->update([
+                                'tap_customer_id' => $tapCustomerId ?? $user->tap_customer_id,
+                                'card_token' => $cardToken ?? $user->card_token,
+                            ]);
+                        }
+                    }
+
                     if ($transaction->project_id) {
                         // Set project to active as per latest requirement
                         DB::table('projects')->where('id', $transaction->project_id)->update([
@@ -111,6 +127,27 @@ class TapWebhookController extends Controller
                             'created_at' => now(),
                             'updated_at' => now(),
                         ]);
+
+                        // Create/Update Subscription for Business Service if it's a subscription type
+                        if ($transaction->type === 'subscription') {
+                            $project = DB::table('projects')->find($transaction->project_id);
+                            \App\Models\Subscription::updateOrCreate(
+                                [
+                                    'client_id' => $transaction->user_id,
+                                    'service_id' => $project->service_id,
+                                ],
+                                [
+                                    'provider_id' => $project->provider_id,
+                                    'billing_cycle' => $transaction->billing_cycle,
+                                    'status' => 'active',
+                                    'starts_at' => now(),
+                                    'ends_at' => $nextBillingDate,
+                                    'next_billing_date' => $nextBillingDate,
+                                    'card_token' => $cardToken,
+                                    'tap_customer_id' => $tapCustomerId,
+                                ]
+                            );
+                        }
                     }
 
                     if ($transaction->plan_id && $event === 'charge.succeeded') {
@@ -119,7 +156,25 @@ class TapWebhookController extends Controller
                             $user->update(['plan_id' => $transaction->plan_id]);
                             $user->enforcePlanLimits();
 
-                            // Record in payments table (optional, but good for record keeping)
+                            // Create/Update Platform Subscription
+                            \App\Models\Subscription::updateOrCreate(
+                                [
+                                    'client_id' => $user->id,
+                                    'plan_id' => $transaction->plan_id,
+                                    'service_id' => null, // Platform Plan
+                                ],
+                                [
+                                    'billing_cycle' => $transaction->billing_cycle,
+                                    'status' => 'active',
+                                    'starts_at' => now(),
+                                    'ends_at' => $nextBillingDate,
+                                    'next_billing_date' => $nextBillingDate,
+                                    'card_token' => $cardToken,
+                                    'tap_customer_id' => $tapCustomerId,
+                                ]
+                            );
+
+                            // Record in payments table
                             Payment::create([
                                 'plan_id' => $transaction->plan_id,
                                 'user_id' => $transaction->user_id,
@@ -130,6 +185,21 @@ class TapWebhookController extends Controller
                             ]);
                         }
                     }
+
+                    // Create Invoice with billing period
+                    $invoiceNumber = 'INV-' . strtoupper(\Illuminate\Support\Str::random(8));
+                    \App\Models\Invoice::create([
+                        'transaction_id' => $transactionId,
+                        'invoice_number' => $invoiceNumber,
+                        'billing_period' => $billingPeriod,
+                        'billing_details' => [
+                            'amount' => $transaction->amount,
+                            'currency' => $transaction->currency,
+                            'date' => now()->toDateTimeString(),
+                            'cycle' => $transaction->billing_cycle,
+                        ],
+                    ]);
+
                     break;
 
                 case 'charge.failed':

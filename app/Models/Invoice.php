@@ -10,6 +10,7 @@ class Invoice extends Model
     protected $fillable = [
         'transaction_id',
         'invoice_number',
+        'billing_period',
         'pdf_path',
         'billing_details',
     ];

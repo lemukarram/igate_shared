@@ -29,10 +29,21 @@ class StatsOverview extends BaseWidget
                 ->description('Verified Agencies & Freelancers')
                 ->descriptionIcon('heroicon-m-building-office')
                 ->color('primary'),
-            Stat::make('Pending Requests', \App\Models\ReleaseRequest::where('status', 'pending')->count())
-                ->description('Awaiting Fund Release')
-                ->descriptionIcon('heroicon-m-clock')
-                ->color('warning'),
+            Stat::make('Upcoming Renewals', \App\Models\Subscription::where('status', 'active')->where('next_billing_date', '<=', now()->addDays(7))->count())
+                ->description('Renewals in next 7 days')
+                ->descriptionIcon('heroicon-m-arrow-path')
+                ->color('info'),
+            Stat::make('Churn Rate', function() {
+                $totalActive = \App\Models\Subscription::where('status', 'active')->count();
+                $cancelled = \App\Models\Subscription::where('status', 'cancelled')
+                    ->where('updated_at', '>=', now()->subMonth())
+                    ->count();
+                if ($totalActive === 0) return '0%';
+                return number_format(($cancelled / ($totalActive + $cancelled)) * 100, 1) . '%';
+            })
+                ->description('Monthly Churn (Prototype logic)')
+                ->descriptionIcon('heroicon-m-user-minus')
+                ->color('danger'),
         ];
     }
 }

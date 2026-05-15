@@ -26,6 +26,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        \Filament\Notifications\Notification::configureUsing(function (\Filament\Notifications\Notification $notification): void {
+            $notification->duration(10000);
+        });
+
         View::composer('*', function ($view) {
             $settings = app(GeneralSettings::class);
             $paymentSettings = app(PaymentSettings::class);

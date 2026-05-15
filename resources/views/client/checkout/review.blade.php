@@ -23,7 +23,7 @@
             <div class="pt-4 border-t border-blue-100 space-y-2">
                 <div class="flex justify-between text-sm">
                     <span class="text-gray-500" x-text="t('common.service_fee')"></span>
-                    <span class="font-normal text-gray-900">{{ number_format($ps->price, 2) }} <span x-text="lang === 'ar' ? 'ر.س' : 'SAR'"></span></span>
+                    <span class="font-normal text-gray-900">{{ number_format($ps->monthly_price, 2) }} <span x-text="lang === 'ar' ? 'ر.س' : 'SAR'"></span></span>
                 </div>
                 <div class="flex justify-between text-sm">
                     <span class="text-gray-500" x-text="t('common.platform_fee') + ' (0%)'"></span>
@@ -31,7 +31,7 @@
                 </div>
                 <div class="flex justify-between text-lg pt-2 border-t border-blue-100">
                     <span class="font-normal text-gray-900" x-text="t('common.total')"></span>
-                    <span class="font-normal text-blue-600">{{ number_format($ps->price, 2) }} <span x-text="lang === 'ar' ? 'ر.س' : 'SAR'"></span></span>
+                    <span class="font-normal text-blue-600">{{ number_format($ps->monthly_price, 2) }} <span x-text="lang === 'ar' ? 'ر.س' : 'SAR'"></span></span>
                 </div>
             </div>
         </div>
@@ -49,6 +49,7 @@
         <form action="{{ route('checkout.process') }}" method="POST" class="space-y-4">
             @csrf
             <input type="hidden" name="provider_service_id" value="{{ $ps->id }}">
+            <input type="hidden" name="billing_cycle" value="monthly">
             
             @if($errors->has('error'))
                 <div class="p-4 bg-red-50 text-red-600 rounded-2xl text-sm font-normal border border-red-100">
@@ -116,7 +117,7 @@
             </div>
 
             <button type="submit" class="w-full py-4 bg-blue-600 text-white rounded-xl font-normal hover:bg-blue-700 transition-all shadow-xl shadow-blue-100 flex items-center justify-center space-x-2">
-                <span x-text="t('common.confirm_pay').replace(':amount', '{{ number_format($ps->price, 0) }}')"></span>
+                <span x-text="t('common.confirm_pay').replace(':amount', '{{ number_format($ps->monthly_price, 0) }}')"></span>
                 <i data-lucide="arrow-right" class="w-5 h-5 ml-2"></i>
             </button>
             <p class="text-center text-xs text-gray-400" x-text="t('common.secure_transaction_notice')"></p>

@@ -13,7 +13,8 @@ class Plan extends Model
         'name',
         'description',
         'type',
-        'price',
+        'monthly_price',
+        'annual_price',
         'max_services',
         'max_users',
         'max_projects',
@@ -23,6 +24,7 @@ class Plan extends Model
 
     protected $casts = [
         'features' => 'array',
-        'price' => 'decimal:2',
+        'monthly_price' => 'decimal:2',
+        'annual_price' => 'decimal:2',
     ];
 }

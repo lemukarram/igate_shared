@@ -12,10 +12,16 @@ class ProviderService extends Model
     protected $fillable = [
         'provider_id',
         'service_id',
-        'price',
+        'monthly_price',
+        'annual_price',
         'delivery_time_days',
         'provider_notes',
         'is_active',
+    ];
+
+    protected $casts = [
+        'monthly_price' => 'decimal:2',
+        'annual_price' => 'decimal:2',
     ];
 
     public function provider()

@@ -47,7 +47,15 @@
         .bg-primary, .bg-blue-600, .bg-indigo-600 { background-color: #3da9e4 !important; }
         .text-primary, .text-blue-600, .text-indigo-600 { color: #3da9e4 !important; }
         .border-primary, .border-blue-600, .border-indigo-600 { border-color: #3da9e4 !important; }
-        
+
+        /* Larger Notifications & Alerts */
+        .fi-no-notification {
+            padding: 2rem !important;
+        }
+        .fi-no-notification-content {
+            gap: 1.5rem !important;
+        }
+
         .sidebar-item { font-weight: 300 !important; }
         .sidebar-item * { font-weight: 300 !important; }
         .sidebar-item:hover { background-color: #f3f4f6; }
@@ -548,45 +556,81 @@
                              x-data="{ 
                                 selectedPlanId: {{ Auth::user()->plan_id ?? 'null' }},
                                 currentPlanId: {{ Auth::user()->plan_id ?? 'null' }},
-                                plans: {{ \App\Models\Plan::where('type', Auth::user()->role)->get()->mapWithKeys(fn($p) => [$p->id => (float)$p->price])->toJson() }},
-                                currentPrice: {{ Auth::user()->plan->price ?? 0 }},
+                                billingCycle: 'monthly',
+                                plans: {{ \App\Models\Plan::where('type', Auth::user()->role)->get()->mapWithKeys(fn($p) => [$p->id => ['monthly' => (float)$p->monthly_price, 'annual' => (float)$p->annual_price]])->toJson() }},
+                                currentPrice: {{ Auth::user()->plan->monthly_price ?? 0 }},
                                 get isUpgrade() {
                                     if (!this.selectedPlanId || this.selectedPlanId == this.currentPlanId) return false;
-                                    return this.plans[this.selectedPlanId] > this.currentPrice;
+                                    const price = this.billingCycle === 'monthly' ? this.plans[this.selectedPlanId].monthly : this.plans[this.selectedPlanId].annual;
+                                    return price > this.currentPrice;
                                 },
                                 get isDowngrade() {
                                     if (!this.selectedPlanId || this.selectedPlanId == this.currentPlanId) return false;
-                                    return this.plans[this.selectedPlanId] < this.currentPrice;
+                                    const price = this.billingCycle === 'monthly' ? this.plans[this.selectedPlanId].monthly : this.plans[this.selectedPlanId].annual;
+                                    return price < this.currentPrice;
                                 }
                              }"
                              class="space-y-4 animate-in fade-in duration-300">
+                            
+                            @php
+                                $activeSub = Auth::user()->role === 'client' 
+                                    ? \App\Models\Subscription::where('client_id', Auth::id())->where('plan_id', Auth::user()->plan_id)->where('status', 'active')->first()
+                                    : null;
+                            @endphp
+
                             <div class="p-6 border border-primary/20 bg-primary-light rounded-xl">
                                 <div class="flex items-center justify-between mb-4">
-                                    <div><p class="text-[10px] font-normal text-primary uppercase tracking-widest mb-1" x-text="t('common.current_plan')"></p><h3 class="text-2xl font-normal text-gray-900">{{ Auth::user()->plan->name ?? '-' }}</h3></div>
-                                    <span class="px-3 py-1 bg-primary text-white rounded-full text-[10px] font-normal uppercase" x-text="t('common.active')"></span>
+                                    <div>
+                                        <p class="text-[10px] font-normal text-primary uppercase tracking-widest mb-1" x-text="t('common.current_plan')"></p>
+                                        <h3 class="text-2xl font-normal text-gray-900">{{ Auth::user()->plan->name ?? '-' }}</h3>
+                                        @if($activeSub)
+                                            <p class="text-[10px] text-gray-500 mt-1">
+                                                Next Renewal: {{ $activeSub->next_billing_date ? $activeSub->next_billing_date->format('M d, Y') : 'N/A' }} 
+                                                ({{ ucfirst($activeSub->billing_cycle) }})
+                                            </p>
+                                        @endif
+                                    </div>
+                                    <div class="flex flex-col items-end gap-2">
+                                        <span class="px-3 py-1 bg-primary text-white rounded-full text-[10px] font-normal uppercase" x-text="t('common.active')"></span>
+                                        @if($activeSub && !$activeSub->canceled_at)
+                                            <form action="{{ route('subscriptions.cancel', $activeSub->id) }}" method="POST">
+                                                @csrf
+                                                <button type="submit" class="text-[10px] text-red-500 hover:underline">Cancel Subscription</button>
+                                            </form>
+                                        @elseif($activeSub && $activeSub->canceled_at)
+                                            <span class="text-[10px] text-amber-600">Expires: {{ $activeSub->ends_at->format('M d, Y') }}</span>
+                                        @endif
+                                    </div>
                                 </div>
                                 <div class="flex items-center justify-between text-sm">
                                     <span class="text-gray-500 font-normal" x-text="t('common.plan_limits').replace(':max_services', '{{ Auth::user()->plan->max_services ?? 1 }}').replace(':max_projects', '{{ Auth::user()->plan->max_projects ?? 1 }}')"></span>
-                                    <button type="button" class="text-primary font-normal uppercase tracking-widest text-xs" x-text="t('common.view_invoices')"></button>
+                                    <button type="button" @click="settingsTab = 'payments'" class="text-primary font-normal uppercase tracking-widest text-xs" x-text="t('common.view_invoices')"></button>
                                 </div>
+                            </div>
+
+                            <!-- Billing Cycle Toggle -->
+                            <div class="flex items-center justify-center p-1 bg-gray-100 rounded-lg w-fit mx-auto my-6">
+                                <button type="button" @click="billingCycle = 'monthly'" :class="billingCycle === 'monthly' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500'" class="px-6 py-1.5 rounded-md text-xs font-normal transition-all">Monthly</button>
+                                <button type="button" @click="billingCycle = 'annually'" :class="billingCycle === 'annually' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500'" class="px-6 py-1.5 rounded-md text-xs font-normal transition-all">Annually <span class="text-[10px] text-green-500 ml-1">-20%</span></button>
                             </div>
 
                             <div x-show="isUpgrade" class="p-4 bg-blue-50 border border-blue-100 rounded-xl flex items-start space-x-3 animate-in slide-in-from-top duration-300">
                                 <i data-lucide="info" class="w-5 h-5 text-blue-600 mt-0.5"></i>
                                 <div>
-                                    <p class="text-xs text-blue-800 font-normal" x-text="t('common.upgrade_notice')"></p>
+                                    <p class="text-xs text-blue-800 font-normal">Proration: You will be charged the difference for the remaining period of your current cycle.</p>
                                 </div>
                             </div>
 
                             <div x-show="isDowngrade" class="p-4 bg-amber-50 border border-amber-100 rounded-xl flex items-start space-x-3 animate-in slide-in-from-top duration-300">
                                 <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-600 mt-0.5"></i>
                                 <div>
-                                    <p class="text-xs text-amber-800 font-normal" x-text="t('common.downgrade_notice')"></p>
+                                    <p class="text-xs text-amber-800 font-normal">Downgrade: Your new limits will apply at the end of your current billing period.</p>
                                 </div>
                             </div>
 
                             <form id="settings-plans-form" action="{{ route('settings.plan') }}" method="POST" class="space-y-4 mt-6">
                                 @csrf
+                                <input type="hidden" name="billing_cycle" :value="billingCycle">
                                 <h4 class="text-sm font-normal" x-text="t('common.upgrade_plan')"></h4>
                                 <div class="grid grid-cols-1 gap-3">
                                     @foreach(\App\Models\Plan::where('type', Auth::user()->role)->get() as $plan)
@@ -600,13 +644,12 @@
                                                 <div class="flex items-center justify-between">
                                                     <p class="font-normal text-sm">{{ $plan->name }}</p>
                                                     <p class="font-normal text-sm">
-                                                        @if($plan->price > 0)
-                                                            {{ number_format($plan->price, 0) }} {{ __('common.sar') }}
-                                                        @elseif($plan->price == 0 && strtolower($plan->name) === 'enterprise')
-                                                            {{ __('common.custom') }}
-                                                        @else
-                                                            {{ __('common.free') }}
-                                                        @endif
+                                                        <span x-show="billingCycle === 'monthly'">
+                                                            {{ $plan->monthly_price > 0 ? number_format($plan->monthly_price, 0) . ' ' . __('common.sar') : ($plan->monthly_price == 0 && strtolower($plan->name) === 'enterprise' ? __('common.custom') : __('common.free')) }}
+                                                        </span>
+                                                        <span x-show="billingCycle === 'annually'">
+                                                            {{ $plan->annual_price > 0 ? number_format($plan->annual_price, 0) . ' ' . __('common.sar') : ($plan->annual_price == 0 && strtolower($plan->name) === 'enterprise' ? __('common.custom') : __('common.free')) }}
+                                                        </span>
                                                     </p>
                                                 </div>
                                                 @if($plan->description)
@@ -817,16 +860,16 @@
                  x-transition:leave-start="translate-x-0 opacity-100"
                  x-transition:leave-end="translate-x-full opacity-0"
                  :class="toast.type === 'success' ? 'bg-white border-green-100' : 'bg-white border-red-100'"
-                 class="pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-lg shadow-xl border min-w-[300px] max-w-md animate-in slide-in-from-right duration-300">
-                <div :class="toast.type === 'success' ? 'bg-green-50 text-green-500' : 'bg-red-50 text-red-500'" class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0">
-                    <i :data-lucide="toast.type === 'success' ? 'check-circle' : 'alert-circle'" class="w-5 h-5"></i>
+                 class="pointer-events-auto flex items-center gap-6 px-10 py-8 rounded-lg shadow-2xl border min-w-[400px] max-w-xl animate-in slide-in-from-right duration-300">
+                <div :class="toast.type === 'success' ? 'bg-green-50 text-green-500' : 'bg-red-50 text-red-500'" class="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0">
+                    <i :data-lucide="toast.type === 'success' ? 'check-circle' : 'alert-circle'" class="w-6 h-6"></i>
                 </div>
                 <div class="flex-1">
                     <p class="text-xs font-normal text-gray-900" x-text="toast.title"></p>
-                    <p class="text-[10px] text-gray-500 mt-0.5" x-text="toast.message"></p>
+                    <p class="text-[10px] text-gray-500 mt-1" x-text="toast.message"></p>
                 </div>
-                <button @click="remove(toast.id)" class="text-gray-400 hover:text-gray-900 transition-colors">
-                    <i data-lucide="x" class="w-4 h-4"></i>
+                <button @click="remove(toast.id)" class="text-gray-400 hover:text-gray-900 transition-colors p-2">
+                    <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
         </template>
@@ -847,7 +890,7 @@
                     });
                     setTimeout(() => {
                         this.remove(id);
-                    }, 5000);
+                    }, 10000);
                     setTimeout(() => lucide.createIcons(), 50);
                 },
                 remove(id) {

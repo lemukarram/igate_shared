@@ -63,16 +63,17 @@ class TapPaymentService
     }
 
     /**
-     * Create a new charge (Authorize or Capture).
+     * Create a new charge (Authorize or Capture) with optional card saving.
      * 
      * @param float $amount
      * @param array $customer
      * @param string $redirectUrl
      * @param bool $isEscrow
+     * @param bool $saveCard
      * @return array ['url' => string, 'id' => string]
      * @throws Exception
      */
-    public function createCharge(float $amount, array $customer, string $redirectUrl, bool $isEscrow = false): array
+    public function createCharge(float $amount, array $customer, string $redirectUrl, bool $isEscrow = false, bool $saveCard = true): array
     {
         try {
             $payload = [
@@ -81,6 +82,7 @@ class TapPaymentService
                 'customer' => $customer,
                 'source' => ['id' => 'src_all'],
                 'redirect' => ['url' => $redirectUrl],
+                'save_card' => $saveCard,
             ];
 
             // Handle Escrow (Authorization) with Auto-Capture from settings
@@ -118,6 +120,48 @@ class TapPaymentService
             ];
         } catch (Exception $e) {
             Log::error('Tap Payment Exception (Create Charge)', ['message' => $e->getMessage()]);
+            throw $e;
+        }
+    }
+
+    /**
+     * Charge a saved card for recurring renewals.
+     * 
+     * @param float $amount
+     * @param string $cardToken
+     * @param string $customerId
+     * @param string $description
+     * @return array
+     * @throws Exception
+     */
+    public function chargeSavedCard(float $amount, string $cardToken, string $customerId, string $description = ''): array
+    {
+        try {
+            $payload = [
+                'amount' => $amount,
+                'currency' => 'SAR',
+                'customer' => ['id' => $customerId],
+                'source' => ['id' => $cardToken],
+                'description' => $description,
+            ];
+
+            $endpoint = '/charges';
+            $response = Http::withHeaders($this->getHeaders())
+                ->post($this->baseUrl . $endpoint, $payload);
+
+            $this->recordLog('recurring_charge', $endpoint, 'POST', $payload, $response);
+
+            if ($response->failed()) {
+                Log::error('Tap Recurring Charge Error', [
+                    'status' => $response->status(),
+                    'body' => $response->json(),
+                ]);
+                throw new Exception('Failed to process recurring charge. ' . $response->body());
+            }
+
+            return $response->json();
+        } catch (Exception $e) {
+            Log::error('Tap Recurring Charge Exception', ['message' => $e->getMessage()]);
             throw $e;
         }
     }

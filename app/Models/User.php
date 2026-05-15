@@ -31,6 +31,8 @@ class User extends Authenticatable implements FilamentUser
         'parent_id',
         'profile_picture',
         'notification_settings',
+        'tap_customer_id',
+        'card_token',
     ];
 
     public function canAccessPanel(Panel $panel): bool

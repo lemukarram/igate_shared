@@ -43,12 +43,15 @@ class SubscriptionResource extends Resource
                         ->relationship('provider', 'name', fn (Builder $query) => $query->where('role', 'provider'))
                         ->searchable()
                         ->preload(),
+                    Forms\Components\Select::make('plan_id')
+                        ->relationship('plan', 'name')
+                        ->searchable()
+                        ->preload(),
                     Forms\Components\TextInput::make('plan_name')
                         ->maxLength(255),
                     Forms\Components\Select::make('billing_cycle')
                         ->options([
                             'monthly' => 'Monthly',
-                            'quarterly' => 'Quarterly',
                             'annually' => 'Annually',
                         ])
                         ->default('monthly')
@@ -64,7 +67,12 @@ class SubscriptionResource extends Resource
                         ->required(),
                     Forms\Components\DateTimePicker::make('starts_at'),
                     Forms\Components\DateTimePicker::make('ends_at'),
+                    Forms\Components\DateTimePicker::make('next_billing_date'),
                     Forms\Components\DateTimePicker::make('canceled_at'),
+                    Forms\Components\TextInput::make('card_token')
+                        ->disabled(),
+                    Forms\Components\TextInput::make('tap_customer_id')
+                        ->disabled(),
                 ])->columns(2),
             ]);
     }
@@ -81,7 +89,12 @@ class SubscriptionResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('service.name')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->placeholder('Platform Plan'),
+                Tables\Columns\TextColumn::make('plan.name')
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
@@ -92,14 +105,16 @@ class SubscriptionResource extends Resource
                         default => 'gray',
                     }),
                 Tables\Columns\TextColumn::make('billing_cycle'),
+                Tables\Columns\TextColumn::make('next_billing_date')
+                    ->dateTime()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('starts_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('ends_at')
                     ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->sortable(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('status')

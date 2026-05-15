@@ -22,11 +22,13 @@ class CheckoutController extends Controller
         $request->validate([
             'amount' => 'required|numeric|min:1',
             'type' => 'required|in:subscription,service_escrow',
+            'billing_cycle' => 'nullable|in:monthly,annually',
             'project_id' => 'nullable|exists:projects,id',
             'plan_id' => 'nullable|exists:plans,id',
         ]);
 
         $user = $request->user();
+        $billingCycle = $request->billing_cycle ?? 'monthly';
         
         // Mock customer data for the example, typically fetched from User model
         $customer = [
@@ -46,7 +48,8 @@ class CheckoutController extends Controller
         $redirectUrl = route('payments.callback', ['transaction_id' => $transactionId]);
 
         try {
-            $checkoutUrl = $this->tapService->createCharge($amount, $customer, $redirectUrl, $isEscrow);
+            // Pass saveCard: true for recurring subscriptions
+            $tapResponse = $this->tapService->createCharge($amount, $customer, $redirectUrl, $isEscrow, true);
 
             // Record pending transaction in DB
             DB::table('transactions')->insert([
@@ -58,11 +61,12 @@ class CheckoutController extends Controller
                 'currency' => 'SAR',
                 'status' => 'pending',
                 'type' => $request->type,
+                'billing_cycle' => $billingCycle,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
 
-            return redirect()->away($checkoutUrl);
+            return redirect()->away($tapResponse['url']);
         } catch (\Exception $e) {
             return back()->with('error', 'Payment initialization failed. Please try again.');
         }

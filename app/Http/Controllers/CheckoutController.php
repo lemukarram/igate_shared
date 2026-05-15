@@ -120,7 +120,8 @@ class CheckoutController extends Controller
             $isEscrow = !str_contains(strtolower($ps->service->name), 'subscription');
             $type = $isEscrow ? 'service_escrow' : 'subscription';
 
-            $tapResponse = $this->tapService->createCharge($ps->price, $customer, $redirectUrl, $isEscrow);
+            // Fixed return value usage and enabled card saving
+            $tapResponse = $this->tapService->createCharge($ps->monthly_price, $customer, $redirectUrl, $isEscrow, true);
             $checkoutUrl = $tapResponse['url'];
             $tapChargeId = $tapResponse['id'];
 
@@ -131,10 +132,11 @@ class CheckoutController extends Controller
                 'provider_id' => $ps->provider_id,
                 'project_id' => $project->id,
                 'tap_charge_id' => $tapChargeId,
-                'amount' => $ps->price,
+                'amount' => $ps->monthly_price,
                 'currency' => 'SAR',
                 'status' => 'pending',
                 'type' => $type,
+                'billing_cycle' => 'monthly', // default
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
@@ -146,16 +148,17 @@ class CheckoutController extends Controller
         }
     }
 
-    public function planReview($planId)
+    public function planReview($planId, Request $request)
     {
         $plan = \App\Models\Plan::findOrFail($planId);
         $user = Auth::user();
+        $billingCycle = $request->query('billing_cycle', 'monthly');
         
         if ($plan->type !== $user->role) {
             return redirect()->route('client.portfolio')->with('error', 'Invalid plan type.');
         }
 
-        return view('client.checkout.plan_review', compact('plan'));
+        return view('client.checkout.plan_review', compact('plan', 'billingCycle'));
     }
 
     public function processPlan(Request $request)
@@ -164,13 +167,17 @@ class CheckoutController extends Controller
         
         $validated = $request->validate([
             'plan_id' => 'required|exists:plans,id',
+            'billing_cycle' => 'required|in:monthly,annually',
         ]);
 
         $plan = \App\Models\Plan::findOrFail($request->plan_id);
+        $billingCycle = $validated['billing_cycle'];
 
         if ($plan->type !== $user->role) {
             return redirect()->back()->with('error', 'Invalid plan type.');
         }
+
+        $amount = ($billingCycle === 'annually') ? $plan->annual_price : $plan->monthly_price;
 
         // Initialize Tap Payment
         $transactionId = (string) Str::ulid();
@@ -190,7 +197,8 @@ class CheckoutController extends Controller
             $isEscrow = false;
             $type = 'subscription';
 
-            $tapResponse = $this->tapService->createCharge($plan->price, $customer, $redirectUrl, $isEscrow);
+            // Pass saveCard: true for recurring
+            $tapResponse = $this->tapService->createCharge($amount, $customer, $redirectUrl, $isEscrow, true);
             $checkoutUrl = $tapResponse['url'];
             $tapChargeId = $tapResponse['id'];
 
@@ -200,10 +208,11 @@ class CheckoutController extends Controller
                 'user_id' => $user->id,
                 'plan_id' => $plan->id,
                 'tap_charge_id' => $tapChargeId,
-                'amount' => $plan->price,
+                'amount' => $amount,
                 'currency' => 'SAR',
                 'status' => 'pending',
                 'type' => $type,
+                'billing_cycle' => $billingCycle,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
@@ -229,6 +238,8 @@ class CheckoutController extends Controller
             $charge = $this->tapService->getCharge($tapChargeId);
             
             $status = strtoupper($charge['status'] ?? 'UNKNOWN');
+            $tapCustomerId = $charge['customer']['id'] ?? null;
+            $cardToken = $charge['card']['id'] ?? null;
             
             \Illuminate\Support\Facades\Log::info('Tap Callback: Received status', [
                 'transaction_id' => $transactionId,
@@ -263,9 +274,28 @@ class CheckoutController extends Controller
             if ($mappedStatus === 'captured' || $mappedStatus === 'authorized') {
                 $message = 'Payment processed successfully.';
                 
+                $nextBillingDate = ($transaction->billing_cycle === 'annually') ? now()->addYear() : now()->addMonth();
+                $billingPeriod = now()->format('M Y') . ' - ' . $nextBillingDate->format('M Y');
+
+                // Save card details if available
+                if ($tapCustomerId || $cardToken) {
+                    $user = \App\Models\User::find($transaction->user_id);
+                    if ($user) {
+                        $user->update([
+                            'tap_customer_id' => $tapCustomerId ?? $user->tap_customer_id,
+                            'card_token' => $cardToken ?? $user->card_token,
+                        ]);
+                    }
+                }
+
                 // Generate Invoice
                 try {
+                    // Update billing period in transaction if possible or pass to service
+                    $transaction->billing_period = $billingPeriod; // Temporary assignment if needed
                     $invoice = $this->invoiceService->generateForTransaction($transaction);
+                    if ($invoice) {
+                        $invoice->update(['billing_period' => $billingPeriod]);
+                    }
                 } catch (\Exception $e) {
                     \Illuminate\Support\Facades\Log::error('Invoice Generation Failed', ['error' => $e->getMessage()]);
                 }
@@ -284,6 +314,24 @@ class CheckoutController extends Controller
                         $user->plan_id = $transaction->plan_id;
                         $user->save();
                         $user->enforcePlanLimits();
+
+                        // Create/Update Platform Subscription
+                        \App\Models\Subscription::updateOrCreate(
+                            [
+                                'client_id' => $user->id,
+                                'plan_id' => $transaction->plan_id,
+                                'service_id' => null,
+                            ],
+                            [
+                                'billing_cycle' => $transaction->billing_cycle ?? 'monthly',
+                                'status' => 'active',
+                                'starts_at' => now(),
+                                'ends_at' => $nextBillingDate,
+                                'next_billing_date' => $nextBillingDate,
+                                'card_token' => $cardToken,
+                                'tap_customer_id' => $tapCustomerId,
+                            ]
+                        );
                             
                         // Record payment entry for billing history
                         Payment::create([
@@ -307,6 +355,27 @@ class CheckoutController extends Controller
                         'status' => 'active',
                         'updated_at' => now(),
                     ]);
+
+                    // If it's a subscription-type service, manage the subscription record
+                    if ($transaction->type === 'subscription') {
+                        $project = DB::table('projects')->find($transaction->project_id);
+                        \App\Models\Subscription::updateOrCreate(
+                            [
+                                'client_id' => $transaction->user_id,
+                                'service_id' => $project->service_id,
+                            ],
+                            [
+                                'provider_id' => $project->provider_id,
+                                'billing_cycle' => $transaction->billing_cycle ?? 'monthly',
+                                'status' => 'active',
+                                'starts_at' => now(),
+                                'ends_at' => $nextBillingDate,
+                                'next_billing_date' => $nextBillingDate,
+                                'card_token' => $cardToken,
+                                'tap_customer_id' => $tapCustomerId,
+                            ]
+                        );
+                    }
 
                     // Record payment entry
                     Payment::create([

@@ -23,12 +23,15 @@
             <div class="pt-4 border-t border-primary/10 space-y-2">
                 <div class="flex justify-between text-sm">
                     <span class="text-gray-500" x-text="t('common.subscription_fee')"></span>
-                    <span class="font-normal text-gray-900">{{ number_format($plan->price, 2) }} <span x-text="lang === 'ar' ? 'ر.س' : 'SAR'"></span></span>
+                    <span class="font-normal text-gray-900">{{ number_format($billingCycle === 'annually' ? $plan->annual_price : $plan->monthly_price, 2) }} <span x-text="lang === 'ar' ? 'ر.س' : 'SAR'"></span></span>
                 </div>
                 <div class="flex justify-between text-lg pt-2 border-t border-primary/10">
                     <span class="font-normal text-gray-900" x-text="t('common.total')"></span>
-                    <span class="font-normal text-primary">{{ number_format($plan->price, 2) }} <span x-text="lang === 'ar' ? 'ر.س' : 'SAR'"></span></span>
+                    <span class="font-normal text-primary">{{ number_format($billingCycle === 'annually' ? $plan->annual_price : $plan->monthly_price, 2) }} <span x-text="lang === 'ar' ? 'ر.س' : 'SAR'"></span></span>
                 </div>
+            </div>
+            <div class="text-xs text-primary font-normal text-center bg-white/50 py-1 rounded-full border border-primary/5">
+                Billing Cycle: {{ ucfirst($billingCycle) }}
             </div>
         </div>
 
@@ -58,6 +61,7 @@
         <form action="{{ route('checkout.plan.process') }}" method="POST" class="space-y-4">
             @csrf
             <input type="hidden" name="plan_id" value="{{ $plan->id }}">
+            <input type="hidden" name="billing_cycle" value="{{ $billingCycle }}">
             
             @if(session('error'))
                 <div class="p-4 bg-red-50 text-red-600 rounded-2xl text-sm font-normal border border-red-100">
@@ -104,7 +108,7 @@
             </div>
 
             <button type="submit" class="w-full py-4 bg-primary text-white rounded-xl font-normal hover:bg-primary-dark transition-all shadow-xl shadow-primary/10 flex items-center justify-center space-x-2">
-                <span x-text="t('common.confirm_pay').replace(':amount', '{{ number_format($plan->price, 0) }}')"></span>
+                <span x-text="t('common.confirm_pay').replace(':amount', '{{ number_format($billingCycle === \'annually\' ? $plan->annual_price : $plan->monthly_price, 0) }}')"></span>
                 <i data-lucide="arrow-right" class="w-5 h-5 ml-2"></i>
             </button>
             <p class="text-center text-xs text-gray-400" x-text="t('common.secure_transaction_notice')"></p>
