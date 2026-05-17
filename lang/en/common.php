@@ -393,4 +393,10 @@ return [
     'tap_reference' => 'Tap Reference',
     'view_project' => 'View Project',
     'return_dashboard' => 'Return to Dashboard',
+    'sar_month' => 'SAR/Month',
+    'save_more' => 'Save More',
+    'save_percent' => 'Save :percent%',
+    'billed_annually' => 'Billed annually',
+    'billed_monthly' => 'Billed monthly',
+    'paid_until' => 'Paid until :date',
 ];

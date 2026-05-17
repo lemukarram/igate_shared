@@ -247,7 +247,7 @@
     </section>
 
     <!-- Subscription Plans -->
-    <section id="pricing" class="py-12 lg:py-24 bg-white px-6" x-data="{ role: 'client', billing: 'monthly' }">
+    <section id="pricing" class="py-12 lg:py-24 bg-white px-6" x-data="{ role: 'client', billing: 'annual' }">
         <div class="max-w-7xl mx-auto">
             <div class="text-center mb-10 lg:mb-16">
                 <h2 class="text-3xl lg:text-4xl font-normal text-gray-900 mb-4">{{ $landingSettings->{"pricing_title_".app()->getLocale()} }}</h2>
@@ -288,9 +288,15 @@
                         <p class="text-sm text-gray-500 font-normal mb-6">{{ $plan->description ?? 'Ideal for individuals and small teams.' }}</p>
                         
                         <div class="mb-8">
-                            <span class="text-4xl font-normal text-gray-900" x-text="billing === 'monthly' ? '{{ number_format($plan->price) }}' : '{{ number_format($plan->price * 10) }}'"></span>
+                            <span class="text-4xl font-normal text-gray-900" x-text="billing === 'monthly' ? '{{ number_format($plan->monthly_price, 0) }}' : '{{ number_format($plan->annual_price / 12, 2) }}'"></span>
                             <span class="text-gray-400 font-normal">{{ __('common.sar') }}</span>
-                            <span class="text-gray-400 text-sm font-normal">/ <span x-text="billing === 'monthly' ? '{{ __('common.mo') }}' : '{{ __('common.yr') }}'"></span></span>
+                            <span class="text-gray-400 text-sm font-normal">/ {{ __('common.month') }}</span>
+                            <div x-show="billing === 'annual' && '{{ $plan->annual_price }}' > 0" class="text-[10px] text-green-500 font-normal mt-1">
+                                {{ __('common.annually') }} 
+                                @if($plan->annual_discount_percentage > 0)
+                                    (Save {{ $plan->annual_discount_percentage }}%)
+                                @endif
+                            </div>
                         </div>
 
                         <ul class="space-y-4 mb-10 flex-1">
@@ -326,9 +332,15 @@
                         <p class="text-sm text-gray-500 font-normal mb-6">{{ $plan->description ?? 'Built for growing service agencies.' }}</p>
                         
                         <div class="mb-8">
-                            <span class="text-4xl font-normal text-gray-900" x-text="billing === 'monthly' ? '{{ number_format($plan->price) }}' : '{{ number_format($plan->price * 10) }}'"></span>
+                            <span class="text-4xl font-normal text-gray-900" x-text="billing === 'monthly' ? '{{ number_format($plan->monthly_price, 0) }}' : '{{ number_format($plan->annual_price / 12, 2) }}'"></span>
                             <span class="text-gray-400 font-normal">{{ __('common.sar') }}</span>
-                            <span class="text-gray-400 text-sm font-normal">/ <span x-text="billing === 'monthly' ? '{{ __('common.mo') }}' : '{{ __('common.yr') }}'"></span></span>
+                            <span class="text-gray-400 text-sm font-normal">/ {{ __('common.month') }}</span>
+                            <div x-show="billing === 'annual' && '{{ $plan->annual_price }}' > 0" class="text-[10px] text-green-500 font-normal mt-1">
+                                {{ __('common.annually') }} 
+                                @if($plan->annual_discount_percentage > 0)
+                                    (Save {{ $plan->annual_discount_percentage }}%)
+                                @endif
+                            </div>
                         </div>
 
                         <ul class="space-y-4 mb-10 flex-1">

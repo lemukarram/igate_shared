@@ -116,28 +116,42 @@
                             </div>
                         </div>
 
-                        <div class="flex items-center gap-12 px-8 border-x border-gray-50 hidden lg:flex">
-                            <div class="text-center">
-                                <span class="block text-xs text-gray-400 uppercase font-normal" x-text="t('common.delivery')"></span>
-                                <span class="text-sm font-normal text-gray-900" x-text="t('common.days_count').replace(':count', '{{ $ps->delivery_time_days }}')"></span>
-                            </div>
-                            <div class="text-center">
-                                <span class="block text-xs text-gray-400 uppercase font-normal" x-text="t('common.price')"></span>
-                                <span class="text-xl font-normal text-blue-600">{{ number_format($ps->price, 0) }} <span x-text="t('common.sar')"></span></span>
+                        <div class="flex flex-col lg:flex-row items-center gap-12 px-8 border-x border-gray-50 w-full lg:w-auto py-4 lg:py-0">
+                            <div class="flex items-center justify-between w-full lg:w-auto lg:gap-12">
+                                <div class="text-center">
+                                    <span class="block text-xs text-gray-400 uppercase font-normal" x-text="t('common.delivery')"></span>
+                                    <span class="text-sm font-normal text-gray-900" x-text="t('common.days_count').replace(':count', '{{ $ps->delivery_time_days }}')"></span>
+                                </div>
+                                <div class="text-center">
+                                    <span class="block text-xs text-gray-400 uppercase font-normal" x-text="t('common.price')"></span>
+                                    <div class="flex flex-col items-center">
+                                        @if($ps->annual_price)
+                                            <span class="text-xl font-normal text-blue-600">
+                                                {{ number_format($ps->annual_price / 12, 0) }} 
+                                                <span class="text-xs font-normal text-gray-500" x-text="t('common.sar_month')"></span>
+                                            </span>
+                                            <span class="text-[10px] text-green-600 font-medium bg-green-50 px-2 py-0.5 rounded-full mt-1 whitespace-nowrap">
+                                                {{ $ps->annual_discount_percentage }}% {{ __('common.save_more') }}
+                                            </span>
+                                        @else
+                                            <span class="text-xl font-normal text-blue-600">{{ number_format($ps->monthly_price, 0) }} <span class="text-xs font-normal text-gray-500" x-text="t('common.sar_month')"></span></span>
+                                        @endif
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="flex items-center gap-3 w-full md:w-auto">
+                        <div class="flex flex-col gap-3 w-full md:w-48">
                             <a href="{{ route('explore.chat', ['serviceId' => $service->id, 'providerId' => $ps->provider_id]) }}" 
-                               class="flex-1 md:flex-none px-6 py-3 bg-gray-50 text-gray-700 rounded-xl font-normal hover:bg-gray-100 transition-all border border-gray-100 text-center">
+                               class="w-full px-6 py-3 bg-gray-50 text-gray-700 rounded-xl font-normal hover:bg-gray-100 transition-all border border-gray-100 text-center">
                                 <span x-text="t('common.chat')"></span>
                             </a>
                             @if($ps->existing_project_id)
-                                <a href="{{ route('projects.show', $ps->existing_project_id) }}" class="flex-1 md:flex-none px-8 py-3 bg-gray-900 text-white rounded-lg font-normal hover:bg-black transition-all shadow-sm text-center">
+                                <a href="{{ route('projects.show', $ps->existing_project_id) }}" class="w-full px-8 py-3 bg-gray-900 text-white rounded-lg font-normal hover:bg-black transition-all shadow-sm text-center">
                                     <span>View Project</span>
                                 </a>
                             @else
-                                <a href="{{ route('checkout.review', $ps->id) }}" class="flex-1 md:flex-none px-8 py-3 bg-primary text-white rounded-lg font-normal hover:bg-primary-dark transition-all shadow-sm text-center">
+                                <a href="{{ route('checkout.review', $ps->id) }}" class="w-full px-8 py-3 bg-primary text-white rounded-lg font-normal hover:bg-primary-dark transition-all shadow-sm text-center">
                                     <span x-text="t('common.request')"></span>
                                 </a>
                             @endif
@@ -163,10 +177,14 @@
                     </button>
                 </div>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
                     <div class="p-6 bg-blue-50 rounded-2xl border border-blue-100">
                         <span class="block text-xs text-blue-500 uppercase font-normal tracking-widest mb-1" x-text="t('common.my_price')"></span>
-                        <span class="text-3xl font-normal text-blue-700">{{ number_format($providerService->price, 0) }} <span class="text-sm" x-text="t('common.sar')"></span></span>
+                        <span class="text-3xl font-normal text-blue-700">{{ number_format($providerService->monthly_price, 0) }} <span class="text-sm" x-text="t('common.sar')"></span></span>
+                    </div>
+                    <div class="p-6 bg-green-50 rounded-2xl border border-green-100">
+                        <span class="block text-xs text-green-500 uppercase font-normal tracking-widest mb-1">Annual Discount</span>
+                        <span class="text-3xl font-normal text-green-700">{{ $providerService->annual_discount_percentage }}%</span>
                     </div>
                     <div class="p-6 bg-indigo-50 rounded-2xl border border-indigo-100">
                         <span class="block text-xs text-indigo-500 uppercase font-normal tracking-widest mb-1" x-text="t('common.delivery')"></span>
@@ -314,7 +332,8 @@
                 @csrf
                 <input type="hidden" name="service_id" value="{{ $service->id }}">
                 <div class="grid grid-cols-2 gap-4">
-                    <div class="space-y-1"><label class="text-[10px] font-normal uppercase tracking-widest text-gray-400" x-text="t('explore.price')"></label><input type="number" name="price" step="0.01" required class="w-full px-4 py-3 border border-gray-100 bg-gray-50 rounded-xl text-sm font-normal"></div>
+                    <div class="space-y-1"><label class="text-[10px] font-normal uppercase tracking-widest text-gray-400" x-text="t('explore.price')"></label><input type="number" name="monthly_price" step="0.01" required class="w-full px-4 py-3 border border-gray-100 bg-gray-50 rounded-xl text-sm font-normal"></div>
+                    <div class="space-y-1"><label class="text-[10px] font-normal uppercase tracking-widest text-gray-400">Annual Discount (%)</label><input type="number" name="annual_discount_percentage" min="0" max="100" value="0" class="w-full px-4 py-3 border border-gray-100 bg-gray-50 rounded-xl text-sm font-normal"></div>
                     <div class="space-y-1"><label class="text-[10px] font-normal uppercase tracking-widest text-gray-400" x-text="t('explore.days')"></label><input type="number" name="delivery_time_days" required class="w-full px-4 py-3 border border-gray-100 bg-gray-50 rounded-xl text-sm font-normal"></div>
                 </div>
                 <button type="submit" class="w-full py-4 bg-primary text-white rounded-xl font-normal" x-text="t('explore.add_to_portfolio_btn')"></button>
@@ -331,7 +350,8 @@
             <form action="{{ route('provider.services.update', $providerService->id) }}" method="POST" class="space-y-6">
                 @csrf @method('PATCH')
                 <div class="grid grid-cols-2 gap-4">
-                    <div class="space-y-1"><label class="text-[10px] font-normal uppercase tracking-widest text-gray-400" x-text="t('common.price')"></label><input type="number" name="price" step="0.01" value="{{ $providerService->price }}" required class="w-full px-4 py-3 border border-gray-100 bg-gray-50 rounded-xl text-sm font-normal"></div>
+                    <div class="space-y-1"><label class="text-[10px] font-normal uppercase tracking-widest text-gray-400" x-text="t('common.price')"></label><input type="number" name="monthly_price" step="0.01" value="{{ $providerService->monthly_price }}" required class="w-full px-4 py-3 border border-gray-100 bg-gray-50 rounded-xl text-sm font-normal"></div>
+                    <div class="space-y-1"><label class="text-[10px] font-normal uppercase tracking-widest text-gray-400">Annual Discount (%)</label><input type="number" name="annual_discount_percentage" min="0" max="100" value="{{ $providerService->annual_discount_percentage }}" class="w-full px-4 py-3 border border-gray-100 bg-gray-50 rounded-xl text-sm font-normal"></div>
                     <div class="space-y-1"><label class="text-[10px] font-normal uppercase tracking-widest text-gray-400" x-text="t('common.days')"></label><input type="number" name="delivery_time_days" value="{{ $providerService->delivery_time_days }}" required class="w-full px-4 py-3 border border-gray-100 bg-gray-50 rounded-xl text-sm font-normal"></div>
                 </div>
                 <div class="space-y-1">

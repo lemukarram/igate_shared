@@ -54,7 +54,7 @@ class AuthController extends Controller
 
         $isProvider = $request->has('join_as_provider');
         $role = $isProvider ? 'provider' : 'client';
-        $plan = Plan::where('type', $role)->orderBy('price', 'asc')->first();
+        $plan = Plan::where('type', $role)->orderBy('monthly_price', 'asc')->first();
 
         $user = User::create([
             'name' => $data['name'],

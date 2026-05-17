@@ -15,6 +15,7 @@ class Plan extends Model
         'type',
         'monthly_price',
         'annual_price',
+        'annual_discount_percentage',
         'max_services',
         'max_users',
         'max_projects',
@@ -26,5 +27,6 @@ class Plan extends Model
         'features' => 'array',
         'monthly_price' => 'decimal:2',
         'annual_price' => 'decimal:2',
+        'annual_discount_percentage' => 'integer',
     ];
 }

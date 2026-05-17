@@ -39,12 +39,32 @@ class PlanResource extends Resource
                         ->required()
                         ->numeric()
                         ->default(0.00)
-                        ->prefix('SAR'),
+                        ->prefix('SAR')
+                        ->live(onBlur: true)
+                        ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get, $state) {
+                            $discount = $get('annual_discount_percentage') ?? 0;
+                            if ($state > 0 && $discount > 0) {
+                                $set('annual_price', number_format($state * 12 * (1 - $discount / 100), 2, '.', ''));
+                            }
+                        }),
+                    Forms\Components\TextInput::make('annual_discount_percentage')
+                        ->label('Annual Discount (%)')
+                        ->numeric()
+                        ->default(0)
+                        ->suffix('%')
+                        ->live(onBlur: true)
+                        ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get, $state) {
+                            $monthly = $get('monthly_price') ?? 0;
+                            if ($monthly > 0 && $state > 0) {
+                                $set('annual_price', number_format($monthly * 12 * (1 - $state / 100), 2, '.', ''));
+                            }
+                        }),
                     Forms\Components\TextInput::make('annual_price')
                         ->required()
                         ->numeric()
                         ->default(0.00)
-                        ->prefix('SAR'),
+                        ->prefix('SAR')
+                        ->helperText('Usually calculated as (Monthly * 12) - Discount'),
                     Forms\Components\Textarea::make('description')
                         ->columnSpanFull(),
                 ])->columns(2),
@@ -93,6 +113,10 @@ class PlanResource extends Resource
                 Tables\Columns\TextColumn::make('type'),
                 Tables\Columns\TextColumn::make('monthly_price')
                     ->money('SAR')
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('annual_discount_percentage')
+                    ->label('Discount (%)')
+                    ->suffix('%')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('annual_price')
                     ->money('SAR')

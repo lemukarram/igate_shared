@@ -8,21 +8,23 @@ use Illuminate\Database\Eloquent\Model;
 class ProviderService extends Model
 {
     use HasFactory;
+protected $fillable = [
+    'provider_id',
+    'service_id',
+    'monthly_price',
+    'annual_price',
+    'annual_discount_percentage',
+    'delivery_time_days',
+    'provider_notes',
+    'is_active',
+];
 
-    protected $fillable = [
-        'provider_id',
-        'service_id',
-        'monthly_price',
-        'annual_price',
-        'delivery_time_days',
-        'provider_notes',
-        'is_active',
-    ];
-
-    protected $casts = [
-        'monthly_price' => 'decimal:2',
-        'annual_price' => 'decimal:2',
-    ];
+protected $casts = [
+    'monthly_price' => 'decimal:2',
+    'annual_price' => 'decimal:2',
+    'annual_discount_percentage' => 'integer',
+    'is_active' => 'boolean',
+];
 
     public function provider()
     {

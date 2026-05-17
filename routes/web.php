@@ -85,6 +85,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/checkout/plan/{planId}', [CheckoutController::class, 'planReview'])->name('checkout.plan');
     Route::post('/checkout/plan/process', [CheckoutController::class, 'processPlan'])->name('checkout.plan.process');
 
+    // Subscriptions
+    Route::post('/subscriptions/{subscription}/cancel', [App\Http\Controllers\SubscriptionController::class, 'cancel'])->name('subscriptions.cancel');
+
+    // Payments Callback
+    Route::get('/payments/callback', [CheckoutController::class, 'callback'])->name('payments.callback');
+
     // Project Workspace
     Route::get('/projects/{id}', [ProjectController::class, 'show'])->name('projects.show');
     Route::get('/projects/{id}/payment-review', [ProjectController::class, 'paymentReview'])->name('projects.payment-review');

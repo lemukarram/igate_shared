@@ -60,7 +60,47 @@ class ProjectController extends Controller
             ->where('reviewer_id', Auth::id())
             ->first();
 
-        return view('projects.show', compact('project', 'messages', 'userReview'));
+        // 1. Try to find an explicit subscription record
+        $subscription = \App\Models\Subscription::where('client_id', $project->client_id)
+            ->where('service_id', $project->service_id)
+            ->where(function($q) use ($project) {
+                $q->where('company_id', $project->company_id)
+                  ->orWhereNull('company_id');
+            })
+            ->latest()
+            ->first();
+
+        // 2. Fallback: Check the transaction for this project
+        if (!$subscription || !$subscription->ends_at) {
+            $transaction = \App\Models\Transaction::where('project_id', $project->id)
+                ->whereIn('status', ['authorized', 'captured', 'CAPTURED', 'AUTHORIZED'])
+                ->latest()
+                ->first();
+            
+            if ($transaction) {
+                $billingCycle = $transaction->billing_cycle ?? 'monthly';
+                $endsAt = ($billingCycle === 'annually') 
+                    ? $transaction->created_at->addYear() 
+                    : $transaction->created_at->addMonth();
+                
+                $subscription = new \App\Models\Subscription([
+                    'ends_at' => $endsAt,
+                    'status' => 'active',
+                ]);
+            }
+        }
+
+        // 3. Last Resort Fallback: If project is active, use created_at
+        if (!$subscription || !$subscription->ends_at) {
+            if ($project->status === 'active') {
+                $subscription = new \App\Models\Subscription([
+                    'ends_at' => $project->created_at->addMonth(),
+                    'status' => 'active',
+                ]);
+            }
+        }
+
+        return view('projects.show', compact('project', 'messages', 'userReview', 'subscription'));
     }
 
     public function updateStatus(Request $request, $id)

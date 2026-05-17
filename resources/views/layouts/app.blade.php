@@ -556,8 +556,13 @@
                              x-data="{ 
                                 selectedPlanId: {{ Auth::user()->plan_id ?? 'null' }},
                                 currentPlanId: {{ Auth::user()->plan_id ?? 'null' }},
-                                billingCycle: 'monthly',
-                                plans: {{ \App\Models\Plan::where('type', Auth::user()->role)->get()->mapWithKeys(fn($p) => [$p->id => ['monthly' => (float)$p->monthly_price, 'annual' => (float)$p->annual_price]])->toJson() }},
+                                billingCycle: 'annually',
+                                plans: {{ \App\Models\Plan::where('type', Auth::user()->role)->get()->mapWithKeys(fn($p) => [$p->id => [
+                                    'monthly' => (float)$p->monthly_price, 
+                                    'annual' => (float)$p->annual_price,
+                                    'annual_monthly' => (float)($p->annual_price / 12),
+                                    'discount' => (int)$p->annual_discount_percentage
+                                ]])->toJson() }},
                                 currentPrice: {{ Auth::user()->plan->monthly_price ?? 0 }},
                                 get isUpgrade() {
                                     if (!this.selectedPlanId || this.selectedPlanId == this.currentPlanId) return false;
@@ -568,6 +573,9 @@
                                     if (!this.selectedPlanId || this.selectedPlanId == this.currentPlanId) return false;
                                     const price = this.billingCycle === 'monthly' ? this.plans[this.selectedPlanId].monthly : this.plans[this.selectedPlanId].annual;
                                     return price < this.currentPrice;
+                                },
+                                get maxDiscount() {
+                                    return Math.max(...Object.values(this.plans).map(p => p.discount));
                                 }
                              }"
                              class="space-y-4 animate-in fade-in duration-300">
@@ -611,7 +619,12 @@
                             <!-- Billing Cycle Toggle -->
                             <div class="flex items-center justify-center p-1 bg-gray-100 rounded-lg w-fit mx-auto my-6">
                                 <button type="button" @click="billingCycle = 'monthly'" :class="billingCycle === 'monthly' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500'" class="px-6 py-1.5 rounded-md text-xs font-normal transition-all">Monthly</button>
-                                <button type="button" @click="billingCycle = 'annually'" :class="billingCycle === 'annually' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500'" class="px-6 py-1.5 rounded-md text-xs font-normal transition-all">Annually <span class="text-[10px] text-green-500 ml-1">-20%</span></button>
+                                <button type="button" @click="billingCycle = 'annually'" :class="billingCycle === 'annually' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500'" class="px-6 py-1.5 rounded-md text-xs font-normal transition-all">
+                                    Annually 
+                                    <template x-if="maxDiscount > 0">
+                                        <span class="text-[10px] text-green-500 ml-1" x-text="'-' + maxDiscount + '%'"></span>
+                                    </template>
+                                </button>
                             </div>
 
                             <div x-show="isUpgrade" class="p-4 bg-blue-50 border border-blue-100 rounded-xl flex items-start space-x-3 animate-in slide-in-from-top duration-300">
@@ -645,10 +658,10 @@
                                                     <p class="font-normal text-sm">{{ $plan->name }}</p>
                                                     <p class="font-normal text-sm">
                                                         <span x-show="billingCycle === 'monthly'">
-                                                            {{ $plan->monthly_price > 0 ? number_format($plan->monthly_price, 0) . ' ' . __('common.sar') : ($plan->monthly_price == 0 && strtolower($plan->name) === 'enterprise' ? __('common.custom') : __('common.free')) }}
+                                                            {{ $plan->monthly_price > 0 ? number_format($plan->monthly_price, 0) . ' ' . __('common.sar') . '/' . __('common.month') : ($plan->monthly_price == 0 && strtolower($plan->name) === 'enterprise' ? __('common.custom') : __('common.free')) }}
                                                         </span>
                                                         <span x-show="billingCycle === 'annually'">
-                                                            {{ $plan->annual_price > 0 ? number_format($plan->annual_price, 0) . ' ' . __('common.sar') : ($plan->annual_price == 0 && strtolower($plan->name) === 'enterprise' ? __('common.custom') : __('common.free')) }}
+                                                            {{ $plan->annual_price > 0 ? number_format($plan->annual_price / 12, 2) . ' ' . __('common.sar') . '/' . __('common.month') : ($plan->annual_price == 0 && strtolower($plan->name) === 'enterprise' ? __('common.custom') : __('common.free')) }}
                                                         </span>
                                                     </p>
                                                 </div>
@@ -834,11 +847,15 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div class="space-y-1">
                         <label class="text-[10px] font-normal uppercase tracking-widest text-gray-400" x-text="t('explore.price')"></label>
-                        <input type="number" name="price" step="0.01" class="w-full px-4 py-2.5 border border-gray-200 bg-white rounded-md text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all">
+                        <input type="number" name="monthly_price" step="0.01" required class="w-full px-4 py-2.5 border border-gray-200 bg-white rounded-md text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-normal uppercase tracking-widest text-gray-400">Annual Discount (%)</label>
+                        <input type="number" name="annual_discount_percentage" min="0" max="100" value="0" class="w-full px-4 py-2.5 border border-gray-200 bg-white rounded-md text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all">
                     </div>
                     <div class="space-y-1">
                         <label class="text-[10px] font-normal uppercase tracking-widest text-gray-400" x-text="t('explore.days')"></label>
-                        <input type="number" name="delivery_time_days" class="w-full px-4 py-2.5 border border-gray-200 bg-white rounded-md text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all">
+                        <input type="number" name="delivery_time_days" required class="w-full px-4 py-2.5 border border-gray-200 bg-white rounded-md text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all">
                     </div>
                 </div>
                 <button type="submit" class="w-full py-4 bg-primary text-white rounded-md font-normal" x-text="t('explore.add_to_portfolio_btn')"></button>

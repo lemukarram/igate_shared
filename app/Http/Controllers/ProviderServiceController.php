@@ -44,7 +44,8 @@ class ProviderServiceController extends Controller
         
         $validated = $request->validate([
             'service_id' => 'required|exists:services,id',
-            'price' => 'required|numeric|min:0',
+            'monthly_price' => 'required|numeric|min:0',
+            'annual_discount_percentage' => 'nullable|integer|min:0|max:100',
             'delivery_time_days' => 'required|integer|min:1',
             'provider_notes' => 'nullable|string',
         ]);
@@ -56,6 +57,9 @@ class ProviderServiceController extends Controller
         if (!$existing && $user->plan && $user->providerServices()->where('is_active', true)->count() >= $user->plan->max_services) {
             return redirect()->route('settings.plan.upgrade')->with('error', 'You have reached the maximum number of active services allowed by your plan.');
         }
+
+        $discount = $validated['annual_discount_percentage'] ?? 0;
+        $validated['annual_price'] = $validated['monthly_price'] * 12 * (1 - ($discount / 100));
 
         ProviderService::updateOrCreate(
             [
@@ -71,12 +75,17 @@ class ProviderServiceController extends Controller
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
-            'price' => 'required|numeric|min:0',
+            'monthly_price' => 'required|numeric|min:0',
+            'annual_discount_percentage' => 'nullable|integer|min:0|max:100',
             'delivery_time_days' => 'required|integer|min:1',
             'provider_notes' => 'nullable|string',
         ]);
 
         $ps = ProviderService::where('provider_id', \Illuminate\Support\Facades\Auth::id())->findOrFail($id);
+        
+        $discount = $validated['annual_discount_percentage'] ?? 0;
+        $validated['annual_price'] = $validated['monthly_price'] * 12 * (1 - ($discount / 100));
+        
         $ps->update($validated);
 
         return redirect()->back()->with('success', 'Service details updated successfully.');

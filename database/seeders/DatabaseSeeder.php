@@ -141,9 +141,14 @@ class DatabaseSeeder extends Seeder
         $servicesToAssign = [$hrService, $accountingService, $legalService];
         foreach ($servicesToAssign as $s) {
             if ($s) {
+                $monthlyPrice = rand(2000, 5000);
                 ProviderService::updateOrCreate(
                     ['provider_id' => $hrUser->id, 'service_id' => $s->id],
-                    ['price' => rand(2000, 5000), 'delivery_time_days' => 14]
+                    [
+                        'monthly_price' => $monthlyPrice,
+                        'annual_price' => $monthlyPrice * 10,
+                        'delivery_time_days' => 14
+                    ]
                 );
             }
         }

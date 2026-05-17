@@ -92,8 +92,9 @@ class MarketplaceController extends Controller
     {
         $service = Service::findOrFail($id);
         $providers = ProviderService::where('service_id', $id)
+            ->where('is_active', true)
             ->with(['provider.providerProfile'])
-            ->orderBy('price', 'asc')
+            ->orderBy('monthly_price', 'asc')
             ->get();
 
         $user = auth()->user();
@@ -110,21 +111,28 @@ class MarketplaceController extends Controller
             }
         }
 
-        // Identify existing valid projects for the client's first company
+        // Identify existing valid projects for the client
         if ($user && $user->role === 'client') {
-            $firstCompany = $user->companies()->first();
-            if ($firstCompany) {
-                $existingProjectIds = \App\Models\Project::where('client_id', $user->id)
+            $companies = $user->companies;
+            if ($companies->count() === 1) {
+                $firstCompany = $companies->first();
+                $existingProjects = \App\Models\Project::where('client_id', $user->id)
                     ->where('company_id', $firstCompany->id)
                     ->where('service_id', $id)
                     ->whereHas('transactions', function($q) {
                         $q->whereIn('status', ['authorized', 'captured']);
                     })
-                    ->pluck('id', 'provider_id')
-                    ->toArray();
+                    ->get()
+                    ->keyBy('provider_id');
                 
                 foreach ($providers as $ps) {
-                    $ps->existing_project_id = $existingProjectIds[$ps->provider_id] ?? null;
+                    $ps->existing_project_id = $existingProjects->get($ps->provider_id)->id ?? null;
+                }
+            } else {
+                // For multi-company users, we don't set a single existing_project_id on this page
+                // to allow them to click "Request" and then choose which company they are subscribing for.
+                foreach ($providers as $ps) {
+                    $ps->existing_project_id = null;
                 }
             }
         }

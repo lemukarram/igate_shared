@@ -393,4 +393,10 @@ return [
     'tap_reference' => 'مرجع Tap',
     'view_project' => 'عرض المشروع',
     'return_dashboard' => 'العودة إلى لوحة التحكم',
+    'sar_month' => 'ر.س/شهر',
+    'save_more' => 'وفر أكثر',
+    'save_percent' => 'وفر :percent%',
+    'billed_annually' => 'فوترة سنوية',
+    'billed_monthly' => 'فوترة شهرية',
+    'paid_until' => 'مدفوع حتى :date',
 ];

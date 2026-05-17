@@ -76,6 +76,9 @@ class InvoiceService
         $project = $transaction->project;
         $company = $project ? $project->company : ($user->companies()->first() ?? null);
         
+        $billingCycle = $transaction->billing_cycle ?? 'monthly';
+        $nextBillingDate = ($billingCycle === 'annually') ? $transaction->created_at->addYear() : $transaction->created_at->addMonth();
+
         // Basic info
         $details = [
             'client_name' => $user->name,
@@ -87,19 +90,21 @@ class InvoiceService
             'date' => $transaction->created_at->format('Y-m-d'),
             'type' => $transaction->type,
             'transaction_id' => $transaction->id,
+            'billing_cycle' => $billingCycle,
+            'expiry_date' => $nextBillingDate->format('Y-m-d'),
         ];
 
         // Type specific info
-        if (in_array($transaction->type, ['service', 'service_escrow']) && $project) {
+        if (in_array($transaction->type, ['service', 'service_escrow', 'subscription']) && $project) {
             $details['item_name'] = $project->service->name ?? 'Service Fulfillment';
-            $details['description'] = 'Standardized service: ' . ($project->service->name ?? '') . ' (PJ-' . $project->id . ')';
+            $details['description'] = 'Standardized service: ' . ($project->service->name ?? '') . ' (' . ucfirst($billingCycle) . ')';
             $details['provider_name'] = $transaction->provider->name ?? ($project->provider->name ?? 'iGate Provider');
         } elseif ($transaction->type === 'subscription' && $transaction->plan) {
             $details['item_name'] = 'Subscription: ' . $transaction->plan->name;
-            $details['description'] = 'iGate ' . ucfirst($transaction->plan->type) . ' Plan - ' . $transaction->plan->name;
+            $details['description'] = 'iGate ' . ucfirst($transaction->plan->type) . ' Plan - ' . $transaction->plan->name . ' (' . ucfirst($billingCycle) . ')';
         } else {
             $details['item_name'] = 'Business Service';
-            $details['description'] = 'Standardized business service fulfillment';
+            $details['description'] = 'Standardized business service fulfillment (' . ucfirst($billingCycle) . ')';
         }
 
         return $details;

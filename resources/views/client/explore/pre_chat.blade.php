@@ -79,7 +79,7 @@
                     <p class="text-[10px] font-normal uppercase tracking-widest text-gray-400 mb-4">{{ __('common.standard_package') }}</p>
                     <div class="flex items-center justify-between mb-2">
                         <span class="text-sm font-normal text-gray-600" x-text="t('common.price')"></span>
-                        <span class="text-lg font-normal text-primary">{{ number_format($ps->price, 0) }} <span x-text="t('common.sar')"></span></span>
+                        <span class="text-lg font-normal text-primary">{{ number_format($ps->monthly_price, 0) }} <span x-text="t('common.sar')"></span></span>
                     </div>
                     <div class="flex items-center justify-between">
                         <span class="text-sm font-normal text-gray-600" x-text="t('common.delivery')"></span>

@@ -70,6 +70,9 @@
                         <p style="margin-top: 5px; color: #64748b;">
                             Invoice #: <strong>{{ $invoice->invoice_number }}</strong><br>
                             Date: <strong>{{ $invoice->created_at->format('M d, Y') }}</strong><br>
+                            @if(!empty($invoice->billing_details['expiry_date']))
+                                Expiry Date: <strong>{{ \Carbon\Carbon::parse($invoice->billing_details['expiry_date'])->format('M d, Y') }}</strong><br>
+                            @endif
                             Transaction ID: <strong>{{ substr($invoice->transaction_id ?? '', -12) }}</strong>
                         </p>
                         <div class="status-badge">Paid</div>

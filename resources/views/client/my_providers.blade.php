@@ -33,7 +33,7 @@
                                 'id' => $ps->id,
                                 'service_id' => $ps->service_id,
                                 'name' => $ps->service->name,
-                                'price' => number_format($ps->price, 0),
+                                'price' => number_format($ps->monthly_price, 0),
                                 'delivery' => $ps->delivery_time_days
                             ];
                         })->toJson() }},
@@ -88,8 +88,7 @@
                         'id' => $ps->id,
                         'service_id' => $ps->service_id,
                         'name' => $ps->service->name,
-                        'price' => number_format($ps->price, 0),
-                        'delivery' => $ps->delivery_time_days
+                        'price' => number_format($ps->monthly_price, 0),                        'delivery' => $ps->delivery_time_days
                     ];
                 })->toJson() }},
                 reviews: {{ $provider->reviewsReceived()->with(['reviewer', 'project.service'])->latest()->take(5)->get()->map(function($r) {
