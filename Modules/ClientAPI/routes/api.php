@@ -1,10 +1,10 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Modules\ClientAPI\app\Http\Controllers\AuthController;
-use Modules\ClientAPI\app\Http\Controllers\CompanyController;
-use Modules\ClientAPI\app\Http\Controllers\ProjectController;
-use Modules\ClientAPI\app\Http\Controllers\MarketplaceController;
+use Modules\ClientAPI\Http\Controllers\AuthController;
+use Modules\ClientAPI\Http\Controllers\CompanyController;
+use Modules\ClientAPI\Http\Controllers\ProjectController;
+use Modules\ClientAPI\Http\Controllers\MarketplaceController;
 
 /*
 |--------------------------------------------------------------------------

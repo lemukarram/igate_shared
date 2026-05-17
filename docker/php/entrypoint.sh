@@ -67,6 +67,9 @@ if [ "$DB_SEED" = "true" ]; then
     php artisan migrate --force || echo "Migration failed, continuing..."
     php artisan db:seed --force || echo "Seeding failed, continuing..."
 else
+    php artisan config:cache || echo "Config cache failed, continuing..."
+    php artisan route:cache  || echo "Route cache failed, continuing..."
+    php artisan view:cache   || echo "View cache failed, continuing..."
     php artisan migrate --force || echo "Migration failed, continuing..."
 fi
 
