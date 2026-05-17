@@ -26,7 +26,12 @@ class Service extends Model
         return app()->getLocale() === 'ar' && $this->description_ar ? $this->description_ar : $this->description;
     }
 
-    public function serviceCategory()
+    public function getTranslatedName(): string
+    {
+        return app()->getLocale() === 'ar' ? ($this->name_ar ?? $this->name) : $this->name;
+    }
+
+    public function category()
     {
         return $this->belongsTo(ServiceCategory::class);
     }

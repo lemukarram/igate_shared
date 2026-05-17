@@ -1,0 +1,141 @@
+{
+	"info": {
+		"name": "iGate Client Mobile API",
+		"description": "Complete API documentation for the iGate B2B Marketplace Client Mobile App.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Register Client",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Accept", "value": "application/json"},
+							{"key": "Accept-Language", "value": "en"}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{"key": "name", "value": "John Doe", "type": "text"},
+								{"key": "email", "value": "client@example.com", "type": "text"},
+								{"key": "password", "value": "password123", "type": "text"},
+								{"key": "password_confirmation", "value": "password123", "type": "text"},
+								{"key": "phone", "value": "966500000000", "type": "text"}
+							]
+						},
+						"url": { "raw": "{{baseUrl}}/register", "host": ["{{baseUrl}}"], "path": ["register"] }
+					}
+				},
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Accept", "value": "application/json"}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{"key": "email", "value": "client@example.com", "type": "text"},
+								{"key": "password", "value": "password123", "type": "text"}
+							]
+						},
+						"url": { "raw": "{{baseUrl}}/login", "host": ["{{baseUrl}}"], "path": ["login"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "Profile & Settings",
+			"item": [
+				{
+					"name": "Get My Info",
+					"request": {
+						"method": "GET",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"},
+							{"key": "Accept", "value": "application/json"}
+						],
+						"url": { "raw": "{{baseUrl}}/me", "host": ["{{baseUrl}}"], "path": ["me"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "Marketplace",
+			"item": [
+				{
+					"name": "List Services",
+					"request": {
+						"method": "GET",
+						"header": [
+							{"key": "Accept-Language", "value": "ar"}
+						],
+						"url": { "raw": "{{baseUrl}}/services", "host": ["{{baseUrl}}"], "path": ["services"] }
+					}
+				},
+				{
+					"name": "List Providers for Service",
+					"request": {
+						"method": "GET",
+						"url": { "raw": "{{baseUrl}}/services/1/providers", "host": ["{{baseUrl}}"], "path": ["services", "1", "providers"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "Projects & Documents",
+			"item": [
+				{
+					"name": "Create Project (Request Service)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"},
+							{"key": "Accept", "value": "application/json"}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{"key": "provider_service_id", "value": "1", "type": "text"},
+								{"key": "company_id", "value": "1", "type": "text"},
+								{"key": "billing_cycle", "value": "annually", "type": "text"}
+							]
+						},
+						"url": { "raw": "{{baseUrl}}/projects", "host": ["{{baseUrl}}"], "path": ["projects"] }
+					}
+				},
+				{
+					"name": "Upload Project Document",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{"key": "name", "value": "Contract Scan", "type": "text"},
+								{"key": "file", "type": "file", "src": "/path/to/file.pdf"}
+							]
+						},
+						"url": { "raw": "{{baseUrl}}/projects/1/documents", "host": ["{{baseUrl}}"], "path": ["projects", "1", "documents"] }
+					}
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": { "type": "text/javascript", "exec": [""] }
+		}
+	],
+	"variable": [
+		{ "key": "baseUrl", "value": "http://your-domain.com/api/v1", "type": "string" },
+		{ "key": "token", "value": "PASTE_TOKEN_HERE", "type": "string" }
+	]
+}

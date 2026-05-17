@@ -1,0 +1,229 @@
+"A datetime string with format `Y-m-d H:i:s`, e.g. `2018-05-23 13:43:32`."
+scalar DateTime @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\DateTime")
+
+"Can be used as an argument to upload files using https://github.com/jaydenseric/graphql-multipart-request-spec"
+scalar Upload @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Upload")
+
+type Query {
+    "Get the currently authenticated user."
+    me: User @auth @guard(with: ["sanctum"])
+
+    "List companies belonging to the authenticated client."
+    myCompanies: [Company!]! @all @guard(with: ["sanctum"]) @whereAuth(relation: "client")
+
+    "List all available standardized services."
+    exploreServices: [Service!]! @all
+
+    "Get details of a specific service."
+    serviceDetails(id: ID! @eq): Service @find
+
+    "List active providers for a specific service."
+    activeProviders(service_id: ID! @eq): [ProviderService!]! @all @where(column: "is_active", value: true)
+
+    "List projects belonging to the authenticated client."
+    myProjects: [Project!]! @all @guard(with: ["sanctum"]) @whereAuth(relation: "client")
+
+    "Get details of a specific project."
+    projectDetails(id: ID! @eq): Project @find @guard(with: ["sanctum"])
+
+    "List subscriptions belonging to the authenticated client."
+    myClientSubscriptions: [ClientSubscription!]! @all @guard(with: ["sanctum"]) @whereAuth(relation: "client")
+
+    "List transactions belonging to the authenticated user."
+    myTransactions: [Transaction!]! @all @guard(with: ["sanctum"]) @whereAuth(relation: "user")
+}
+
+type Mutation {
+    # Authentication
+    login(input: LoginInput!): AuthPayload! @field(resolver: "Modules\\ClientAPI\\GraphQL\\Mutations\\AuthMutation@login")
+    register(input: RegisterInput!): AuthPayload! @field(resolver: "Modules\\ClientAPI\\GraphQL\\Mutations\\AuthMutation@register")
+    forgotPassword(email: String!): StatusPayload! @field(resolver: "Modules\\ClientAPI\\GraphQL\\Mutations\\AuthMutation@forgotPassword")
+    resetPassword(input: ResetPasswordInput!): StatusPayload! @field(resolver: "Modules\\ClientAPI\\GraphQL\\Mutations\\AuthMutation@resetPassword")
+
+    # Profile Management
+    updateProfile(input: UpdateProfileInput!): User! @update @guard(with: ["sanctum"])
+
+    # Company Management
+    addCompany(input: AddCompanyInput!): Company! @field(resolver: "Modules\\ClientAPI\\GraphQL\\Mutations\\CompanyMutation@create") @guard(with: ["sanctum"])
+    updateCompany(id: ID!, input: UpdateCompanyInput!): Company! @update @guard(with: ["sanctum"])
+
+    # Project Management
+    requestService(input: RequestServiceInput!): Project! @field(resolver: "Modules\\ClientAPI\\GraphQL\\Mutations\\ProjectMutation@requestService") @guard(with: ["sanctum"])
+    sendMessage(project_id: ID!, message: String!): Message! @field(resolver: "Modules\\ClientAPI\\GraphQL\\Mutations\\ProjectMutation@sendMessage") @guard(with: ["sanctum"])
+
+    # Document Management
+    uploadDocument(input: UploadDocumentInput!): Document! @field(resolver: "Modules\\ClientAPI\\GraphQL\\Mutations\\DocumentMutation@upload") @guard(with: ["sanctum"])
+}
+
+# --- Inputs & Payloads ---
+
+input LoginInput {
+    email: String!
+    password: String!
+}
+
+input RegisterInput {
+    name: String!
+    email: String!
+    password: String!
+    password_confirmation: String!
+    phone: String
+}
+
+input ResetPasswordInput {
+    email: String!
+    token: String!
+    password: String!
+    password_confirmation: String!
+}
+
+type AuthPayload {
+    user: User!
+    token: String!
+}
+
+type StatusPayload {
+    status: String!
+    message: String
+}
+
+input UpdateProfileInput {
+    id: ID!
+    name: String
+    phone: String
+}
+
+input AddCompanyInput {
+    name: String!
+    industry: String
+    registration_number: String
+    about: String
+}
+
+input UpdateCompanyInput {
+    name: String
+    industry: String
+    registration_number: String
+    about: String
+}
+
+input RequestServiceInput {
+    provider_service_id: ID!
+    company_id: ID!
+    billing_cycle: String!
+}
+
+input UploadDocumentInput {
+    project_id: ID
+    company_id: ID
+    name: String!
+    file: Upload!
+}
+
+# --- Types ---
+
+type User {
+    id: ID!
+    name: String!
+    email: String!
+    phone: String
+    role: String!
+    profile_picture: String
+    companies: [Company!]! @hasMany
+    projects: [Project!]! @hasMany
+    subscriptions: [ClientSubscription!]! @hasMany
+    created_at: DateTime!
+    updated_at: DateTime!
+}
+
+type Company {
+    id: ID!
+    name: String!
+    industry: String
+    registration_number: String
+    about: String
+    logo: String
+    projects: [Project!]! @hasMany
+    created_at: DateTime!
+}
+
+type Service {
+    id: ID!
+    name: String! @method(name: "getTranslatedName")
+    name_ar: String
+    slug: String
+    icon: String
+    description: String
+    subtasks: [String!]
+    providerServices: [ProviderService!]! @hasMany
+}
+
+type ProviderService {
+    id: ID!
+    provider: User! @belongsTo
+    service: Service! @belongsTo
+    monthly_price: Float!
+    annual_price: Float
+    annual_discount_percentage: Int
+    delivery_time_days: Int
+    is_active: Boolean!
+}
+
+type Project {
+    id: ID!
+    service: Service! @belongsTo
+    company: Company @belongsTo
+    provider: User! @belongsTo
+    status: String!
+    total_amount: Float!
+    start_date: DateTime
+    end_date: DateTime
+    tasks: [Task!]! @hasMany
+    documents: [Document!]! @hasMany
+    messages: [Message!]! @hasMany
+    created_at: DateTime!
+}
+
+type Task {
+    id: ID!
+    title: String!
+    status: String!
+    is_verified: Boolean
+    created_at: DateTime!
+}
+
+type Document {
+    id: ID!
+    name: String!
+    file_path: String!
+    user: User! @belongsTo
+    created_at: DateTime!
+}
+
+type Message {
+    id: ID!
+    user: User! @belongsTo
+    message: String!
+    created_at: DateTime!
+}
+
+type ClientSubscription {
+    id: ID!
+    service: Service! @belongsTo
+    company: Company! @belongsTo
+    provider: User! @belongsTo
+    billing_cycle: String!
+    status: String!
+    ends_at: DateTime
+    next_billing_date: DateTime
+}
+
+type Transaction {
+    id: ID!
+    amount: Float!
+    currency: String!
+    status: String!
+    type: String!
+    billing_cycle: String
+    created_at: DateTime!
+}
