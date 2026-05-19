@@ -121,6 +121,9 @@ class CheckoutController extends Controller
             'description' => 'Project initiated, awaiting payment.',
         ]);
 
+        // Dispatch Service Requested Event
+        event(new \Modules\Emails\Events\ServiceRequested($project));
+
         $transactionId = (string) \Illuminate\Support\Str::ulid();
         $redirectUrl = route('payments.callback', ['transaction_id' => $transactionId]);
 

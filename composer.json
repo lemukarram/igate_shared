@@ -37,6 +37,8 @@
             "App\\": "app/",
             "Modules\\Admin\\": "Modules/Admin/app/",
             "Modules\\ClientAPI\\": "Modules/ClientAPI/app/",
+            "Modules\\Payments\\": "Modules/Payments/app/",
+            "Modules\\Emails\\": "Modules/Emails/app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
         }

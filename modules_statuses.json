@@ -1,5 +1,6 @@
 {
     "Admin": true,
     "Payments": true,
-    "ClientAPI": true
+    "ClientAPI": true,
+    "Emails": true
 }

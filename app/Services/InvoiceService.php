@@ -44,6 +44,9 @@ class InvoiceService
         $pdfPath = $this->generatePdf($invoice);
         $invoice->update(['pdf_path' => $pdfPath]);
 
+        // Dispatch Invoice Generated Event
+        event(new \Modules\Emails\Events\InvoiceGenerated($invoice));
+
         return $invoice;
     }
 

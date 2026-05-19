@@ -5,9 +5,12 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use App\Models\User;
 use App\Models\Plan;
 use App\Models\ProviderProfile;
+use Modules\Emails\Events\UserRegistered;
+use Modules\Emails\Events\PasswordResetRequested;
 
 class AuthController extends Controller
 {
@@ -76,6 +79,11 @@ class AuthController extends Controller
 
         Auth::login($user);
 
+        // Fire User Registered Event to send Activation Email
+        $activationToken = Str::random(60);
+        // (Optional: save this token to the user record or a tokens table if you build verification logic)
+        event(new UserRegistered($user, $activationToken));
+
         if ($isProvider) {
             return redirect()->route('provider.onboarding');
         }
@@ -91,6 +99,15 @@ class AuthController extends Controller
     public function sendResetLink(Request $request)
     {
         $request->validate(['email' => 'required|email']);
+        
+        $user = User::where('email', $request->email)->first();
+        
+        if ($user) {
+            $resetToken = Str::random(60);
+            // (Optional: save token to password_reset_tokens table)
+            event(new PasswordResetRequested($user, $resetToken));
+        }
+
         return back()->with('status', 'We have emailed your password reset link if the email exists in our system.');
     }
 

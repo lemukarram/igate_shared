@@ -122,6 +122,9 @@ class ProjectController extends Controller
         $oldStatus = $project->status;
         $project->update(['status' => $request->status]);
 
+        // Dispatch Project Status Updated Event
+        event(new \Modules\Emails\Events\ProjectStatusUpdated($project, $request->status));
+
         \App\Models\ProjectHistory::create([
             'project_id' => $project->id,
             'user_id' => Auth::id(),
