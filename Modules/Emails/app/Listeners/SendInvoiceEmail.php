@@ -30,8 +30,8 @@ class SendInvoiceEmail implements ShouldQueue
         }
 
         if ($client) {
-            // Provide a generic fallback for invoice routes based on Laravel conventions
-            $invoiceLink = url('/invoices/' . $invoice->id); 
+            // Use the correct named route for downloading the invoice
+            $invoiceLink = route('invoices.download', ['invoice' => $invoice->id]); 
             
             $this->emailService->sendInvoiceGenerated(
                 $client->email,

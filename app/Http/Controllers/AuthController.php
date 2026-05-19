@@ -111,6 +111,21 @@ class AuthController extends Controller
         return back()->with('status', 'We have emailed your password reset link if the email exists in our system.');
     }
 
+    public function showReset($token)
+    {
+        return "Password reset page for token: " . $token;
+    }
+
+    public function resetPassword(Request $request)
+    {
+        return "Password reset logic here.";
+    }
+
+    public function verifyEmail($token)
+    {
+        return "Email verification logic here for token: " . $token;
+    }
+
     public function logout(Request $request)
     {
         Auth::logout();
