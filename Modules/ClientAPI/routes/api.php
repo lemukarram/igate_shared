@@ -22,6 +22,7 @@ Route::prefix('v1')->group(function () {
     Route::post('register', [AuthController::class, 'register']);
     Route::post('login', [AuthController::class, 'login']);
     Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
+    Route::post('reset-password', [AuthController::class, 'resetPassword']);
     
     Route::get('services', [MarketplaceController::class, 'services']);
     Route::get('services/{id}/providers', [MarketplaceController::class, 'providers']);
@@ -30,6 +31,7 @@ Route::prefix('v1')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('me', [AuthController::class, 'me']);
         Route::post('profile', [AuthController::class, 'updateProfile']);
+        Route::post('logout', [AuthController::class, 'logout']);
         
         Route::apiResource('companies', CompanyController::class);
         

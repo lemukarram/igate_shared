@@ -36,6 +36,12 @@
             <p class="text-gray-500 mt-2 text-sm" id="form-subtitle">{{ __('common.signin_subtitle') }}</p>
         </div>
 
+        @if(session('status'))
+            <div class="bg-green-50 text-green-500 p-3 rounded-lg text-sm mb-6 border border-green-100">
+                {{ session('status') }}
+            </div>
+        @endif
+
         @if($errors->any())
             <div class="bg-red-50 text-red-500 p-3 rounded-lg text-sm mb-6 border border-red-100">
                 <ul class="list-disc pl-5">
@@ -77,6 +83,7 @@
         <!-- Register Form (Hidden by default) -->
         <form id="register-form" action="{{ route('register.post') }}" method="POST" class="space-y-4 hidden">
             @csrf
+            <input type="hidden" name="register_form" value="1">
             <div>
                 <label class="block text-sm font-normal text-gray-700 mb-1.5">{{ __('common.fullname_company') }}</label>
                 <input type="text" name="name" required placeholder="{{ __('common.name') }}" value="{{ old('name') }}"
@@ -158,8 +165,19 @@
         }
 
         // If there are validation errors on registration, show register form
-        @if($errors->has('name') || $errors->has('phone') || $errors->has('agree_terms'))
-            toggleForms();
+        @if(old('register_form'))
+            isLogin = false;
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
+            const title = document.getElementById('form-title');
+            const subtitle = document.getElementById('form-subtitle');
+            const toggleText = document.getElementById('toggle-text');
+
+            loginForm.classList.add('hidden');
+            registerForm.classList.remove('hidden');
+            title.textContent = dict.create_account_title;
+            subtitle.textContent = dict.join_marketplace_subtitle;
+            toggleText.innerHTML = `${dict.already_have_account} <button type="button" onclick="toggleForms()" class="theme-text hover:underline ml-1 font-normal">${dict.signin}</button>`;
         @endif
 
         lucide.createIcons();

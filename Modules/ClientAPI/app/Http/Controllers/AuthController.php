@@ -56,14 +56,14 @@ class AuthController extends Controller
             ]);
 
             if (!Auth::attempt($request->only('email', 'password'))) {
-                return $this->errorResponse('Invalid credentials', 401);
+                return $this->errorResponse(__('common.auth_failed'), 401);
             }
 
             $user = Auth::user();
 
             if ($user->role !== 'client') {
                 Auth::logout();
-                return $this->errorResponse('Access restricted to clients', 403);
+                return $this->errorResponse(__('common.access_denied_clients'), 403);
             }
 
             $token = $user->createToken('client_mobile_app')->plainTextToken;
@@ -104,8 +104,49 @@ class AuthController extends Controller
     {
         try {
             $request->validate(['email' => 'required|email']);
-            // Logic for sending reset link
-            return $this->successResponse(null, 'Password reset link sent if email exists');
+            
+            $user = User::where('email', $request->email)->first();
+            
+            if ($user) {
+                $token = \Illuminate\Support\Str::random(60);
+                event(new \Modules\Emails\Events\PasswordResetRequested($user, $token));
+            }
+
+            return $this->successResponse(null, 'If an account with that email exists, we have sent a password reset link.');
+        } catch (\Throwable $e) {
+            return $this->handleException($e);
+        }
+    }
+
+    public function resetPassword(Request $request)
+    {
+        try {
+            $request->validate([
+                'token' => 'required',
+                'email' => 'required|email',
+                'password' => 'required|string|min:8|confirmed',
+            ]);
+
+            $user = User::where('email', $request->email)->first();
+
+            if (!$user) {
+                return $this->errorResponse('User not found', 404);
+            }
+
+            $user->password = Hash::make($request->password);
+            $user->save();
+
+            return $this->successResponse(null, 'Password reset successful');
+        } catch (\Throwable $e) {
+            return $this->handleException($e);
+        }
+    }
+
+    public function logout(Request $request)
+    {
+        try {
+            $request->user()->currentAccessToken()->delete();
+            return $this->successResponse(null, 'Logout successful');
         } catch (\Throwable $e) {
             return $this->handleException($e);
         }

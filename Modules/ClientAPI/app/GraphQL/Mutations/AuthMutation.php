@@ -19,7 +19,7 @@ class AuthMutation
 
         if (!Auth::attempt($input)) {
             throw ValidationException::withMessages([
-                'email' => ['The provided credentials do not match our records.'],
+                'email' => [__('common.auth_failed')],
             ]);
         }
 
@@ -29,7 +29,7 @@ class AuthMutation
         if ($user->role !== 'client') {
             Auth::logout();
             throw ValidationException::withMessages([
-                'email' => ['Access denied. This API module is restricted to clients.'],
+                'email' => [__('common.access_denied_clients')],
             ]);
         }
 
