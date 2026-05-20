@@ -82,6 +82,21 @@ class GeneralSettings extends SettingsPage
                         ->required(),
                 ])->columns(2),
 
+                Forms\Components\Section::make('Contextual URLs')->schema([
+                    Forms\Components\TextInput::make('services_url')
+                        ->label('Services URL')
+                        ->url()
+                        ->required(),
+                    Forms\Components\TextInput::make('finance_url')
+                        ->label('Finance URL')
+                        ->url()
+                        ->required(),
+                    Forms\Components\TextInput::make('enterprise_url')
+                        ->label('Enterprise URL')
+                        ->url()
+                        ->required(),
+                ])->columns(3),
+
                 Forms\Components\Section::make('Global Protection Block')->schema([
                     Forms\Components\TextInput::make('protection_block_title')
                         ->label('Title')

@@ -87,14 +87,31 @@
                 <i data-lucide="chevron-left" class="w-3.5 h-3.5 text-gray-400 transition-transform" :class="sidebarCollapsed ? 'rotate-180' : ''"></i>
             </button>
 
-            <div class="p-6 overflow-hidden">
+            <div class="p-6 flex flex-col" :class="sidebarCollapsed ? 'items-center' : 'items-start'">
                 @php
                     $logoPath = $settings->logo;
                     $collapsedLogoPath = $settings->collapsed_logo;
                     $logoUrl = str_starts_with($logoPath, 'settings/') ? asset('storage/' . $logoPath) : asset($logoPath);
                     $collapsedLogoUrl = str_starts_with($collapsedLogoPath, 'settings/') ? asset('storage/' . $collapsedLogoPath) : asset($collapsedLogoPath);
                 @endphp
-                <img :src="sidebarCollapsed ? '{{ $collapsedLogoUrl }}' : '{{ $logoUrl }}'" alt="{{ $settings->site_name }}" class="h-10 w-auto object-contain min-w-[40px] transition-all duration-300">
+                
+                <div x-data="{ open: false, selected: 'Services' }" class="relative inline-flex flex-col w-fit group cursor-pointer" @click="open = !open">
+                    <img :src="sidebarCollapsed ? '{{ $collapsedLogoUrl }}' : '{{ $logoUrl }}'" alt="{{ $settings->site_name }}" class="h-10 w-auto object-contain min-w-[40px] transition-all duration-300">
+                    
+                    <!-- Logo Dropdown Text -->
+                    <div x-show="!sidebarCollapsed" class="mt-[-6px] flex justify-end w-full items-center">
+                        <span class="text-[1rem] font-semibold text-gray-900 transition-colors uppercase tracking-tight whitespace-nowrap" x-text="selected"></span>
+                        <i data-lucide="chevron-down" class="w-2 h-2 ml-[-3px] transition-transform" :class="open ? 'rotate-180' : ''"></i>
+                    </div>
+
+                    <!-- Dropdown Menu -->
+                    <div x-show="open" @click.away="open = false" 
+                         class="absolute top-full left-0 mt-1 w-40 bg-white border border-gray-100 rounded-lg shadow-lg z-[100] py-1 animate-in fade-in slide-in-from-top-1" style="display:none;" @click.stop>
+                         <a href="{{ $settings->services_url }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-primary-light hover:text-primary transition-colors">Services</a>
+                         <a href="{{ $settings->finance_url }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-primary-light hover:text-primary transition-colors">Finance</a>
+                         <a href="{{ $settings->enterprise_url }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-primary-light hover:text-primary transition-colors">Enterprise</a>
+                    </div>
+                </div>
             </div>
 
             <div class="px-6 mb-6 overflow-hidden">
@@ -113,44 +130,44 @@
 
             <nav class="flex-1 px-3 space-y-1 overflow-y-auto custom-scrollbar overflow-x-hidden">
                 @if(Auth::user()->role === 'admin')
-                    <a href="/" class="sidebar-item {{ request()->is('/') ? 'active' : '' }} flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 transition-all">
+                    <a href="/" :class="sidebarCollapsed ? 'justify-center px-0' : 'px-3'" class="sidebar-item {{ request()->is('/') ? 'active' : '' }} flex items-center gap-3 py-2.5 rounded-lg text-gray-600 transition-all">
                         <i data-lucide="bar-chart-3" class="w-4 h-4 flex-shrink-0"></i>
                         <span x-show="!sidebarCollapsed" class="text-sm font-normal whitespace-nowrap" x-text="t('common.analytics')"></span>
                     </a>
                 @elseif(Auth::user()->role === 'provider')
-                    <a href="{{ route('explore.index') }}" class="sidebar-item {{ request()->routeIs('explore.*') ? 'active' : '' }} flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 transition-all">
+                    <a href="{{ route('explore.index') }}" :class="sidebarCollapsed ? 'justify-center px-0' : 'px-3'" class="sidebar-item {{ request()->routeIs('explore.*') ? 'active' : '' }} flex items-center gap-3 py-2.5 rounded-lg text-gray-600 transition-all">
                         <i data-lucide="compass" class="w-4 h-4 flex-shrink-0"></i>
                         <span x-show="!sidebarCollapsed" class="text-sm font-normal whitespace-nowrap" x-text="t('common.explore')"></span>
                     </a>
 
-                    <a href="{{ route('provider.dashboard') }}" class="sidebar-item {{ request()->routeIs('provider.dashboard') ? 'active' : '' }} flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 transition-all">
+                    <a href="{{ route('provider.dashboard') }}" :class="sidebarCollapsed ? 'justify-center px-0' : 'px-3'" class="sidebar-item {{ request()->routeIs('provider.dashboard') ? 'active' : '' }} flex items-center gap-3 py-2.5 rounded-lg text-gray-600 transition-all">
                         <i data-lucide="layout-dashboard" class="w-4 h-4 flex-shrink-0"></i>
                         <span x-show="!sidebarCollapsed" class="text-sm font-normal whitespace-nowrap" x-text="t('common.dashboard')"></span>
                     </a>
-                    <a href="{{ route('provider.services.index') }}" class="sidebar-item {{ request()->routeIs('provider.services.*') ? 'active' : '' }} flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 transition-all">
+                    <a href="{{ route('provider.services.index') }}" :class="sidebarCollapsed ? 'justify-center px-0' : 'px-3'" class="sidebar-item {{ request()->routeIs('provider.services.*') ? 'active' : '' }} flex items-center gap-3 py-2.5 rounded-lg text-gray-600 transition-all">
                         <i data-lucide="briefcase" class="w-4 h-4 flex-shrink-0"></i>
                         <span x-show="!sidebarCollapsed" class="text-sm font-normal whitespace-nowrap" x-text="t('common.my_services')"></span>
                     </a>
                     
-                    <a href="{{ route('provider.clients') }}" class="sidebar-item {{ request()->routeIs('provider.clients*') ? 'active' : '' }} flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 transition-all">
+                    <a href="{{ route('provider.clients') }}" :class="sidebarCollapsed ? 'justify-center px-0' : 'px-3'" class="sidebar-item {{ request()->routeIs('provider.clients*') ? 'active' : '' }} flex items-center gap-3 py-2.5 rounded-lg text-gray-600 transition-all">
                         <i data-lucide="users" class="w-4 h-4 flex-shrink-0"></i>
                         <span x-show="!sidebarCollapsed" class="text-sm font-normal whitespace-nowrap" x-text="t('common.clients')"></span>
                     </a>
                 @elseif(Auth::user()->role === 'client')
-                    <a href="{{ route('explore.index') }}" class="sidebar-item {{ request()->routeIs('explore.*') ? 'active' : '' }} flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 transition-all">
+                    <a href="{{ route('explore.index') }}" :class="sidebarCollapsed ? 'justify-center px-0' : 'px-3'" class="sidebar-item {{ request()->routeIs('explore.*') ? 'active' : '' }} flex items-center gap-3 py-2.5 rounded-lg text-gray-600 transition-all">
                         <i data-lucide="search" class="w-4 h-4 flex-shrink-0"></i>
                         <span x-show="!sidebarCollapsed" class="text-sm font-normal whitespace-nowrap" x-text="t('common.explore')"></span>
                     </a>
 
-                    <a href="{{ route('client.dashboard') }}" class="sidebar-item {{ request()->routeIs('client.dashboard') ? 'active' : '' }} flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 transition-all">
+                    <a href="{{ route('client.dashboard') }}" :class="sidebarCollapsed ? 'justify-center px-0' : 'px-3'" class="sidebar-item {{ request()->routeIs('client.dashboard') ? 'active' : '' }} flex items-center gap-3 py-2.5 rounded-lg text-gray-600 transition-all">
                         <i data-lucide="home" class="w-4 h-4 flex-shrink-0"></i>
                         <span x-show="!sidebarCollapsed" class="text-sm font-normal whitespace-nowrap" x-text="t('common.dashboard')"></span>
                     </a>
-                    <a href="{{ route('client.portfolio') }}" class="sidebar-item {{ request()->routeIs('client.portfolio') ? 'active' : '' }} flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 transition-all">
+                    <a href="{{ route('client.portfolio') }}" :class="sidebarCollapsed ? 'justify-center px-0' : 'px-3'" class="sidebar-item {{ request()->routeIs('client.portfolio') ? 'active' : '' }} flex items-center gap-3 py-2.5 rounded-lg text-gray-600 transition-all">
                         <i data-lucide="briefcase" class="w-4 h-4 flex-shrink-0"></i>
                         <span x-show="!sidebarCollapsed" class="text-sm font-normal whitespace-nowrap" x-text="t('common.portfolio')"></span>
                     </a>
-                    <a href="{{ route('client.my_providers') }}" class="sidebar-item {{ request()->routeIs('client.my_providers') ? 'active' : '' }} flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 transition-all">
+                    <a href="{{ route('client.my_providers') }}" :class="sidebarCollapsed ? 'justify-center px-0' : 'px-3'" class="sidebar-item {{ request()->routeIs('client.my_providers') ? 'active' : '' }} flex items-center gap-3 py-2.5 rounded-lg text-gray-600 transition-all">
                         <i data-lucide="users" class="w-4 h-4 flex-shrink-0"></i>
                         <span x-show="!sidebarCollapsed" class="text-sm font-normal whitespace-nowrap" x-text="t('common.my_providers')"></span>
                     </a>
@@ -158,14 +175,14 @@
                     
                 @endif
 
-                <div class="pt-8 px-3 overflow-hidden">
-                    <div class="flex items-center justify-between text-[10px] font-normal uppercase tracking-widest text-gray-400 mb-4">
+                <div class="pt-8 overflow-hidden" :class="sidebarCollapsed ? 'px-0' : 'px-3'">
+                    <div class="flex items-center text-[10px] font-normal uppercase tracking-widest text-gray-400 mb-4" :class="sidebarCollapsed ? 'justify-center' : 'justify-between'">
                         <span x-show="!sidebarCollapsed" x-text="t('common.projects')" class="whitespace-nowrap"></span>
                         <span class="bg-primary text-white px-2 py-0.5 rounded-md">{{ $ongoingProjects->count() }}</span>
                     </div>
                     <div class="space-y-1">
                         @foreach($ongoingProjects as $p)
-                        <a href="{{ route('projects.show', $p->id) }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-500 hover:bg-gray-50 transition-all {{ request()->is('projects/'.$p->id) ? 'bg-primary-light text-primary font-normal' : '' }}">
+                        <a href="{{ route('projects.show', $p->id) }}" :class="sidebarCollapsed ? 'justify-center px-0' : 'px-3'" class="flex items-center gap-3 py-2 rounded-lg text-gray-500 hover:bg-gray-50 transition-all {{ request()->is('projects/'.$p->id) ? 'bg-primary-light text-primary font-normal' : '' }}">
                             <div class="w-1.5 h-1.5 rounded-full bg-green-500 flex-shrink-0"></div>
                             <span x-show="!sidebarCollapsed" class="truncate text-xs font-normal whitespace-nowrap">{{ $p->service->name }}</span>
                         </a>
@@ -175,8 +192,8 @@
             </nav>
 
             <!-- Bottom Profile -->
-            <div class="p-4 border-t border-gray-100 relative ">
-                <div @click="profileOpen = !profileOpen" class="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-all">
+            <div class="p-4 border-t border-gray-100 relative">
+                <div @click="profileOpen = !profileOpen" :class="sidebarCollapsed ? 'justify-center px-0' : 'px-2'" class="flex items-center gap-3 py-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-all">
                     <div class="w-8 h-8 bg-gradient-to-br from-primary to-primary-dark rounded-lg flex items-center justify-center text-white font-normal text-xs shadow-sm flex-shrink-0 overflow-hidden">
                         @if(Auth::user()->profile_picture)
                             <img src="{{ asset('storage/' . Auth::user()->profile_picture) }}" class="w-full bg-white h-full object-cover">

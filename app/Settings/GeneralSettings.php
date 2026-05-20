@@ -14,6 +14,11 @@ class GeneralSettings extends Settings
     public string $default_language;
     public string $logo;
     public string $collapsed_logo;
+
+    // Contextual URLs
+    public string $services_url = 'https://services.igate.com';
+    public string $finance_url = 'https://finance.igate.com';
+    public string $enterprise_url = 'https://enterprise.igate.com';
     
     // Protection Block
     public string $protection_block_title;

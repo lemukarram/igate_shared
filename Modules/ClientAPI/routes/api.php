@@ -6,6 +6,8 @@ use Modules\ClientAPI\Http\Controllers\CompanyController;
 use Modules\ClientAPI\Http\Controllers\ProjectController;
 use Modules\ClientAPI\Http\Controllers\MarketplaceController;
 
+use Modules\ClientAPI\Http\Controllers\SettingsController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -24,8 +26,21 @@ Route::prefix('v1')->group(function () {
     Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
     Route::post('reset-password', [AuthController::class, 'resetPassword']);
     
+    // Marketplace routes
+    Route::get('categories', [MarketplaceController::class, 'categories']);
+    Route::get('categories/{id}', [MarketplaceController::class, 'categoryDetail']);
     Route::get('services', [MarketplaceController::class, 'services']);
-    Route::get('services/{id}/providers', [MarketplaceController::class, 'providers']);
+    Route::get('services/{id}', [MarketplaceController::class, 'serviceDetail']);
+    Route::get('services/{id}/providers', [MarketplaceController::class, 'serviceProviders']);
+    Route::get('providers/{id}', [MarketplaceController::class, 'providerDetail']);
+
+    // Settings routes
+    Route::prefix('settings')->group(function () {
+        Route::get('general', [SettingsController::class, 'general']);
+        Route::get('invoice', [SettingsController::class, 'invoice']);
+        Route::get('payment', [SettingsController::class, 'payment']);
+        Route::get('landing', [SettingsController::class, 'landing']);
+    });
 
     // Protected routes
     Route::middleware('auth:sanctum')->group(function () {
