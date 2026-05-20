@@ -20,6 +20,7 @@ class MarketplaceController extends Controller
                     $query->where('service_category_id', $request->category_id);
                 })
                 ->where('is_active', true)
+                ->with('serviceCategory')
                 ->get()
                 ->map(function ($service) use ($request) {
                     $data = [
@@ -31,6 +32,10 @@ class MarketplaceController extends Controller
                         'icon' => $service->icon,
                         'description' => $service->description,
                         'service_category_id' => $service->service_category_id,
+                        'category' => $service->serviceCategory ? [
+                            'id' => $service->serviceCategory->id,
+                            'name' => $service->serviceCategory->name,
+                        ] : null,
                     ];
 
                     if ($request->boolean('include_subtasks')) {
@@ -74,6 +79,26 @@ class MarketplaceController extends Controller
         try {
             $service = Service::with(['serviceCategory'])->findOrFail($id);
             
+            // Get providers for this service
+            $providers = ProviderService::where('service_id', $id)
+                ->where('is_active', true)
+                ->with(['provider.providerProfile'])
+                ->get()
+                ->map(function ($ps) {
+                    return [
+                        'id' => $ps->id,
+                        'provider_id' => $ps->provider_id,
+                        'company_name' => $ps->provider->providerProfile->company_name ?? $ps->provider->name,
+                        'logo' => $ps->provider->providerProfile->logo ? url('storage/' . $ps->provider->providerProfile->logo) : null,
+                        'rating' => $ps->provider->providerProfile->rating ?? 0,
+                        'monthly_price' => $ps->monthly_price,
+                        'annual_price' => $ps->annual_price,
+                        'annual_per_month' => $ps->annual_price ? ($ps->annual_price / 12) : null,
+                        'discount_percentage' => $ps->annual_discount_percentage,
+                        'delivery_days' => $ps->delivery_time_days,
+                    ];
+                });
+
             $data = [
                 'id' => $service->id,
                 'name' => $service->getTranslatedName(),
@@ -83,7 +108,11 @@ class MarketplaceController extends Controller
                 'icon' => $service->icon,
                 'description' => $service->description,
                 'subtasks' => $service->subtasks,
-                'category' => $service->serviceCategory,
+                'category' => $service->serviceCategory ? [
+                    'id' => $service->serviceCategory->id,
+                    'name' => $service->serviceCategory->name,
+                ] : null,
+                'providers' => $providers
             ];
 
             return $this->successResponse($data);
@@ -131,7 +160,8 @@ class MarketplaceController extends Controller
     public function providerDetail($id)
     {
         try {
-            $provider = \App\Models\User::role('provider')
+            // Check for providerProfile presence instead of role to avoid guard/role definition issues
+            $provider = \App\Models\User::whereHas('providerProfile')
                 ->with(['providerProfile', 'providerServices.service'])
                 ->findOrFail($id);
 
