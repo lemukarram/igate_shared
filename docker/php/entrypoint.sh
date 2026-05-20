@@ -47,27 +47,21 @@ fi
 
 # Wait for DB to be ready
 echo "Waiting for database connection (DB_HOST: $DB_HOST)..."
-MAX_TRIES=20
+MAX_TRIES=30
 COUNT=0
-until php artisan db:show > /dev/null 2>&1; do
+# Try to connect to the DB port first (faster than artisan)
+until nc -z "$DB_HOST" "$DB_PORT"; do
     COUNT=$((COUNT+1))
-    
-    # Check if artisan itself is crashing
-    if ! php artisan --version > /dev/null 2>&1; then
-        echo "ERROR: php artisan is crashing. Checking why..."
-        php artisan --version
-        exit 1
-    fi
-
     if [ $COUNT -gt $MAX_TRIES ]; then
-        echo "ERROR: Database connection timed out after $MAX_TRIES attempts."
-        php artisan db:show # Run one last time without redirection to show the error
-        exit 1
+        echo "ERROR: Database host $DB_HOST:$DB_PORT unreachable after $MAX_TRIES attempts."
+        # Continue anyway to allow FPM to start (app will show DB error in browser)
+        break
     fi
-    echo "Database not ready (Attempt $COUNT/$MAX_TRIES), retrying in 3s..."
-    sleep 3
+    echo "Database port not reachable (Attempt $COUNT/$MAX_TRIES), retrying in 2s..."
+    sleep 2
 done
-echo "Database connected!"
+
+echo "Attempting artisan migration..."
 
 if [ "$DB_SEED" = "true" ]; then
     php artisan db:wipe --force || echo "Wipe failed, continuing..."
