@@ -237,14 +237,9 @@
         <div class="bg-white w-full max-w-4xl rounded-lg shadow-2xl relative z-10 overflow-hidden border border-gray-100 animate-in zoom-in duration-300">
             <div class="flex h-[550px]">
                 <div class="w-56 bg-gray-50 border-r border-gray-100 p-8 flex flex-col">
-                    <h3 class="text-[10px] font-normal uppercase tracking-widest text-gray-400 mb-8 px-2">{{ __('common.settings') }}</h3>
-                    <!-- <div class="pb-4 px-4 overflow-hidden">
-                        @php
-                            $modalLogoPath = $settings->logo;
-                            $modalLogoUrl = str_starts_with($modalLogoPath, 'settings/') ? asset('storage/' . $modalLogoPath) : asset($modalLogoPath);
-                        @endphp
-                        <img src="{{ $modalLogoUrl }}" alt="{{ $settings->site_name }}" class="h-10 w-auto object-contain min-w-[40px]">
-                    </div> -->
+                    <div class="h-8 flex items-center mb-8">
+                        <h3 class="text-[10px] font-normal uppercase tracking-widest text-gray-400 px-2">{{ __('common.settings') }}</h3>
+                    </div>
                     <div class="space-y-1 flex-1">
                         <template x-for="t_tab in ['account', 'company', 'preferences', 'permissions', 'plans', 'notifications', 'security', 'payments']">
                             <button @click="settingsTab = t_tab" 
@@ -255,9 +250,11 @@
                     </div>
                 </div>
                 <div class="flex-1 p-8 flex flex-col">
-                    <div class="flex items-center justify-between mb-8">
+                    <div class="h-8 flex items-center justify-between mb-8">
                         <h2 class="text-2xl font-normal text-gray-900 capitalize" x-text="settingsTab"></h2>
-                        <button @click="settingsOpen = false" class="text-gray-400 hover:text-gray-900"><i data-lucide="x" class="w-5 h-5"></i></button>
+                        <button @click="settingsOpen = false" class="text-gray-400 hover:text-gray-900 transition-colors">
+                            <i data-lucide="x" class="w-5 h-5"></i>
+                        </button>
                     </div>
                     <div class="space-y-6 flex-1 overflow-y-auto pr-4 custom-scrollbar">
                         <!-- Account Tab -->
