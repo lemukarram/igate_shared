@@ -39,7 +39,5 @@ RUN echo '[global]\ndaemonize = no\n\n[www]\nlisten = 0.0.0.0:9000' > /usr/local
 COPY docker/php/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
-USER www-data
-
 ENTRYPOINT ["entrypoint.sh"]
 CMD ["php-fpm"]
