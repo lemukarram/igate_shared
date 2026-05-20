@@ -34,12 +34,19 @@ fi
 echo "Linking storage..."
 php artisan storage:link --force || echo "Storage link failed, continuing..."
 
-# ✅ Fix storage permissions
-chmod -R 755 /var/www/storage
-chmod -R 755 /var/www/public/storage
+# ✅ Fix storage permissions (ignore errors if volumes are root-owned)
+echo "Setting storage permissions..."
+chmod -R 775 /var/www/storage || echo "Warning: Could not set permissions for /var/www/storage"
+chmod -R 775 /var/www/bootstrap/cache || echo "Warning: Could not set permissions for /var/www/bootstrap/cache"
+
+# Copy public assets to shared volume if it exists (for Nginx)
+if [ -d "/var/www/public_shared" ]; then
+    echo "Syncing public assets to shared volume..."
+    cp -ru /var/www/public/. /var/www/public_shared/
+fi
 
 # Wait for DB to be ready
-echo "Waiting for database connection..."
+echo "Waiting for database connection (DB_HOST: $DB_HOST)..."
 MAX_TRIES=20
 COUNT=0
 until php artisan db:show > /dev/null 2>&1; do

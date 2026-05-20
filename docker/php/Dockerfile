@@ -8,6 +8,7 @@ ENV GID=33
 RUN apt-get update && apt-get install -y \
     git curl libpng-dev libonig-dev libxml2-dev \
     zip unzip libzip-dev libicu-dev libpq-dev \
+    libfcgi-bin \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions

@@ -18,9 +18,8 @@ services:
       DB_USERNAME: ${DB_USERNAME:-igate}
       DB_PASSWORD: ${DB_PASSWORD:-root}
     volumes:
-      - .:/var/www
-      - public-files:/var/www/public
       - storage-files:/var/www/storage
+      - public-files:/var/www/public_shared
     networks:
       - igate_network
       - dokploy-network
@@ -28,11 +27,11 @@ services:
       db:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "cat /proc/net/tcp | grep 2328 || exit 1"]
+      test: ["CMD-SHELL", "SCRIPT_NAME=/ping SCRIPT_FILENAME=/ping REQUEST_METHOD=GET cgi-fcgi -bind -connect 127.0.0.1:9000 || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 120s
+      start_period: 60s
 
   worker:
     image: igate-app:latest
@@ -52,15 +51,13 @@ services:
       DB_PASSWORD: ${DB_PASSWORD:-root}
       QUEUE_CONNECTION: database
     volumes:
-      - .:/var/www
-      - public-files:/var/www/public
       - storage-files:/var/www/storage
     networks:
       - igate_network
       - dokploy-network
     depends_on:
       app:
-        condition: service_healthy
+        condition: service_started
 
   web:
     image: nginx:alpine
@@ -69,13 +66,11 @@ services:
     ports:
       - "${WEB_PORT:-8001}:80"
     volumes:
-      - .:/var/www
-      - public-files:/var/www/public
-      - storage-files:/var/www/storage
+      - public-files:/var/www/public:ro
       - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       app:
-        condition: service_healthy
+        condition: service_started
     networks:
       - igate_network
       - dokploy-network
