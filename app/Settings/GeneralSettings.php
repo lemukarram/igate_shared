@@ -15,6 +15,18 @@ class GeneralSettings extends Settings
     public string $logo;
     public string $collapsed_logo;
 
+    // Logo Customization
+    public string $logo_circle_bg_color;
+    public string $logo_circle_padding;
+    public string $logo_circle_padding_collapsed;
+    public string $logo_icon_size;
+    public string $logo_icon_size_collapsed;
+    public string $logo_text_gap;
+    public string $logo_text_content;
+    public string $logo_text_color;
+    public string $logo_text_size;
+    public string $logo_text_weight;
+
     // Contextual URLs
     public string $services_url = 'https://services.igate.com';
     public string $finance_url = 'https://finance.igate.com';

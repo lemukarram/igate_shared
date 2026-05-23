@@ -89,28 +89,29 @@
 
             <div class="p-6 flex flex-col" :class="sidebarCollapsed ? 'items-center' : 'items-start'">
                 @php
-                    $logoPath = $settings->logo;
                     $collapsedLogoPath = $settings->collapsed_logo;
-                    $logoUrl = str_starts_with($logoPath, 'settings/') ? asset('storage/' . $logoPath) : asset($logoPath);
                     $collapsedLogoUrl = str_starts_with($collapsedLogoPath, 'settings/') ? asset('storage/' . $collapsedLogoPath) : asset($collapsedLogoPath);
                 @endphp
                 
-                <div x-data="{ open: false }" class="relative inline-flex flex-col w-fit group cursor-pointer" @click="open = !open">
-                    <img :src="sidebarCollapsed ? '{{ $collapsedLogoUrl }}' : '{{ $logoUrl }}'" alt="{{ $settings->site_name }}" class="h-10 w-auto object-contain min-w-[40px] transition-all duration-300">
+                <div class="flex items-center" style="gap: {{ $settings->logo_text_gap }};">
+                    <div class="rounded-full flex items-center justify-center transition-all duration-300"
+                         :style="{ 
+                            backgroundColor: '{{ $settings->logo_circle_bg_color }}', 
+                            padding: sidebarCollapsed ? '{{ $settings->logo_circle_padding_collapsed }}' : '{{ $settings->logo_circle_padding }}' 
+                         }">
+                        <img src="{{ $collapsedLogoUrl }}" alt="{{ $settings->site_name }}" 
+                             class="object-contain transition-all duration-300"
+                             :style="{ 
+                                height: sidebarCollapsed ? '{{ $settings->logo_icon_size_collapsed }}' : '{{ $settings->logo_icon_size }}',
+                                width: sidebarCollapsed ? '{{ $settings->logo_icon_size_collapsed }}' : '{{ $settings->logo_icon_size }}'
+                             }">
+                    </div>
                     
-                    <!-- Logo Dropdown Text -->
-                    <div x-show="!sidebarCollapsed" class="mt-[-6px] flex justify-end w-full items-start">
-                        <span class="text-[1rem] font-semibold text-gray-900 transition-colors uppercase tracking-tight whitespace-nowrap" x-text="active_portal"></span>
-                        <i data-lucide="square-chevron-down" class="w-2 h-2 ml-[1px] mt-1 transition-transform" :class="open ? 'rotate-180' : ''"></i>
-                    </div>
-
-                    <!-- Dropdown Menu -->
-                    <div x-show="open" @click.away="open = false" 
-                         class="absolute top-full left-0 mt-1 w-40 bg-white border border-gray-100 rounded-lg shadow-lg z-[100] py-1 animate-in fade-in slide-in-from-top-1" style="display:none;" @click.stop>
-                         <a href="{{ $settings->services_url }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-primary-light hover:text-primary transition-colors">Services</a>
-                         <a href="{{ $settings->finance_url }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-primary-light hover:text-primary transition-colors">Finance</a>
-                         <a href="{{ $settings->enterprise_url }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-primary-light hover:text-primary transition-colors">Enterprise</a>
-                    </div>
+                    <span x-show="!sidebarCollapsed" 
+                          class="transition-all duration-300 whitespace-nowrap"
+                          style="color: {{ $settings->logo_text_color }}; font-size: {{ $settings->logo_text_size }}; font-weight: {{ $settings->logo_text_weight }};">
+                        {{ $settings->logo_text_content }}
+                    </span>
                 </div>
             </div>
 

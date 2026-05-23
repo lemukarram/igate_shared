@@ -51,6 +51,49 @@ class GeneralSettings extends SettingsPage
                         }),
                 ])->columns(2),
 
+                Forms\Components\Section::make('Logo Customization')->schema([
+                    Forms\Components\ColorPicker::make('logo_circle_bg_color')
+                        ->label('Circle Background Color'),
+                    
+                    Forms\Components\Grid::make(2)->schema([
+                        Forms\Components\TextInput::make('logo_circle_padding')
+                            ->label('Circle Padding - Expanded (e.g., 0.5rem)')
+                            ->placeholder('0.5rem'),
+                        Forms\Components\TextInput::make('logo_circle_padding_collapsed')
+                            ->label('Circle Padding - Collapsed (e.g., 0.25rem)')
+                            ->placeholder('0.25rem'),
+                    ]),
+
+                    Forms\Components\Grid::make(2)->schema([
+                        Forms\Components\TextInput::make('logo_icon_size')
+                            ->label('Icon Size - Expanded (e.g., 2rem)')
+                            ->placeholder('2rem'),
+                        Forms\Components\TextInput::make('logo_icon_size_collapsed')
+                            ->label('Icon Size - Collapsed (e.g., 1.5rem)')
+                            ->placeholder('1.5rem'),
+                    ]),
+
+                    Forms\Components\TextInput::make('logo_text_gap')
+                        ->label('Text Gap (e.g., 0.4rem)')
+                        ->placeholder('0.4rem'),
+                    Forms\Components\TextInput::make('logo_text_content')
+                        ->label('Logo Text Content'),
+                    Forms\Components\ColorPicker::make('logo_text_color')
+                        ->label('Logo Text Color'),
+                    Forms\Components\TextInput::make('logo_text_size')
+                        ->label('Logo Text Size (e.g., 1.25rem)')
+                        ->placeholder('1.25rem'),
+                    Forms\Components\Select::make('logo_text_weight')
+                        ->label('Logo Text Weight')
+                        ->options([
+                            '300' => 'Light (300)',
+                            '400' => 'Normal (400)',
+                            '500' => 'Medium (500)',
+                            '600' => 'Semibold (600)',
+                            '700' => 'Bold (700)',
+                        ]),
+                ])->columns(3),
+
                 Forms\Components\Section::make('General Configuration')->schema([
                     Forms\Components\TextInput::make('site_name')
                         ->label('Site Name')
