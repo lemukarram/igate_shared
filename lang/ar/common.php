@@ -56,6 +56,7 @@ return [
     'delivery' => 'التسليم',
     'days_count' => ':count أيام',
     'active_clients_br' => 'العملاء<br>النشطون',
+    'portal'        => 'البوابة',
     'account'       => 'الحساب',
     'company'       => 'الشركة',
     'preferences'   => 'التفضيلات',

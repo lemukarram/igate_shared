@@ -12,11 +12,12 @@ class GeneralSettings extends Settings
     public string $default_currency;
     public float $platform_fee_percentage;
     public string $default_language;
+    public string $client_theme_color;
+    public string $provider_theme_color;
     public string $logo;
     public string $collapsed_logo;
 
     // Logo Customization
-    public string $logo_circle_bg_color;
     public string $logo_circle_padding;
     public string $logo_circle_padding_collapsed;
     public string $logo_icon_size;

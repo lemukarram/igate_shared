@@ -10,20 +10,30 @@
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+    @php
+        $activeThemeColor = Auth::user()->isProviderMode() ? $settings->provider_theme_color : $settings->client_theme_color;
+        
+        // Simple logic for dark/light variations
+        // For production, a more robust PHP color helper would be better, but for now we'll use inline opacity or CSS variables
+    @endphp
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        primary: '#3da9e4',
-                        'primary-dark': '#2a8cc2',
-                        'primary-light': '#ebf6fd',
+                        primary: '{{ $activeThemeColor }}',
+                        'primary-dark': '{{ $activeThemeColor }}dd', // slight transparency for dark effect
+                        'primary-light': '{{ $activeThemeColor }}15', // very transparent for light bg effect
                     }
                 }
             }
         }
     </script>
     <style>
+        :root {
+            --primary-color: {{ $activeThemeColor }};
+            --primary-light: {{ $activeThemeColor }}15;
+        }
         @font-face { font-family: 'Poppins'; src: url('/fonts/Poppins/Poppins-Light.woff') format('woff'); font-weight: 300; }
         @font-face { font-family: 'Poppins'; src: url('/fonts/Poppins/Poppins-Regular.woff') format('woff'); font-weight: 400; }
         @font-face { font-family: 'Poppins'; src: url('/fonts/Poppins/Poppins-Regular.woff') format('woff'); font-weight: 500; }
@@ -44,9 +54,13 @@
         /* Global Font Weight Constraints */
         h1, h2, h3, h4, .font-normal, .font-normal, .font-normal { font-weight: 400 !important; }
         
-        .bg-primary, .bg-blue-600, .bg-indigo-600 { background-color: #3da9e4 !important; }
-        .text-primary, .text-blue-600, .text-indigo-600 { color: #3da9e4 !important; }
-        .border-primary, .border-blue-600, .border-indigo-600 { border-color: #3da9e4 !important; }
+        .bg-primary, .bg-blue-600, .bg-indigo-600 { background-color: var(--primary-color) !important; }
+        .text-primary, .text-blue-600, .text-indigo-600 { color: var(--primary-color) !important; }
+        .border-primary, .border-blue-600, .border-indigo-600 { border-color: var(--primary-color) !important; }
+        
+        .bg-primary-light { background-color: var(--primary-light) !important; }
+        .text-primary-light { color: var(--primary-light) !important; }
+        .border-primary-light { border-color: var(--primary-light) !important; }
 
         /* Larger Notifications & Alerts */
         .fi-no-notification {
@@ -96,7 +110,7 @@
                 <div class="flex items-center" style="gap: {{ $settings->logo_text_gap }};">
                     <div class="rounded-full flex items-center justify-center transition-all duration-300"
                          :style="{ 
-                            backgroundColor: '{{ $settings->logo_circle_bg_color }}', 
+                            backgroundColor: 'var(--primary-color)', 
                             padding: sidebarCollapsed ? '{{ $settings->logo_circle_padding_collapsed }}' : '{{ $settings->logo_circle_padding }}' 
                          }">
                         <img src="{{ $collapsedLogoUrl }}" alt="{{ $settings->site_name }}" 
@@ -324,7 +338,7 @@
                                 <div class="flex items-center space-x-4 mb-2">
                                     <div class="w-20 h-20 bg-gray-50 rounded-lg flex items-center justify-center text-[#3da9e4] border border-gray-200 cursor-pointer hover:border-[#3da9e4] transition-all relative group overflow-hidden">
                                         @php
-                                            $logo = Auth::user()->role === 'client' 
+                                            $logo = Auth::user()->isClientMode() 
                                                 ? (Auth::user()->companies()->first()->logo ?? null) 
                                                 : (Auth::user()->providerProfile->logo ?? null);
                                         @endphp
@@ -333,11 +347,11 @@
                                         <input type="file" name="logo" class="absolute inset-0 opacity-0 cursor-pointer" onchange="previewImage(this, 'logo-preview', 'logo-upload-icon')">
                                     </div>
                                     <div>
-                                        <p class="text-sm font-normal text-gray-900">Company Logo</p>
+                                        <p class="text-sm font-normal text-gray-900">{{ Auth::user()->isClientMode() ? 'Company Logo' : 'Agency Logo' }}</p>
                                         <p class="text-xs text-gray-500">Used on invoices and marketplace</p>
                                     </div>
                                 </div>
-                                @if(Auth::user()->role === 'client')
+                                @if(Auth::user()->isClientMode())
                                 <div class="grid grid-cols-2 gap-4">
                                     <div class="space-y-1">
                                         <label class="text-[10px] font-normal uppercase tracking-widest text-gray-400">Company Name</label>
@@ -354,8 +368,8 @@
                                 </div>
                                 @endif
                                 <div class="space-y-1">
-                                    <label class="text-[10px] font-normal uppercase tracking-widest text-gray-400">About Company</label>
-                                    <textarea name="about" rows="4" placeholder="Briefly describe your company, services, and industry..." class="w-full px-4 py-3 border border-gray-100 bg-gray-50 rounded-lg outline-none focus:ring-2 focus:ring-[#3da9e4]/50 focus:border-[#3da9e4] text-sm resize-none">{{ Auth::user()->role === 'client' ? (Auth::user()->companies()->first()->about ?? '') : (Auth::user()->providerProfile->bio ?? '') }}</textarea>
+                                    <label class="text-[10px] font-normal uppercase tracking-widest text-gray-400">{{ Auth::user()->isClientMode() ? 'About Company' : 'About Agency' }}</label>
+                                    <textarea name="about" rows="4" placeholder="Briefly describe your company, services, and industry..." class="w-full px-4 py-3 border border-gray-100 bg-gray-50 rounded-lg outline-none focus:ring-2 focus:ring-[#3da9e4]/50 focus:border-[#3da9e4] text-sm resize-none">{{ Auth::user()->isClientMode() ? (Auth::user()->companies()->first()->about ?? '') : (Auth::user()->providerProfile->bio ?? '') }}</textarea>
                                 </div>
                                 <div class="space-y-1">
                                     <label class="text-[10px] font-normal uppercase tracking-widest text-gray-400">Company Documents</label>
@@ -404,7 +418,7 @@
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center space-x-4">
                                     <div class="w-10 h-10 bg-primary-light text-primary rounded-lg flex items-center justify-center"><i data-lucide="shield" class="w-5 h-5"></i></div>
-                                    <div><p class="text-sm font-normal">Role: {{ ucfirst(Auth::user()->role) }}</p><p class="text-xs text-gray-400">Full access to dashboard and services</p></div>
+                                    <div><p class="text-sm font-normal">Active Portal: <span class="capitalize">{{ Auth::user()->active_portal }}</span></p><p class="text-xs text-gray-400">Full access to {{ Auth::user()->active_portal }} portal features</p></div>
                                 </div>
                                 <button @click="showAddUserForm = !showAddUserForm" class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-md text-xs font-normal hover:bg-primary-dark transition-all">
                                     <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
@@ -510,7 +524,7 @@
                                                     <td class="px-4 py-3">
                                                         <span class="px-2 py-0.5 bg-green-50 text-green-600 rounded-full text-[10px] font-normal" x-text="t('common.active')"></span>
                                                     </td>
-                                                    <td class="px-4 py-3 capitalize text-xs">{{ Auth::user()->role }} (<span x-text="t('common.owner')"></span>)</td>
+                                                    <td class="px-4 py-3 capitalize text-xs">{{ Auth::user()->active_portal }} (<span x-text="t('common.owner')"></span>)</td>
                                                     <td class="px-4 py-3"><span class="px-2 py-0.5 bg-primary-light text-primary rounded-full text-[10px] font-normal" x-text="t('common.full_access')"></span></td>
                                                     <td class="px-4 py-3 text-right"></td>
                                                 </tr>

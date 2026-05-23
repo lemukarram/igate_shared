@@ -124,7 +124,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/settings/team-members', [App\Http\Controllers\SettingsController::class, 'addTeamMember'])->name('settings.team_members.store');
     Route::delete('/settings/team-members/{id}', [App\Http\Controllers\SettingsController::class, 'removeTeamMember'])->name('settings.team_members.destroy');
     Route::get('/settings/plan/upgrade', function() {
-        $plans = \App\Models\Plan::where('type', Auth::user()->role)->get();
+        $plans = \App\Models\Plan::where('type', Auth::user()->active_portal)->get();
         return view('settings.upgrade_plan', compact('plans'));
     })->name('settings.plan.upgrade');
 

@@ -56,6 +56,7 @@ return [
     'delivery' => 'Delivery',
     'days_count' => ':count Days',
     'active_clients_br' => 'Active<br>Clients',
+    'portal'        => 'Portal',
     'account'       => 'Account',
     'company'       => 'Company',
     'preferences'   => 'Preferences',

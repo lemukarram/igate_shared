@@ -52,9 +52,6 @@ class GeneralSettings extends SettingsPage
                 ])->columns(2),
 
                 Forms\Components\Section::make('Logo Customization')->schema([
-                    Forms\Components\ColorPicker::make('logo_circle_bg_color')
-                        ->label('Circle Background Color'),
-                    
                     Forms\Components\Grid::make(2)->schema([
                         Forms\Components\TextInput::make('logo_circle_padding')
                             ->label('Circle Padding - Expanded (e.g., 0.5rem)')
@@ -98,6 +95,14 @@ class GeneralSettings extends SettingsPage
                     Forms\Components\TextInput::make('site_name')
                         ->label('Site Name')
                         ->required(),
+                    Forms\Components\Grid::make(2)->schema([
+                        Forms\Components\ColorPicker::make('client_theme_color')
+                            ->label('Client Portal Theme Color')
+                            ->default('#3da9e4'),
+                        Forms\Components\ColorPicker::make('provider_theme_color')
+                            ->label('Provider Portal Theme Color')
+                            ->default('#10b981'),
+                    ]),
                     Forms\Components\TextInput::make('contact_email')
                         ->label('Contact Email')
                         ->email(),
