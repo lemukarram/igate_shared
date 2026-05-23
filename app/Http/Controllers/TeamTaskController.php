@@ -12,7 +12,7 @@ class TeamTaskController extends Controller
     protected function getProviderId()
     {
         $user = Auth::user();
-        if ($user->role === 'provider') {
+        if ($user->isProviderMode()) {
             return $user->id;
         }
         

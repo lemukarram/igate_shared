@@ -459,6 +459,6 @@ class ProjectController extends Controller
             'status' => 'open',
         ]);
 
-        return redirect()->route(Auth::user()->role . '.dashboard')->with('success', 'Support ticket submitted successfully. We will get back to you soon.');
+        return redirect()->route(Auth::user()->active_portal . '.dashboard')->with('success', 'Support ticket submitted successfully. We will get back to you soon.');
     }
 }

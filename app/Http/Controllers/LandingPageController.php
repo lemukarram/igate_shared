@@ -15,7 +15,7 @@ class LandingPageController extends Controller
             if (Auth::user()->role === 'admin') {
                 return view('welcome');
             }
-            if (Auth::user()->role === 'provider') {
+            if (Auth::user()->isProviderMode()) {
                 return redirect()->route('provider.dashboard');
             }
             return redirect()->route('client.dashboard');

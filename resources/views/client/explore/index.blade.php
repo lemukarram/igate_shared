@@ -8,7 +8,7 @@
             <h1 class="text-2xl font-normal text-gray-900" x-text="t('common.explore_services')"></h1>
             <p class="text-gray-500 mt-1" x-text="t('common.discover_connect_subtitle')"></p>
         </div>
-        @if(Auth::user()->role === 'provider')
+        @if(Auth::user()->isProviderMode())
             <button @click="addServiceOpen = true" class="px-6 py-3 bg-primary text-white rounded-xl font-normal hover:bg-primary-dark transition-all flex items-center gap-2 shadow-lg shadow-primary/20">
                 <i data-lucide="plus" class="w-5 h-5"></i>
                 <span x-text="t('explore.add_new_service')"></span>
@@ -77,7 +77,7 @@
                     
                     @php
                         $providerService = null;
-                        if(Auth::user()->role === 'provider' && $service->providerServices->isNotEmpty()) {
+                        if(Auth::user()->isProviderMode() && $service->providerServices->isNotEmpty()) {
                             $providerService = $service->providerServices->first();
                         }
                     @endphp
@@ -100,7 +100,7 @@
                     @else
                         <a href="{{ route('explore.show', $service->id) }}" 
                            class="w-full py-3 rounded-lg text-sm font-normal bg-primary-light text-primary hover:bg-gray-900 hover:text-white transition-all duration-300 text-center flex items-center justify-center gap-2">
-                            <span x-text="'{{ Auth::user()->role }}' === 'provider' ? t('common.opt_in') : t('common.request')"></span>
+                            <span x-text="'{{ Auth::user()->active_portal }}' === 'provider' ? t('common.opt_in') : t('common.request')"></span>
                             <i data-lucide="arrow-right" class="w-4 h-4 flip-rtl"></i>
                         </a>
                     @endif

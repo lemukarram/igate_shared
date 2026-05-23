@@ -149,7 +149,7 @@
             </div>
 
             <!-- Team/Internal Messaging -->
-            @if(Auth::user()->role === 'provider')
+            @if(Auth::user()->isProviderMode())
                 <a href="{{ route('provider.team_tasks') }}" class="block bg-white border border-gray-100 rounded-lg shadow-sm overflow-hidden hover:bg-gray-50 transition-colors group">
                     <div class="p-4 flex items-center justify-between">
                         <div class="flex items-center gap-2">
@@ -159,7 +159,7 @@
                         <i data-lucide="external-link" class="w-4 h-4 text-gray-400 group-hover:text-primary transition-colors"></i>
                     </div>
                 </a>
-            @elseif(Auth::user()->role === 'client')
+            @elseif(Auth::user()->isClientMode())
                 <a href="{{ route('internal-messages.index') }}" class="block bg-white border border-gray-100 rounded-lg shadow-sm overflow-hidden hover:bg-gray-50 transition-colors group">
                     <div class="p-4 flex items-center justify-between">
                         <div class="flex items-center gap-2">
@@ -199,7 +199,7 @@
                                             @endif
                                         @endif
                                     </div>
-                                    @if($task->status === 'done' && !$task->is_verified && Auth::user()->role === 'client')
+                                    @if($task->status === 'done' && !$task->is_verified && Auth::user()->isClientMode())
                                     <form action="{{ route('tasks.verify', $task->id) }}" method="POST" @click.stop class="mt-2">
                                         @csrf
                                         <button type="submit" class="text-[9px] bg-primary text-white px-2 py-1 rounded hover:bg-primary-dark transition-colors font-normal uppercase tracking-widest">
@@ -247,7 +247,7 @@
                         <p class="text-[10px] text-gray-400 italic text-center py-4 uppercase tracking-widest" x-text="t('project.no_files')"></p>
                         @endforelse
                     </div>
-                    @if(Auth::user()->role === 'provider')
+                    @if(Auth::user()->isProviderMode())
                     <button @click="fileUploadModalOpen = true" class="w-full mt-2 py-1.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 border-dashed rounded text-[10px] font-normal text-gray-600 transition-all flex items-center justify-center gap-2 uppercase tracking-widest">
                         <i data-lucide="upload" class="w-3 h-3"></i>
                         <span x-text="t('project.upload_file')"></span>
@@ -273,7 +273,7 @@
                     
                     <div class="space-y-2">
                         <!-- Scenario 1: Successful Completion -->
-                        @if(Auth::user()->role === 'provider' && $project->status === 'active' && !$project->provider_marked_complete)
+                        @if(Auth::user()->isProviderMode() && $project->status === 'active' && !$project->provider_marked_complete)
                         <form action="{{ route('projects.complete', $project->id) }}" method="POST">
                             @csrf
                             <button type="submit" class="w-full py-2 bg-green-600 hover:bg-green-700 text-white rounded text-xs font-normal transition-all flex items-center justify-center gap-2 uppercase tracking-widest">
@@ -283,7 +283,7 @@
                         </form>
                         @endif
 
-                        @if(Auth::user()->role === 'client' && $project->provider_marked_complete && $project->status !== 'completed')
+                        @if(Auth::user()->isClientMode() && $project->provider_marked_complete && $project->status !== 'completed')
                         <div class="flex gap-2">
                             <form action="{{ route('projects.approve', $project->id) }}" method="POST" class="flex-1">
                                 @csrf
@@ -309,7 +309,7 @@
                                 </button>
                             </form>
                             @else
-                                @if(($project->cancellation_requested_by === 'client' && Auth::user()->role === 'provider') || ($project->cancellation_requested_by === 'provider' && Auth::user()->role === 'client'))
+                                @if(($project->cancellation_requested_by === 'client' && Auth::user()->isProviderMode()) || ($project->cancellation_requested_by === 'provider' && Auth::user()->isClientMode()))
                                 <div class="flex gap-2">
                                     <form action="{{ route('projects.confirm-cancellation', $project->id) }}" method="POST" class="flex-1">
                                         @csrf
@@ -331,14 +331,14 @@
                         @endif
 
                         <!-- Scenario 5: Termination Request (2-sided) -->
-                        @if($project->status === 'active' && !$project->termination_requested && Auth::user()->role === 'provider')
+                        @if($project->status === 'active' && !$project->termination_requested && Auth::user()->isProviderMode())
                         <button @click="terminateModalOpen = true" class="w-full py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded text-xs font-normal transition-all flex items-center justify-center gap-2 uppercase tracking-widest">
                             <i data-lucide="user-x" class="w-3 h-3"></i>
                             <span x-text="t('project.actions.terminate')"></span>
                         </button>
                         @endif
 
-                        @if($project->termination_requested && Auth::user()->role === 'client')
+                        @if($project->termination_requested && Auth::user()->isClientMode())
                         <div class="flex gap-2">
                             <form action="{{ route('projects.approve', $project->id) }}" method="POST" class="flex-1">
                                 @csrf

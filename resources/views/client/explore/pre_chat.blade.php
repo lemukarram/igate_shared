@@ -6,7 +6,7 @@
     <div class="flex items-center justify-between bg-white p-4 rounded-lg border border-gray-100 shadow-sm">
         <div class="flex items-center space-x-4">
             @php
-                $backRoute = Auth::user()->role === 'provider' 
+                $backRoute = Auth::user()->isProviderMode() 
                     ? route('provider.pre_sale_chats.index') 
                     : route('explore.show', $service->id);
             @endphp
@@ -15,7 +15,7 @@
             </a>
             <div>
                 <h1 class="text-xl font-normal text-gray-900 tracking-tight" x-text="t('common.consultation')"></h1>
-                @if(Auth::user()->role === 'provider')
+                @if(Auth::user()->isProviderMode())
                     @php $client = \App\Models\User::find(request('client_id')); @endphp
                     <p class="text-[10px] font-normal text-gray-400 uppercase tracking-widest">{{ $service->name }} • {{ $client->name ?? 'Client' }}</p>
                 @else
@@ -42,7 +42,7 @@
             <div class="space-y-6 flex-1">
                 <div class="bg-white p-6 rounded-lg border border-gray-100 shadow-sm">
                     <!-- Participant Info -->
-                    @if(Auth::user()->role === 'provider')
+                    @if(Auth::user()->isProviderMode())
                         @php $client = \App\Models\User::find(request('client_id')); @endphp
                         <div class="flex items-center space-x-3 mb-6 pb-6 border-b border-gray-50">
                             <div class="w-10 h-10 bg-primary-light text-primary rounded-lg flex items-center justify-center font-normal text-xs uppercase">
@@ -87,7 +87,7 @@
                     </div>
                 </div>
 
-                @if(Auth::user()->role === 'client')
+                @if(Auth::user()->isClientMode())
                 <div class="p-6 bg-primary-light rounded-lg border border-primary/10">
                     <p class="text-xs font-normal text-primary mb-2 flex items-center">
                         <i data-lucide="info" class="w-4 h-4 mr-2"></i>
@@ -100,7 +100,7 @@
                 @endif
             </div>
 
-            @if(Auth::user()->role === 'client')
+            @if(Auth::user()->isClientMode())
             <div class="pt-8 mt-auto">
                 <a href="{{ route('checkout.review', $ps->id) }}" class="w-full py-4 bg-primary text-white rounded-lg font-normal text-sm hover:bg-primary-dark transition-all shadow-lg shadow-primary/20 text-center flex items-center justify-center space-x-2">
                     <span x-text="t('common.request_service')"></span>
@@ -149,11 +149,11 @@
             <div class="p-6 bg-gray-50 border-t border-gray-100">
                 <form action="{{ route('explore.chat.send', [$service->id, $provider->id]) }}" method="POST" class="flex flex-col space-y-4">
                     @csrf
-                    @if(Auth::user()->role === 'provider')
+                    @if(Auth::user()->isProviderMode())
                         <input type="hidden" name="client_id" value="{{ request('client_id') }}">
                     @endif
 
-                    @if(Auth::user()->role === 'client' && $companies->count() > 0)
+                    @if(Auth::user()->isClientMode() && $companies->count() > 0)
                     <div class="flex items-center space-x-2">
                         <span class="text-[10px] font-normal uppercase tracking-widest text-gray-400">Regarding:</span>
                         <select name="company_id" class="text-[10px] font-normal uppercase tracking-widest bg-transparent border-none focus:ring-0 text-primary cursor-pointer">

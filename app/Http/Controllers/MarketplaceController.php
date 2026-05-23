@@ -40,7 +40,7 @@ class MarketplaceController extends Controller
         $user = Auth::user();
         $query->withAvg('reviews', 'rating');
         
-        if ($user && $user->role === 'provider') {
+        if ($user && $user->isProviderMode()) {
             $query->with(['providerServices' => function($q) use ($user) {
                 $q->where('provider_id', $user->id)->withCount('projects');
             }]);
@@ -101,7 +101,7 @@ class MarketplaceController extends Controller
         $providerService = null;
         $clientCount = 0;
 
-        if ($user && $user->role === 'provider') {
+        if ($user && $user->isProviderMode()) {
             $providerService = ProviderService::where('service_id', $id)
                 ->where('provider_id', $user->id)
                 ->first();
@@ -112,7 +112,7 @@ class MarketplaceController extends Controller
         }
 
         // Identify existing valid projects for the client
-        if ($user && $user->role === 'client') {
+        if ($user && $user->isClientMode()) {
             $companies = $user->companies;
             if ($companies->count() === 1) {
                 $firstCompany = $companies->first();

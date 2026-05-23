@@ -645,9 +645,9 @@
                              class="space-y-4 animate-in fade-in duration-300">
                             
                             @php
-                                $activeSub = Auth::user()->role === 'client' 
+                                $activeSub = Auth::user()->isClientMode() 
                                     ? \App\Models\Subscription::where('client_id', Auth::id())->where('plan_id', Auth::user()->plan_id)->where('status', 'active')->first()
-                                    : null;
+                                    : \App\Models\Subscription::where('client_id', Auth::id())->where('plan_id', Auth::user()->plan_id)->where('status', 'active')->first(); // Both use same logic for current context
                             @endphp
 
                             <div class="p-6 border border-primary/20 bg-primary-light rounded-xl">
@@ -882,7 +882,7 @@
     </div>
 
     <!-- ADD SERVICE MODAL -->
-    @if(Auth::user()->role === 'provider')
+    @if(Auth::user()->isProviderMode())
     <div x-show="addServiceOpen" class="fixed inset-0 z-[100] flex items-center justify-center" style="display: none;">
         <div class="absolute inset-0 bg-black/40 backdrop-blur-md" @click="addServiceOpen = false"></div>
         <div class="bg-white w-full max-w-lg rounded-lg shadow-2xl relative z-10 p-10 border border-gray-100 animate-in zoom-in duration-300">

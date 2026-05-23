@@ -4,7 +4,7 @@
 <div class="max-w-6xl w-full space-y-8 p-4" x-data="{ addServiceModalOpen: false, editServiceModalOpen: false, providerInfoModalOpen: false, selectedProvider: {} }">
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div class="flex items-center gap-4">
-            <a href="{{ auth()->user()->role === 'provider' ? route('provider.services.index') : route('explore.index') }}" class="w-10 h-10 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-900 transition-colors">
+            <a href="{{ auth()->user()->isProviderMode() ? route('provider.services.index') : route('explore.index') }}" class="w-10 h-10 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-900 transition-colors">
                 <i data-lucide="arrow-left" class="w-5 h-5 flip-rtl"></i>
             </a>
             <div>
@@ -13,7 +13,7 @@
             </div>
         </div>
 
-        @if(auth()->user()->role === 'provider')
+        @if(auth()->user()->isProviderMode())
             <div class="flex items-center gap-3">
                 @if($providerService)
                     <div class="bg-blue-50 px-4 py-2 rounded-xl border border-blue-100 flex items-center gap-3 me-2">
@@ -55,7 +55,7 @@
                 </div>
             </div>
 
-            @if(auth()->user()->role === 'client')
+            @if(auth()->user()->isClientMode())
             <div class="space-y-6">
                 <h2 class="text-xl font-normal text-gray-900" x-text="t('common.available_providers')"></h2>
                 
@@ -168,7 +168,7 @@
             </div>
             @endif
 
-            @if(auth()->user()->role === 'provider' && $providerService)
+            @if(auth()->user()->isProviderMode() && $providerService)
             <div class="bg-white border border-gray-100 rounded-3xl p-8 shadow-sm">
                 <div class="flex items-center justify-between mb-6">
                     <h2 class="text-xl font-normal text-gray-900" x-text="t('common.my_offering_details')"></h2>
@@ -322,7 +322,7 @@
     </div>
 
     <!-- MODALS -->
-    @if(auth()->user()->role === 'provider')
+    @if(auth()->user()->isProviderMode())
     <!-- Add Service Modal -->
     <div x-show="addServiceModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center" style="display: none;">
         <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="addServiceModalOpen = false"></div>

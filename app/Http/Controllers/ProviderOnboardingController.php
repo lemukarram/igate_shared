@@ -82,6 +82,9 @@ class ProviderOnboardingController extends Controller
             'status' => 'pending'
         ]));
 
+        Auth::user()->update(['active_portal' => 'provider']);
+        session(['active_portal' => 'provider']);
+
         return redirect()->route('provider.dashboard')->with('success', 'Onboarding completed! Your profile is now under review.');
     }
 }

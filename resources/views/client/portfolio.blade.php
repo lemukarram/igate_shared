@@ -7,10 +7,12 @@
             <h1 class="text-3xl font-normal text-gray-900" x-text="t('common.my_portfolio_companies')"></h1>
             <p class="text-gray-500 mt-1" x-text="t('common.manage_business_profiles_subtitle')"></p>
         </div>
+        @if(Auth::user()->isClientMode())
         <button onclick="document.getElementById('add-company-modal').classList.remove('hidden')" class="px-6 py-3 bg-primary text-white rounded-xl font-normal hover:bg-primary-dark transition-all flex items-center gap-2 shadow-lg shadow-primary/20">
             <i data-lucide="plus" class="w-5 h-5"></i>
             <span x-text="t('common.add_company')"></span>
         </button>
+        @endif
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

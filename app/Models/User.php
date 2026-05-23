@@ -18,6 +18,17 @@ class User extends Authenticatable implements FilamentUser
     /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, Notifiable, HasRoles;
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($user) {
+            if (empty($user->active_portal)) {
+                $user->active_portal = $user->role ?? 'client';
+            }
+        });
+    }
+
     /**
      * The attributes that are mass assignable.
      *

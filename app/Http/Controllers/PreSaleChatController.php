@@ -33,7 +33,7 @@ class PreSaleChatController extends Controller
 
         $messages = PreSaleMessage::where('service_id', $serviceId)
             ->where(function($q) use ($providerId) {
-                if (Auth::user()->role === 'client') {
+                if (Auth::user()->isClientMode()) {
                     $q->where('client_id', Auth::id())->where('provider_id', $providerId);
                 } else {
                     $q->where('provider_id', Auth::id())->where('client_id', request('client_id'));
@@ -42,7 +42,7 @@ class PreSaleChatController extends Controller
             ->oldest()
             ->get();
 
-        $companies = Auth::user()->role === 'client' ? Auth::user()->companies : collect();
+        $companies = Auth::user()->isClientMode() ? Auth::user()->companies : collect();
 
         return view('client.explore.pre_chat', compact('service', 'provider', 'ps', 'messages', 'companies'));
     }
@@ -54,7 +54,7 @@ class PreSaleChatController extends Controller
             'company_id' => 'nullable|exists:companies,id',
         ]);
 
-        $clientId = Auth::user()->role === 'client' ? Auth::id() : $request->client_id;
+        $clientId = Auth::user()->isClientMode() ? Auth::id() : $request->client_id;
 
         PreSaleMessage::create([
             'client_id' => $clientId,

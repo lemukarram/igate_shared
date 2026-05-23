@@ -31,7 +31,7 @@ class AuthController extends Controller
         if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
             
-            if (Auth::user()->role === 'provider') {
+            if (Auth::user()->isProviderMode()) {
                 if (!Auth::user()->providerProfile || !Auth::user()->providerProfile->onboarding_completed) {
                     return redirect()->route('provider.onboarding');
                 }
@@ -65,6 +65,7 @@ class AuthController extends Controller
             'phone' => $data['phone'],
             'password' => Hash::make($data['password']),
             'role' => $role,
+            'active_portal' => $role,
             'plan_id' => $plan ? $plan->id : null,
         ]);
 
