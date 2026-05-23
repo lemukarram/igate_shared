@@ -13,11 +13,11 @@ class EnsureProviderIsOnboarded
     {
         $user = Auth::user();
 
-        if ($user && $user->role === 'provider') {
+        if ($user && $user->isProviderMode()) {
             $profile = $user->providerProfile;
 
             if (!$profile || !$profile->onboarding_completed) {
-                if (!$request->routeIs('provider.onboarding*')) {
+                if (!$request->routeIs('provider.onboarding*') && !$request->routeIs('portal_switch')) {
                     return redirect()->route('provider.onboarding');
                 }
             }

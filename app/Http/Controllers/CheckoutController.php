@@ -31,6 +31,13 @@ class CheckoutController extends Controller
     {
         $ps = \App\Models\ProviderService::with(['service', 'provider.providerProfile'])->findOrFail($providerServiceId);
         $user = auth()->user();
+
+        // Rule: Same user cannot subscribe a service of same provider account
+        if ($user->id === $ps->provider_id) {
+            return redirect()->route('explore.index')
+                ->with('error', 'You cannot subscribe to your own services.');
+        }
+
         $companies = $user->companies;
         
         // Identify companies that already have an active project for this specific provider and service
@@ -81,6 +88,13 @@ class CheckoutController extends Controller
         ]);
 
         $ps = \App\Models\ProviderService::findOrFail($request->provider_service_id);
+
+        // Rule: Same user cannot subscribe a service of same provider account
+        if ($user->id === $ps->provider_id) {
+            return redirect()->route('explore.index')
+                ->with('error', 'You cannot subscribe to your own services.');
+        }
+
         $billingCycle = $request->billing_cycle;
 
         $existingProject = Project::where('client_id', $user->id)
@@ -167,7 +181,7 @@ class CheckoutController extends Controller
         $user = auth()->user();
         $billingCycle = $request->query('billing_cycle', 'monthly');
         
-        if ($plan->type !== $user->role) {
+        if ($plan->type !== $user->active_portal) {
             return redirect()->route('client.portfolio')->with('error', 'Invalid plan type.');
         }
 
@@ -186,7 +200,7 @@ class CheckoutController extends Controller
         $plan = \App\Models\Plan::findOrFail($request->plan_id);
         $billingCycle = $validated['billing_cycle'];
 
-        if ($plan->type !== $user->role) {
+        if ($plan->type !== $user->active_portal) {
             return redirect()->back()->with('error', 'Invalid plan type.');
         }
 
@@ -307,7 +321,13 @@ class CheckoutController extends Controller
 
             // Handle Plan Upgrade
             if ($transaction->plan_id && $transaction->type === 'subscription' && $status === 'captured') {
-                $user->update(['plan_id' => $transaction->plan_id]);
+                if ($user->active_portal === 'provider') {
+                    $user->update(['provider_plan_id' => $transaction->plan_id]);
+                } else {
+                    $user->update(['client_plan_id' => $transaction->plan_id]);
+                    // Compatibility: update plan_id too if needed
+                    $user->update(['plan_id' => $transaction->plan_id]);
+                }
                 $user->enforcePlanLimits();
 
                 Subscription::updateOrCreate(

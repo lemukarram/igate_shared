@@ -47,7 +47,7 @@ class AppServiceProvider extends ServiceProvider
                     ->get();
                 
                 $teamMembers = [];
-                if (Auth::user()->role === 'provider') {
+                if (Auth::user()->isProviderMode()) {
                     $team = \App\Models\Team::where('owner_id', Auth::id())->first();
                     if ($team) {
                         $teamMembers = $team->members()->with('user')->get();
@@ -58,7 +58,7 @@ class AppServiceProvider extends ServiceProvider
                      ->with('teamMembers', collect($teamMembers));
 
                 // Add Pre-Sale Chats
-                if (Auth::user()->role === 'client') {
+                if (Auth::user()->isClientMode()) {
                     $preSaleChats = PreSaleMessage::where('client_id', Auth::id())
                         ->with(['service', 'provider.providerProfile'])
                         ->latest()
@@ -67,7 +67,7 @@ class AppServiceProvider extends ServiceProvider
                             return $item->provider_id . '-' . $item->service_id;
                         });
                     $view->with('preSaleChats', $preSaleChats);
-                } elseif (Auth::user()->role === 'provider') {
+                } elseif (Auth::user()->isProviderMode()) {
                     $preSaleChats = PreSaleMessage::where('provider_id', Auth::id())
                         ->with(['service', 'client'])
                         ->latest()
@@ -81,11 +81,11 @@ class AppServiceProvider extends ServiceProvider
                 }
 
                 // Share entities for permissions scoping
-                if (Auth::user()->role === 'client') {
+                if (Auth::user()->isClientMode()) {
                     $view->with('permission_companies', Auth::user()->companies()->where('is_active', true)->get());
                     $view->with('permission_projects', Auth::user()->projects()->where('status', 'active')->get());
                     $view->with('permission_clients', collect()); // Clients don't have other clients
-                } elseif (Auth::user()->role === 'provider') {
+                } elseif (Auth::user()->isProviderMode()) {
                     $view->with('permission_companies', collect()); // Providers don't have companies in this context
                     $view->with('permission_projects', Auth::user()->providerProjects()->where('status', 'active')->get());
                     $activeProjects = Auth::user()->providerProjects()->where('status', 'active');

@@ -95,13 +95,13 @@
                     $collapsedLogoUrl = str_starts_with($collapsedLogoPath, 'settings/') ? asset('storage/' . $collapsedLogoPath) : asset($collapsedLogoPath);
                 @endphp
                 
-                <div x-data="{ open: false, selected: 'Services' }" class="relative inline-flex flex-col w-fit group cursor-pointer" @click="open = !open">
+                <div x-data="{ open: false }" class="relative inline-flex flex-col w-fit group cursor-pointer" @click="open = !open">
                     <img :src="sidebarCollapsed ? '{{ $collapsedLogoUrl }}' : '{{ $logoUrl }}'" alt="{{ $settings->site_name }}" class="h-10 w-auto object-contain min-w-[40px] transition-all duration-300">
                     
                     <!-- Logo Dropdown Text -->
-                    <div x-show="!sidebarCollapsed" class="mt-[-6px] flex justify-end w-full items-center">
-                        <span class="text-[1rem] font-semibold text-gray-900 transition-colors uppercase tracking-tight whitespace-nowrap" x-text="selected"></span>
-                        <i data-lucide="chevron-down" class="w-2 h-2 ml-[-3px] transition-transform" :class="open ? 'rotate-180' : ''"></i>
+                    <div x-show="!sidebarCollapsed" class="mt-[-6px] flex justify-end w-full items-start">
+                        <span class="text-[1rem] font-semibold text-gray-900 transition-colors uppercase tracking-tight whitespace-nowrap" x-text="active_portal"></span>
+                        <i data-lucide="square-chevron-down" class="w-2 h-2 ml-[1px] mt-1 transition-transform" :class="open ? 'rotate-180' : ''"></i>
                     </div>
 
                     <!-- Dropdown Menu -->
@@ -115,12 +115,12 @@
             </div>
 
             <div class="px-6 mb-6 overflow-hidden">
-                @if(Auth::user()->role === 'client')
+                @if(Auth::user()->isClientMode())
                     <!-- <a href="{{ route('explore.index') }}" class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition-all font-normal shadow-sm">
                         <i data-lucide="plus" class="w-4 h-4 flex-shrink-0"></i>
                         <span x-show="!sidebarCollapsed" x-text="t('explore.request')" class="whitespace-nowrap"></span>
                     </a> -->
-                @elseif(Auth::user()->role === 'provider')
+                @elseif(Auth::user()->isProviderMode())
                     <!-- <button @click="addServiceOpen = true" class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-primary text-white rounded-[0.5rem] hover:bg-primary-dark transition-all font-normal shadow-sm">
                         <i data-lucide="plus" class="w-4 h-4 flex-shrink-0"></i>
                         <span x-show="!sidebarCollapsed" x-text="t('explore.add_to_portfolio')" class="whitespace-nowrap"></span>
@@ -134,7 +134,7 @@
                         <i data-lucide="bar-chart-3" class="w-4 h-4 flex-shrink-0"></i>
                         <span x-show="!sidebarCollapsed" class="text-sm font-normal whitespace-nowrap" x-text="t('common.analytics')"></span>
                     </a>
-                @elseif(Auth::user()->role === 'provider')
+                @elseif(Auth::user()->isProviderMode())
                     <a href="{{ route('explore.index') }}" :class="sidebarCollapsed ? 'justify-center px-0' : 'px-3'" class="sidebar-item {{ request()->routeIs('explore.*') ? 'active' : '' }} flex items-center gap-3 py-2.5 rounded-lg text-gray-600 transition-all">
                         <i data-lucide="compass" class="w-4 h-4 flex-shrink-0"></i>
                         <span x-show="!sidebarCollapsed" class="text-sm font-normal whitespace-nowrap" x-text="t('common.explore')"></span>
@@ -148,12 +148,12 @@
                         <i data-lucide="briefcase" class="w-4 h-4 flex-shrink-0"></i>
                         <span x-show="!sidebarCollapsed" class="text-sm font-normal whitespace-nowrap" x-text="t('common.my_services')"></span>
                     </a>
-                    
+
                     <a href="{{ route('provider.clients') }}" :class="sidebarCollapsed ? 'justify-center px-0' : 'px-3'" class="sidebar-item {{ request()->routeIs('provider.clients*') ? 'active' : '' }} flex items-center gap-3 py-2.5 rounded-lg text-gray-600 transition-all">
                         <i data-lucide="users" class="w-4 h-4 flex-shrink-0"></i>
                         <span x-show="!sidebarCollapsed" class="text-sm font-normal whitespace-nowrap" x-text="t('common.clients')"></span>
                     </a>
-                @elseif(Auth::user()->role === 'client')
+                @elseif(Auth::user()->isClientMode())
                     <a href="{{ route('explore.index') }}" :class="sidebarCollapsed ? 'justify-center px-0' : 'px-3'" class="sidebar-item {{ request()->routeIs('explore.*') ? 'active' : '' }} flex items-center gap-3 py-2.5 rounded-lg text-gray-600 transition-all">
                         <i data-lucide="search" class="w-4 h-4 flex-shrink-0"></i>
                         <span x-show="!sidebarCollapsed" class="text-sm font-normal whitespace-nowrap" x-text="t('common.explore')"></span>
@@ -171,8 +171,6 @@
                         <i data-lucide="users" class="w-4 h-4 flex-shrink-0"></i>
                         <span x-show="!sidebarCollapsed" class="text-sm font-normal whitespace-nowrap" x-text="t('common.my_providers')"></span>
                     </a>
-                    
-                    
                 @endif
 
                 <div class="pt-8 overflow-hidden" :class="sidebarCollapsed ? 'px-0' : 'px-3'">
@@ -241,7 +239,7 @@
                         <h3 class="text-[10px] font-normal uppercase tracking-widest text-gray-400 px-2">{{ __('common.settings') }}</h3>
                     </div>
                     <div class="space-y-1 flex-1">
-                        <template x-for="t_tab in ['account', 'company', 'preferences', 'permissions', 'plans', 'notifications', 'security', 'payments']">
+                        <template x-for="t_tab in ['portal', 'account', 'company', 'preferences', 'permissions', 'plans', 'notifications', 'security', 'payments']">
                             <button @click="settingsTab = t_tab" 
                                     :class="settingsTab === t_tab ? 'bg-primary text-white font-normal' : 'text-gray-500 hover:bg-gray-100'" 
                                     class="w-full text-left px-4 py-2 rounded-md text-xs transition-all capitalize" 
@@ -257,6 +255,43 @@
                         </button>
                     </div>
                     <div class="space-y-6 flex-1 overflow-y-auto pr-4 custom-scrollbar">
+                        <!-- Portal Tab -->
+                        <div x-show="settingsTab === 'portal'" class="space-y-6 animate-in fade-in duration-300">
+                            <div class="p-6 bg-primary-light border border-primary/20 rounded-xl">
+                                <h3 class="text-sm font-normal text-primary uppercase tracking-widest mb-4">Active Portal</h3>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <a href="{{ route('portal_switch', 'client') }}" 
+                                       class="flex flex-col items-center justify-center p-6 border-2 rounded-xl transition-all group"
+                                       :class="active_portal === 'client' ? 'border-primary bg-white shadow-lg' : 'border-gray-100 bg-gray-50 hover:border-primary/50'">
+                                        <div class="w-12 h-12 rounded-full flex items-center justify-center mb-3 transition-colors"
+                                             :class="active_portal === 'client' ? 'bg-primary text-white' : 'bg-gray-200 text-gray-400 group-hover:bg-primary/10 group-hover:text-primary'">
+                                            <i data-lucide="user" class="w-6 h-6"></i>
+                                        </div>
+                                        <span class="text-sm font-normal" :class="active_portal === 'client' ? 'text-gray-900' : 'text-gray-500'">Client Portal</span>
+                                        <p class="text-[10px] text-gray-400 mt-2 text-center">Manage your companies and subscribe to services.</p>
+                                    </a>
+
+                                    <a href="{{ route('portal_switch', 'provider') }}" 
+                                       class="flex flex-col items-center justify-center p-6 border-2 rounded-xl transition-all group"
+                                       :class="active_portal === 'provider' ? 'border-primary bg-white shadow-lg' : 'border-gray-100 bg-gray-50 hover:border-primary/50'">
+                                        <div class="w-12 h-12 rounded-full flex items-center justify-center mb-3 transition-colors"
+                                             :class="active_portal === 'provider' ? 'bg-primary text-white' : 'bg-gray-200 text-gray-400 group-hover:bg-primary/10 group-hover:text-primary'">
+                                            <i data-lucide="briefcase" class="w-6 h-6"></i>
+                                        </div>
+                                        <span class="text-sm font-normal" :class="active_portal === 'provider' ? 'text-gray-900' : 'text-gray-500'">Provider Portal</span>
+                                        <p class="text-[10px] text-gray-400 mt-2 text-center">Offer services to clients and manage your agency.</p>
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <div class="p-4 bg-amber-50 border border-amber-100 rounded-lg flex items-start space-x-3">
+                                <i data-lucide="info" class="w-5 h-5 text-amber-600 mt-0.5"></i>
+                                <p class="text-xs text-amber-800">
+                                    Switching portals changes your dashboard and available features. Your subscriptions and data are maintained separately for each portal.
+                                </p>
+                            </div>
+                        </div>
+
                         <!-- Account Tab -->
                         <div x-show="settingsTab === 'account'" class="space-y-4 animate-in fade-in duration-300">
                             <form id="settings-account-form" action="{{ route('settings.profile') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
@@ -571,7 +606,7 @@
                                 selectedPlanId: {{ Auth::user()->plan_id ?? 'null' }},
                                 currentPlanId: {{ Auth::user()->plan_id ?? 'null' }},
                                 billingCycle: 'annually',
-                                plans: {{ \App\Models\Plan::where('type', Auth::user()->role)->get()->mapWithKeys(fn($p) => [$p->id => [
+                                plans: {{ \App\Models\Plan::where('type', Auth::user()->active_portal)->get()->mapWithKeys(fn($p) => [$p->id => [
                                     'monthly' => (float)$p->monthly_price, 
                                     'annual' => (float)$p->annual_price,
                                     'annual_monthly' => (float)($p->annual_price / 12),
@@ -660,7 +695,7 @@
                                 <input type="hidden" name="billing_cycle" :value="billingCycle">
                                 <h4 class="text-sm font-normal" x-text="t('common.upgrade_plan')"></h4>
                                 <div class="grid grid-cols-1 gap-3">
-                                    @foreach(\App\Models\Plan::where('type', Auth::user()->role)->get() as $plan)
+                                    @foreach(\App\Models\Plan::where('type', Auth::user()->active_portal)->get() as $plan)
                                     <label class="flex items-center justify-between p-4 border rounded-lg cursor-pointer transition-all hover:bg-gray-50"
                                            :class="selectedPlanId == {{ $plan->id }} ? 'border-primary bg-primary-light' : 'border-gray-200'">
                                         <div class="flex items-center space-x-3 w-full">
@@ -939,10 +974,11 @@
         function i18nManager() {
             return {
                 lang: '{{ App::getLocale() }}',
+                active_portal: '{{ Auth::user()->active_portal ?? 'client' }}',
                 settingsOpen: false,
                 addServiceOpen: false,
                 showAddUserForm: false,
-                settingsTab: 'account',
+                settingsTab: 'portal',
                 profileOpen: false,
                 sidebarCollapsed: localStorage.getItem('sidebar_collapsed') === 'true',
                 dict: {

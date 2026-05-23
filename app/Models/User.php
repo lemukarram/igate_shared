@@ -28,6 +28,9 @@ class User extends Authenticatable implements FilamentUser
         'email',
         'password',
         'role',
+        'active_portal',
+        'client_plan_id',
+        'provider_plan_id',
         'phone',
         'plan_id',
         'parent_id',
@@ -63,7 +66,30 @@ class User extends Authenticatable implements FilamentUser
 
     public function plan()
     {
-        return $this->belongsTo(Plan::class);
+        if ($this->active_portal === 'provider') {
+            return $this->belongsTo(Plan::class, 'provider_plan_id');
+        }
+        return $this->belongsTo(Plan::class, 'client_plan_id');
+    }
+
+    public function clientPlan()
+    {
+        return $this->belongsTo(Plan::class, 'client_plan_id');
+    }
+
+    public function providerPlan()
+    {
+        return $this->belongsTo(Plan::class, 'provider_plan_id');
+    }
+
+    public function isProviderMode(): bool
+    {
+        return $this->active_portal === 'provider';
+    }
+
+    public function isClientMode(): bool
+    {
+        return $this->active_portal === 'client';
     }
 
     /**
@@ -170,7 +196,7 @@ class User extends Authenticatable implements FilamentUser
         if (!$plan) return;
 
         // 1. Projects
-        $activeProjects = $this->role === 'client' 
+        $activeProjects = $this->isClientMode() 
             ? $this->projects()->where('status', 'active')->orderBy('created_at', 'desc')->get()
             : $this->providerProjects()->where('status', 'active')->orderBy('created_at', 'desc')->get();
 
@@ -182,7 +208,7 @@ class User extends Authenticatable implements FilamentUser
         }
 
         // 2. Companies (Client only)
-        if ($this->role === 'client') {
+        if ($this->isClientMode()) {
             $activeCompanies = $this->companies()->where('is_active', true)->orderBy('created_at', 'desc')->get();
             if ($activeCompanies->count() > $plan->max_companies) {
                 $companiesToDeactivate = $activeCompanies->slice($plan->max_companies);
@@ -193,7 +219,7 @@ class User extends Authenticatable implements FilamentUser
         }
 
         // 3. Services (Provider only)
-        if ($this->role === 'provider') {
+        if ($this->isProviderMode()) {
             $activeServices = $this->providerServices()->where('is_active', true)->orderBy('created_at', 'desc')->get();
             if ($activeServices->count() > $plan->max_services) {
                 $servicesToDeactivate = $activeServices->slice($plan->max_services);

@@ -54,14 +54,14 @@ class SettingsController extends Controller
             'documents.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:5120',
         ]);
 
-        if ($user->role === 'provider' && $user->providerProfile) {
+        if ($user->isProviderMode() && $user->providerProfile) {
             $data = ['bio' => $validated['about']];
             if ($request->hasFile('logo')) {
                 $path = $request->file('logo')->store('logos', 'public');
                 $data['logo'] = $path;
             }
             $user->providerProfile->update($data);
-        } elseif ($user->role === 'client') {
+        } elseif ($user->isClientMode()) {
             $company = $user->companies()->first();
             if ($company) {
                 $data = [
@@ -131,7 +131,7 @@ class SettingsController extends Controller
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make('password'), // default password
-            'role' => $user->role, // same role as owner (provider or client)
+            'role' => $user->active_portal, // same role as owner (provider or client)
         ]);
 
         $team = $user->ownedTeam; // Assuming a relationship exists or we find it
@@ -229,7 +229,7 @@ class SettingsController extends Controller
         $currentPlan = $user->plan;
         $billingCycle = $validated['billing_cycle'] ?? 'monthly';
         
-        if ($newPlan->type !== $user->role) {
+        if ($newPlan->type !== $user->active_portal) {
             return redirect()->back()->withErrors(['error' => 'Invalid plan type.']);
         }
 
@@ -264,7 +264,13 @@ class SettingsController extends Controller
         }
 
         // Downgrade or Free plan: update directly
-        $user->update(['plan_id' => $newPlan->id]);
+        if ($user->isProviderMode()) {
+            $user->update(['provider_plan_id' => $newPlan->id]);
+        } else {
+            $user->update(['client_plan_id' => $newPlan->id]);
+            // Compatibility
+            $user->update(['plan_id' => $newPlan->id]);
+        }
         
         if ($activeSub) {
             $activeSub->update([
@@ -281,7 +287,7 @@ class SettingsController extends Controller
     public function updateStatus(Request $request)
     {
         $user = Auth::user();
-        if ($user->role !== 'provider' || !$user->providerProfile) {
+        if (!$user->isProviderMode() || !$user->providerProfile) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 

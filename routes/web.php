@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\PortalSwitchController;
 use App\Http\Controllers\ProviderOnboardingController;
 use App\Http\Controllers\ProviderServiceController;
 use App\Http\Controllers\MarketplaceController;
@@ -34,6 +35,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middl
 
 Route::middleware(['auth'])->group(function () {
     // Global Auth Routes
+    Route::get('/portal/switch/{mode}', [PortalSwitchController::class, 'switch'])->name('portal_switch');
 
     Route::middleware(['App\Http\Middleware\EnsureProviderIsOnboarded'])->group(function () {
         Route::get('/dashboard', [MarketplaceController::class, 'dashboard'])->name('client.dashboard');
