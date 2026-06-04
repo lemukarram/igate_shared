@@ -79,7 +79,17 @@ class AuthController extends Controller
 
     public function me()
     {
-        return $this->successResponse(Auth::user()->load(['companies', 'projects']));
+        $user = Auth::user();
+        $user->load(['companies', 'projects', 'clientPlan']);
+        
+        // Add full URL for profile picture
+        if ($user->profile_picture) {
+            $user->profile_picture_url = asset('storage/' . $user->profile_picture);
+        } else {
+            $user->profile_picture_url = null;
+        }
+
+        return $this->successResponse($user);
     }
 
     public function updateProfile(Request $request)
@@ -89,10 +99,42 @@ class AuthController extends Controller
             
             $validated = $request->validate([
                 'name' => 'sometimes|string|max:255',
+                'email' => 'sometimes|email|max:255|unique:users,email,' . $user->id,
                 'phone' => 'sometimes|string',
+                'profile_picture' => 'sometimes|image|mimes:jpeg,png,jpg,gif|max:2048',
+                'push_notifications' => 'sometimes|boolean',
+                'email_notifications' => 'sometimes|boolean',
+                'marketing_notifications' => 'sometimes|boolean',
+                'sms_notifications' => 'sometimes|boolean',
             ]);
 
-            $user->update($validated);
+            // Handle file upload
+            if ($request->hasFile('profile_picture')) {
+                $path = $request->file('profile_picture')->store('profile_pictures', 'public');
+                $validated['profile_picture'] = $path;
+            }
+
+            // Handle notification settings
+            $notificationSettings = $user->notification_settings ?? [];
+            foreach (['push_notifications', 'email_notifications', 'marketing_notifications', 'sms_notifications'] as $field) {
+                if ($request->has($field)) {
+                    $notificationSettings[$field] = $request->boolean($field);
+                }
+            }
+            
+            if (!empty($notificationSettings)) {
+                $user->notification_settings = $notificationSettings;
+            }
+
+            $user->update(collect($validated)->except([
+                'push_notifications', 'email_notifications', 'marketing_notifications', 'sms_notifications'
+            ])->toArray());
+
+            // Reload user with relationships for response
+            $user->load(['companies', 'projects', 'clientPlan']);
+            if ($user->profile_picture) {
+                $user->profile_picture_url = asset('storage/' . $user->profile_picture);
+            }
 
             return $this->successResponse($user, 'Profile updated successfully');
         } catch (\Throwable $e) {

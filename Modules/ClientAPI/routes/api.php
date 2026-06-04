@@ -7,6 +7,8 @@ use Modules\ClientAPI\Http\Controllers\ProjectController;
 use Modules\ClientAPI\Http\Controllers\MarketplaceController;
 
 use Modules\ClientAPI\Http\Controllers\SettingsController;
+use Modules\ClientAPI\Http\Controllers\PlanController;
+use Modules\ClientAPI\Http\Controllers\TeamController;
 
 /*
 |--------------------------------------------------------------------------
@@ -34,6 +36,9 @@ Route::prefix('v1')->group(function () {
     Route::get('services/{id}/providers', [MarketplaceController::class, 'serviceProviders']);
     Route::get('providers/{id}', [MarketplaceController::class, 'providerDetail']);
 
+    // Plans route
+    Route::get('plans', [PlanController::class, 'index']);
+
     // Settings routes
     Route::prefix('settings')->group(function () {
         Route::get('general', [SettingsController::class, 'general']);
@@ -49,6 +54,11 @@ Route::prefix('v1')->group(function () {
         Route::post('logout', [AuthController::class, 'logout']);
         
         Route::apiResource('companies', CompanyController::class);
+        
+        // Team Management
+        Route::get('team/members', [TeamController::class, 'index']);
+        Route::post('team/members', [TeamController::class, 'store']);
+        Route::delete('team/members/{id}', [TeamController::class, 'destroy']);
         
         Route::get('projects', [ProjectController::class, 'index']);
         Route::get('projects/{id}', [ProjectController::class, 'show']);

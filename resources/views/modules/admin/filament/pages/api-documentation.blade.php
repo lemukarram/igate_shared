@@ -74,6 +74,81 @@
             </div>
         </div>
 
+        <!-- Get Profile (Me) -->
+        <div class="p-6 bg-white rounded-xl shadow-sm border border-gray-100">
+            <div class="flex flex-wrap items-center gap-3 mb-4">
+                <span class="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs font-bold">GET</span>
+                <code class="text-sm font-bold text-gray-800 bg-gray-50 px-2 py-1 rounded">/me</code>
+                <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-[10px] uppercase font-bold">Auth Required</span>
+                <h2 class="text-lg font-bold text-gray-700 ml-auto">Get My Profile</h2>
+            </div>
+            <p class="text-gray-600 mb-4">Get authenticated user details including current plan and notification settings.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="font-bold mb-2 text-sm text-gray-500 uppercase">Response (200)</h3>
+                    <pre class="p-4 bg-gray-900 text-blue-400 rounded-lg text-xs overflow-x-auto">
+{
+  "status": "success",
+  "data": {
+    "id": 1,
+    "name": "John Doe",
+    "email": "john@example.com",
+    "profile_picture_url": "https://...",
+    "notification_settings": {
+        "push_notifications": true,
+        "email_notifications": true,
+        "marketing_notifications": false,
+        "sms_notifications": true
+    },
+    "client_plan": {
+        "id": 1,
+        "name": "Professional Plan",
+        "max_projects": 5,
+        ...
+    },
+    ...
+  }
+}</pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Update Profile -->
+        <div class="p-6 bg-white rounded-xl shadow-sm border border-gray-100">
+            <div class="flex flex-wrap items-center gap-3 mb-4">
+                <span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-bold">POST</span>
+                <code class="text-sm font-bold text-gray-800 bg-gray-50 px-2 py-1 rounded">/profile</code>
+                <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-[10px] uppercase font-bold">Auth Required</span>
+                <h2 class="text-lg font-bold text-gray-700 ml-auto">Update Profile</h2>
+            </div>
+            <p class="text-gray-600 mb-4">Update user details, upload profile picture, and change notification settings.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="font-bold mb-2 text-sm text-gray-500 uppercase">Payload (form-data)</h3>
+                    <pre class="p-4 bg-gray-900 text-green-400 rounded-lg text-xs overflow-x-auto">
+{
+  "name": "John Doe",
+  "email": "john.updated@example.com",
+  "phone": "+966500000000",
+  "profile_picture": [File],
+  "push_notifications": 1,
+  "email_notifications": 1,
+  "marketing_notifications": 0,
+  "sms_notifications": 1
+}</pre>
+                </div>
+                <div>
+                    <h3 class="font-bold mb-2 text-sm text-gray-500 uppercase">Response (200)</h3>
+                    <pre class="p-4 bg-gray-900 text-blue-400 rounded-lg text-xs overflow-x-auto">
+{
+  "status": "success",
+  "message": "Profile updated successfully",
+  "data": { ... }
+}</pre>
+                </div>
+            </div>
+        </div>
+
         <!-- Forgot Password -->
         <div class="p-6 bg-white rounded-xl shadow-sm border border-gray-100">
             <div class="flex flex-wrap items-center gap-3 mb-4">
@@ -356,6 +431,113 @@ Accept: application/json</pre>
     "profile": { ... },
     "services": [ ... ]
   }
+}</pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Plans -->
+        <div class="p-6 bg-white rounded-xl shadow-sm border border-gray-100">
+            <div class="flex flex-wrap items-center gap-3 mb-4">
+                <span class="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs font-bold">GET</span>
+                <code class="text-sm font-bold text-gray-800 bg-gray-50 px-2 py-1 rounded">/plans</code>
+                <h2 class="text-lg font-bold text-gray-700 ml-auto">List Plans</h2>
+            </div>
+            <p class="text-gray-600 mb-4">Get all available client subscription plans.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="font-bold mb-2 text-sm text-gray-500 uppercase">Response (200)</h3>
+                    <pre class="p-4 bg-gray-900 text-blue-400 rounded-lg text-xs overflow-x-auto">
+{
+  "status": "success",
+  "data": [
+    { "id": 1, "name": "Basic", "monthly_price": "0.00", "max_users": 1, ... }
+  ]
+}</pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="border-t border-gray-200 my-8"></div>
+        <h1 class="text-2xl font-bold text-gray-800 mb-6">Team Management</h1>
+
+        <!-- List Team Members -->
+        <div class="p-6 bg-white rounded-xl shadow-sm border border-gray-100">
+            <div class="flex flex-wrap items-center gap-3 mb-4">
+                <span class="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs font-bold">GET</span>
+                <code class="text-sm font-bold text-gray-800 bg-gray-50 px-2 py-1 rounded">/team/members</code>
+                <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-[10px] uppercase font-bold">Auth Required</span>
+                <h2 class="text-lg font-bold text-gray-700 ml-auto">List Team Members</h2>
+            </div>
+            <p class="text-gray-600 mb-4">List all members of your team with their roles and assigned companies.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="font-bold mb-2 text-sm text-gray-500 uppercase">Response (200)</h3>
+                    <pre class="p-4 bg-gray-900 text-blue-400 rounded-lg text-xs overflow-x-auto">
+{
+  "status": "success",
+  "data": [
+    {
+      "id": 1,
+      "role": "manager",
+      "user": { "name": "Staff Name", "email": "staff@example.com" },
+      "company": { "id": 5, "name": "Acme Corp" }
+    }
+  ]
+}</pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Team Member -->
+        <div class="p-6 bg-white rounded-xl shadow-sm border border-gray-100">
+            <div class="flex flex-wrap items-center gap-3 mb-4">
+                <span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-bold">POST</span>
+                <code class="text-sm font-bold text-gray-800 bg-gray-50 px-2 py-1 rounded">/team/members</code>
+                <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-[10px] uppercase font-bold">Auth Required</span>
+                <h2 class="text-lg font-bold text-gray-700 ml-auto">Add Team Member</h2>
+            </div>
+            <p class="text-gray-600 mb-4">Add a new member to your team. Note: Plan limits apply.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="font-bold mb-2 text-sm text-gray-500 uppercase">Payload</h3>
+                    <pre class="p-4 bg-gray-900 text-green-400 rounded-lg text-xs overflow-x-auto">
+{
+  "name": "Staff Name",
+  "email": "staff@example.com",
+  "role": "manager", // manager, staff
+  "company_id": 5
+}</pre>
+                </div>
+                <div>
+                    <h3 class="font-bold mb-2 text-sm text-gray-500 uppercase">Response (201)</h3>
+                    <pre class="p-4 bg-gray-900 text-blue-400 rounded-lg text-xs overflow-x-auto">
+{
+  "status": "success",
+  "message": "Team member added successfully",
+  "data": { ... }
+}</pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Remove Team Member -->
+        <div class="p-6 bg-white rounded-xl shadow-sm border border-gray-100">
+            <div class="flex flex-wrap items-center gap-3 mb-4">
+                <span class="px-2 py-1 bg-red-100 text-red-700 rounded text-xs font-bold">DELETE</span>
+                <code class="text-sm font-bold text-gray-800 bg-gray-50 px-2 py-1 rounded">/team/members/{id}</code>
+                <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-[10px] uppercase font-bold">Auth Required</span>
+                <h2 class="text-lg font-bold text-gray-700 ml-auto">Remove Team Member</h2>
+            </div>
+            <p class="text-gray-600 mb-4">Remove a member from your team.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="font-bold mb-2 text-sm text-gray-500 uppercase">Response (200)</h3>
+                    <pre class="p-4 bg-gray-900 text-blue-400 rounded-lg text-xs overflow-x-auto">
+{
+  "status": "success",
+  "message": "Team member removed successfully",
+  "data": null
 }</pre>
                 </div>
             </div>

@@ -12,6 +12,7 @@ class TeamMember extends Model
     protected $fillable = [
         'team_id',
         'user_id',
+        'company_id',
         'role', // owner, manager, staff
         'permissions',
         'is_active',
@@ -29,5 +30,10 @@ class TeamMember extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function company()
+    {
+        return $this->belongsTo(Company::class);
     }
 }
