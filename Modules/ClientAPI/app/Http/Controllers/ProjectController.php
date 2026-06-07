@@ -50,9 +50,7 @@ class ProjectController extends Controller
             $existing = Project::where('client_id', $user->id)
                 ->where('company_id', $request->company_id)
                 ->where('service_id', $ps->service_id)
-                ->whereHas('transactions', function($q) {
-                    $q->whereIn('status', ['authorized', 'captured', 'CAPTURED', 'AUTHORIZED']);
-                })
+                ->where('status', 'active')
                 ->first();
 
             if ($existing) {

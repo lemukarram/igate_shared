@@ -119,9 +119,7 @@ class MarketplaceController extends Controller
                 $existingProjects = \App\Models\Project::where('client_id', $user->id)
                     ->where('company_id', $firstCompany->id)
                     ->where('service_id', $id)
-                    ->whereHas('transactions', function($q) {
-                        $q->whereIn('status', ['authorized', 'captured']);
-                    })
+                    ->where('status', 'active')
                     ->get()
                     ->keyBy('provider_id');
                 

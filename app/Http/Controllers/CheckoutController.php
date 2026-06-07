@@ -40,13 +40,11 @@ class CheckoutController extends Controller
 
         $companies = $user->companies;
         
-        // Identify companies that already have an active project for this specific provider and service
+        // Identify companies that already have a successful (active) project for this specific provider and service
         $subscribedCompanyIds = Project::where('client_id', $user->id)
             ->where('provider_id', $ps->provider_id)
             ->where('service_id', $ps->service_id)
-            ->whereHas('transactions', function($q) {
-                $q->whereIn('status', ['authorized', 'captured']);
-            })
+            ->where('status', 'active')
             ->pluck('company_id')
             ->toArray();
 
@@ -101,9 +99,7 @@ class CheckoutController extends Controller
             ->where('company_id', $request->company_id)
             ->where('provider_id', $ps->provider_id)
             ->where('service_id', $ps->service_id)
-            ->whereHas('transactions', function($q) {
-                $q->whereIn('status', ['authorized', 'captured']);
-            })
+            ->where('status', 'active')
             ->first();
 
         if ($existingProject) {
