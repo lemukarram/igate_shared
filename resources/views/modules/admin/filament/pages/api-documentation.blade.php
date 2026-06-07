@@ -665,5 +665,125 @@ Accept: application/json</pre>
                 </div>
             </div>
         </div>
+
+        <div class="border-t border-gray-200 my-8"></div>
+        <h1 class="text-2xl font-bold text-gray-800 mb-6">Service Requests & Payments</h1>
+
+        <!-- Service Request Details -->
+        <div class="p-6 bg-white rounded-xl shadow-sm border border-gray-100">
+            <div class="flex flex-wrap items-center gap-3 mb-4">
+                <span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-bold">POST</span>
+                <code class="text-sm font-bold text-gray-800 bg-gray-50 px-2 py-1 rounded">/service-request</code>
+                <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-[10px] uppercase font-bold">Auth Required</span>
+                <h2 class="text-lg font-bold text-gray-700 ml-auto">Service Request Details</h2>
+            </div>
+            <p class="text-gray-600 mb-4">Get pricing and company eligibility details before initiating checkout.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="font-bold mb-2 text-sm text-gray-500 uppercase">Payload</h3>
+                    <pre class="p-4 bg-gray-900 text-green-400 rounded-lg text-xs overflow-x-auto">
+{
+  "provider_service_id": 1
+}</pre>
+                </div>
+                <div>
+                    <h3 class="font-bold mb-2 text-sm text-gray-500 uppercase">Response (200)</h3>
+                    <pre class="p-4 bg-gray-900 text-blue-400 rounded-lg text-xs overflow-x-auto">
+{
+  "status": "success",
+  "data": {
+    "service": { "id": 1, "name": "VAT Filing", ... },
+    "pricing": { "monthly_price": 500, "annual_price": 5400, ... },
+    "companies": [ { "id": 5, "name": "Acme Corp", "is_subscribed": false } ]
+  }
+}</pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Checkout -->
+        <div class="p-6 bg-white rounded-xl shadow-sm border border-gray-100">
+            <div class="flex flex-wrap items-center gap-3 mb-4">
+                <span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-bold">POST</span>
+                <code class="text-sm font-bold text-gray-800 bg-gray-50 px-2 py-1 rounded">/checkout</code>
+                <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-[10px] uppercase font-bold">Auth Required</span>
+                <h2 class="text-lg font-bold text-gray-700 ml-auto">Initiate Checkout</h2>
+            </div>
+            <p class="text-gray-600 mb-4">Create a project and get the Tap Payment URL.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="font-bold mb-2 text-sm text-gray-500 uppercase">Payload</h3>
+                    <pre class="p-4 bg-gray-900 text-green-400 rounded-lg text-xs overflow-x-auto">
+{
+  "provider_service_id": 1,
+  "company_id": 5,
+  "billing_cycle": "monthly"
+}</pre>
+                </div>
+                <div>
+                    <h3 class="font-bold mb-2 text-sm text-gray-500 uppercase">Response (200)</h3>
+                    <pre class="p-4 bg-gray-900 text-blue-400 rounded-lg text-xs overflow-x-auto">
+{
+  "status": "success",
+  "data": {
+    "transaction_id": "01H...",
+    "payment_url": "https://gosell.tap.company/...",
+    "amount": 500
+  }
+}</pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Verify Payment -->
+        <div class="p-6 bg-white rounded-xl shadow-sm border border-gray-100">
+            <div class="flex flex-wrap items-center gap-3 mb-4">
+                <span class="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs font-bold">GET</span>
+                <code class="text-sm font-bold text-gray-800 bg-gray-50 px-2 py-1 rounded">/payment/verify/{transaction_id}</code>
+                <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-[10px] uppercase font-bold">Auth Required</span>
+                <h2 class="text-lg font-bold text-gray-700 ml-auto">Verify Payment Status</h2>
+            </div>
+            <p class="text-gray-600 mb-4">Manually verify the status of a payment via Tap API.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="font-bold mb-2 text-sm text-gray-500 uppercase">Response (200)</h3>
+                    <pre class="p-4 bg-gray-900 text-blue-400 rounded-lg text-xs overflow-x-auto">
+{
+  "status": "success",
+  "data": {
+    "status": "captured",
+    "project_id": 10,
+    "invoice": { "id": 1, "invoice_number": "IGATE-..." }
+  }
+}</pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Invoice Details -->
+        <div class="p-6 bg-white rounded-xl shadow-sm border border-gray-100">
+            <div class="flex flex-wrap items-center gap-3 mb-4">
+                <span class="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs font-bold">GET</span>
+                <code class="text-sm font-bold text-gray-800 bg-gray-50 px-2 py-1 rounded">/invoices/{id}</code>
+                <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-[10px] uppercase font-bold">Auth Required</span>
+                <h2 class="text-lg font-bold text-gray-700 ml-auto">Invoice Details</h2>
+            </div>
+            <p class="text-gray-600 mb-4">Get metadata and download link for an invoice.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="font-bold mb-2 text-sm text-gray-500 uppercase">Response (200)</h3>
+                    <pre class="p-4 bg-gray-900 text-blue-400 rounded-lg text-xs overflow-x-auto">
+{
+  "status": "success",
+  "data": {
+    "id": 1,
+    "invoice_number": "IGATE-...",
+    "pdf_url": "https://.../api/v1/invoices/1/download",
+    "billing_details": { ... }
+  }
+}</pre>
+                </div>
+            </div>
+        </div>
     </div>
 </x-filament-panels::page>

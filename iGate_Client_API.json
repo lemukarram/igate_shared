@@ -90,7 +90,7 @@
 			"name": "Projects & Documents",
 			"item": [
 				{
-					"name": "Create Project (Request Service)",
+					"name": "Create Project (Legacy - Direct)",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -123,6 +123,79 @@
 							]
 						},
 						"url": { "raw": "{{baseUrl}}/projects/1/documents", "host": ["{{baseUrl}}"], "path": ["projects", "1", "documents"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "Service Request & Payments",
+			"item": [
+				{
+					"name": "Get Service Request Details",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"},
+							{"key": "Accept", "value": "application/json"}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{"key": "provider_service_id", "value": "1", "type": "text"}
+							]
+						},
+						"url": { "raw": "{{baseUrl}}/service-request", "host": ["{{baseUrl}}"], "path": ["service-request"] }
+					}
+				},
+				{
+					"name": "Initiate Checkout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"},
+							{"key": "Accept", "value": "application/json"}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{"key": "provider_service_id", "value": "1", "type": "text"},
+								{"key": "company_id", "value": "1", "type": "text"},
+								{"key": "billing_cycle", "value": "monthly", "type": "text"}
+							]
+						},
+						"url": { "raw": "{{baseUrl}}/checkout", "host": ["{{baseUrl}}"], "path": ["checkout"] }
+					}
+				},
+				{
+					"name": "Verify Payment",
+					"request": {
+						"method": "GET",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"},
+							{"key": "Accept", "value": "application/json"}
+						],
+						"url": { "raw": "{{baseUrl}}/payment/verify/{{transactionId}}", "host": ["{{baseUrl}}"], "path": ["payment", "verify", "{{transactionId}}"] }
+					}
+				},
+				{
+					"name": "Get Invoice Details",
+					"request": {
+						"method": "GET",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"},
+							{"key": "Accept", "value": "application/json"}
+						],
+						"url": { "raw": "{{baseUrl}}/invoices/1", "host": ["{{baseUrl}}"], "path": ["invoices", "1"] }
+					}
+				},
+				{
+					"name": "Download Invoice PDF",
+					"request": {
+						"method": "GET",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"}
+						],
+						"url": { "raw": "{{baseUrl}}/invoices/1/download", "host": ["{{baseUrl}}"], "path": ["invoices", "1", "download"] }
 					}
 				}
 			]

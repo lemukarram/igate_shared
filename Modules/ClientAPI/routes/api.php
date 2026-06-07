@@ -10,6 +10,8 @@ use Modules\ClientAPI\Http\Controllers\SettingsController;
 use Modules\ClientAPI\Http\Controllers\PlanController;
 use Modules\ClientAPI\Http\Controllers\TeamController;
 
+use Modules\ClientAPI\Http\Controllers\PaymentController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -68,5 +70,12 @@ Route::prefix('v1')->group(function () {
         
         Route::get('subscriptions', [ProjectController::class, 'subscriptions']);
         Route::get('transactions', [ProjectController::class, 'transactions']);
+
+        // Service Request & Payment flow
+        Route::post('service-request', [PaymentController::class, 'serviceRequestDetails']);
+        Route::post('checkout', [PaymentController::class, 'checkout']);
+        Route::get('payment/verify/{transaction_id}', [PaymentController::class, 'verifyPayment']);
+        Route::get('invoices/{id}', [PaymentController::class, 'invoiceDetails']);
+        Route::get('invoices/{id}/download', [PaymentController::class, 'downloadInvoice']);
     });
 });
