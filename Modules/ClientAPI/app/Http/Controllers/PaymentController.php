@@ -13,6 +13,7 @@ use App\Models\User;
 use App\Models\ProviderService;
 use App\Services\InvoiceService;
 use App\Traits\HandlesApiResponses;
+use App\Traits\SyncsProjectPayment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -21,7 +22,7 @@ use Modules\Payments\Services\TapPaymentService;
 
 class PaymentController extends Controller
 {
-    use HandlesApiResponses;
+    use HandlesApiResponses, SyncsProjectPayment;
 
     protected TapPaymentService $tapService;
     protected InvoiceService $invoiceService;
@@ -206,21 +207,38 @@ class PaymentController extends Controller
                 ->where('user_id', auth()->id())
                 ->firstOrFail();
 
-            // If already captured or authorized, return success
+            // Run payment sync just like in the main website to get the latest status
+            if ($transaction->project_id) {
+                $project = Project::find($transaction->project_id);
+                if ($project) {
+                    $this->syncProjectPayment($project);
+                    $transaction->refresh();
+                }
+            }
+
+            // Check if already captured or authorized, and ensure we have an invoice
+            $invoice = Invoice::where('transaction_id', $transaction->id)->first();
+            
             if (in_array($transaction->status, ['captured', 'authorized'])) {
-                $invoice = Invoice::where('transaction_id', $transaction->id)->first();
+                if (!$invoice) {
+                    $charge = $this->tapService->getCharge($transaction->tap_charge_id);
+                    $result = $this->finalizeTransaction($transaction, $charge, $transaction->status);
+                    return $this->successResponse($result);
+                }
+
                 return $this->successResponse([
                     'status' => $transaction->status,
                     'project_id' => $transaction->project_id,
-                    'invoice' => $invoice ? [
+                    'invoice' => [
                         'id' => $invoice->id,
                         'invoice_number' => $invoice->invoice_number,
                         'amount' => $transaction->amount,
-                    ] : null
+                        'pdf_url' => url('api/v1/invoices/' . $invoice->id . '/download'),
+                    ]
                 ]);
             }
 
-            // Otherwise, check with Tap
+            // Otherwise, check with Tap (for non-project transactions or failed ones)
             $charge = $this->tapService->getCharge($transaction->tap_charge_id);
             $status = strtoupper($charge['status'] ?? 'UNKNOWN');
             
@@ -236,7 +254,9 @@ class PaymentController extends Controller
                 return $this->successResponse($result);
             }
 
-            $transaction->update(['status' => $mappedStatus]);
+            if ($transaction->status !== $mappedStatus) {
+                $transaction->update(['status' => $mappedStatus]);
+            }
             
             return $this->successResponse([
                 'status' => $mappedStatus,
@@ -257,15 +277,16 @@ class PaymentController extends Controller
         return DB::transaction(function () use ($transaction, $charge, $status) {
             $transaction = Transaction::where('id', $transaction->id)->lockForUpdate()->first();
             
-            if (in_array($transaction->status, ['captured', 'authorized'])) {
-                $invoice = Invoice::where('transaction_id', $transaction->id)->first();
+            $invoice = Invoice::where('transaction_id', $transaction->id)->first();
+            
+            if (in_array($transaction->status, ['captured', 'authorized']) && $invoice) {
                 return [
                     'status' => $transaction->status,
                     'project_id' => $transaction->project_id,
-                    'invoice' => $invoice ? [
+                    'invoice' => [
                         'id' => $invoice->id,
                         'invoice_number' => $invoice->invoice_number,
-                    ] : null
+                    ]
                 ];
             }
 
