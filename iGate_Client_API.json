@@ -124,6 +124,84 @@
 						},
 						"url": { "raw": "{{baseUrl}}/projects/1/documents", "host": ["{{baseUrl}}"], "path": ["projects", "1", "documents"] }
 					}
+				},
+				{
+					"name": "List Project Documents",
+					"request": {
+						"method": "GET",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"},
+							{"key": "Accept", "value": "application/json"}
+						],
+						"url": { "raw": "{{baseUrl}}/projects/1/documents", "host": ["{{baseUrl}}"], "path": ["projects", "1", "documents"] }
+					}
+				},
+				{
+					"name": "Update Task Status",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"},
+							{"key": "Accept", "value": "application/json"}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{"key": "status", "value": "in_progress", "type": "text"}
+							]
+						},
+						"url": { "raw": "{{baseUrl}}/projects/1/tasks/1/status", "host": ["{{baseUrl}}"], "path": ["projects", "1", "tasks", "1", "status"] }
+					}
+				},
+				{
+					"name": "Verify Task Status",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"},
+							{"key": "Accept", "value": "application/json"}
+						],
+						"url": { "raw": "{{baseUrl}}/projects/1/tasks/1/verify", "host": ["{{baseUrl}}"], "path": ["projects", "1", "tasks", "1", "verify"] }
+					}
+				},
+				{
+					"name": "Approve Project Completion",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"},
+							{"key": "Accept", "value": "application/json"}
+						],
+						"url": { "raw": "{{baseUrl}}/projects/1/approve", "host": ["{{baseUrl}}"], "path": ["projects", "1", "approve"] }
+					}
+				},
+				{
+					"name": "Reject Project Action",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"},
+							{"key": "Accept", "value": "application/json"}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{"key": "reason", "value": "The work does not meet our initial requirements.", "type": "text"}
+							]
+						},
+						"url": { "raw": "{{baseUrl}}/projects/1/reject", "host": ["{{baseUrl}}"], "path": ["projects", "1", "reject"] }
+					}
+				},
+				{
+					"name": "Request Project Cancellation",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"},
+							{"key": "Accept", "value": "application/json"}
+						],
+						"url": { "raw": "{{baseUrl}}/projects/1/cancel-request", "host": ["{{baseUrl}}"], "path": ["projects", "1", "cancel-request"] }
+					}
 				}
 			]
 		},

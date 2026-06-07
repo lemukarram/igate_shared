@@ -66,7 +66,17 @@ Route::prefix('v1')->group(function () {
         Route::get('projects/{id}', [ProjectController::class, 'show']);
         Route::post('projects', [ProjectController::class, 'store']);
         Route::post('projects/{id}/messages', [ProjectController::class, 'sendMessage']);
+        Route::get('projects/{id}/documents', [ProjectController::class, 'documents']);
         Route::post('projects/{id}/documents', [ProjectController::class, 'uploadDocument']);
+        
+        // Task Management
+        Route::patch('projects/{id}/tasks/{taskId}/status', [ProjectController::class, 'updateTaskStatus']);
+        Route::post('projects/{id}/tasks/{taskId}/verify', [ProjectController::class, 'verifyTask']);
+        
+        // Project Status Management
+        Route::post('projects/{id}/approve', [ProjectController::class, 'approve']);
+        Route::post('projects/{id}/reject', [ProjectController::class, 'reject']);
+        Route::post('projects/{id}/cancel-request', [ProjectController::class, 'requestCancellation']);
         
         Route::get('subscriptions', [ProjectController::class, 'subscriptions']);
         Route::get('transactions', [ProjectController::class, 'transactions']);

@@ -10,6 +10,9 @@ use App\Models\Message;
 use App\Models\Document;
 use App\Models\Subscription;
 use App\Models\Transaction;
+use App\Models\Task;
+use App\Models\TaskHistory;
+use App\Models\ClientActivity;
 use App\Traits\HandlesApiResponses;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -128,6 +131,217 @@ class ProjectController extends Controller
             ]);
 
             return $this->successResponse($document, 'Document uploaded successfully', 201);
+        } catch (\Throwable $e) {
+            return $this->handleException($e);
+        }
+    }
+
+    public function documents($id)
+    {
+        try {
+            $project = Auth::user()->projects()->findOrFail($id);
+            $documents = Document::where('project_id', $project->id)->with('user')->get();
+            return $this->successResponse($documents);
+        } catch (\Throwable $e) {
+            return $this->handleException($e);
+        }
+    }
+
+    public function updateTaskStatus(Request $request, $id, $taskId)
+    {
+        try {
+            $request->validate(['status' => 'required|in:todo,in_progress,review,done']);
+            $project = Auth::user()->projects()->findOrFail($id);
+
+            if ($project->status === 'inactive' && Auth::user()->role !== 'admin') {
+                return $this->errorResponse('Project is inactive. Actions are restricted.', 403);
+            }
+
+            $task = Task::where('project_id', $project->id)->findOrFail($taskId);
+            $oldStatus = $task->status;
+
+            $updateData = ['status' => $request->status];
+            if ($request->status !== 'done') {
+                $updateData['is_verified'] = false;
+                $updateData['verified_at'] = null;
+            }
+
+            $task->update($updateData);
+
+            TaskHistory::create([
+                'task_id' => $task->id,
+                'user_id' => Auth::id(),
+                'field' => 'status',
+                'old_value' => $oldStatus,
+                'new_value' => $request->status,
+                'action' => 'status_changed',
+            ]);
+
+            ClientActivity::create([
+                'client_id' => $project->client_id,
+                'provider_id' => $project->provider_id,
+                'project_id' => $project->id,
+                'activity_type' => 'task_status_changed',
+                'description' => 'Task "' . $task->title . '" status changed from ' . $oldStatus . ' to ' . $request->status . '.',
+            ]);
+
+            return $this->successResponse($task, 'Task status updated.');
+        } catch (\Throwable $e) {
+            return $this->handleException($e);
+        }
+    }
+
+    public function verifyTask(Request $request, $id, $taskId)
+    {
+        try {
+            $project = Auth::user()->projects()->findOrFail($id);
+
+            if ($project->status === 'inactive' && Auth::user()->role !== 'admin') {
+                return $this->errorResponse('Project is inactive. Actions are restricted.', 403);
+            }
+
+            $task = Task::where('project_id', $project->id)->findOrFail($taskId);
+
+            if ($task->status !== 'done') {
+                return $this->errorResponse('Only completed tasks can be verified.', 422);
+            }
+
+            $task->update([
+                'is_verified' => true,
+                'verified_at' => now(),
+            ]);
+
+            TaskHistory::create([
+                'task_id' => $task->id,
+                'user_id' => Auth::id(),
+                'action' => 'verified',
+            ]);
+
+            return $this->successResponse($task, 'Task verified successfully.');
+        } catch (\Throwable $e) {
+            return $this->handleException($e);
+        }
+    }
+
+    public function approve($id)
+    {
+        try {
+            $project = Auth::user()->projects()->findOrFail($id);
+
+            if ($project->status === 'inactive' && Auth::user()->role !== 'admin') {
+                return $this->errorResponse('Project is inactive. Actions are restricted.', 403);
+            }
+
+            $status = 'completed';
+            $action = 'approved';
+            $description = 'Client approved the project. Funds released.';
+
+            if ($project->termination_requested) {
+                $status = 'terminated';
+                $action = 'termination_approved';
+                $description = 'Client approved the termination request.';
+            }
+
+            $project->update([
+                'status' => $status,
+                'client_approved' => true,
+                'escrow_released_at' => $status === 'completed' ? now() : null,
+                'last_action_by' => 'client',
+            ]);
+
+            ProjectHistory::create([
+                'project_id' => $project->id,
+                'user_id' => Auth::id(),
+                'action' => $action,
+                'description' => $description,
+            ]);
+
+            return $this->successResponse($project, 'Request approved.');
+        } catch (\Throwable $e) {
+            return $this->handleException($e);
+        }
+    }
+
+    public function reject(Request $request, $id)
+    {
+        try {
+            $request->validate(['reason' => 'required|string']);
+            $project = Auth::user()->projects()->findOrFail($id);
+
+            if ($project->status === 'inactive' && Auth::user()->role !== 'admin') {
+                return $this->errorResponse('Project is inactive. Actions are restricted.', 403);
+            }
+
+            $action = 'rejected';
+            $description = 'Client rejected the request with reason: ' . $request->reason;
+
+            if ($project->provider_marked_complete) {
+                $project->update([
+                    'provider_marked_complete' => false,
+                    'rejection_reason' => $request->reason,
+                    'rejected_at' => now(),
+                    'last_action_by' => 'client',
+                ]);
+                $action = 'completion_rejected';
+            } elseif ($project->mutual_cancellation_requested && $project->cancellation_requested_by === 'provider') {
+                $project->update([
+                    'status' => 'active',
+                    'mutual_cancellation_requested' => false,
+                    'cancellation_requested_by' => null,
+                    'rejection_reason' => $request->reason,
+                    'rejected_at' => now(),
+                    'last_action_by' => 'client',
+                ]);
+                $action = 'cancellation_rejected';
+                $description = 'Client rejected the cancellation request with reason: ' . $request->reason;
+            } elseif ($project->termination_requested) {
+                $project->update([
+                    'termination_requested' => false,
+                    'rejection_reason' => $request->reason,
+                    'rejected_at' => now(),
+                    'last_action_by' => 'client',
+                ]);
+                $action = 'termination_rejected';
+            }
+
+            ProjectHistory::create([
+                'project_id' => $project->id,
+                'user_id' => Auth::id(),
+                'action' => $action,
+                'description' => $description,
+                'metadata' => ['reason' => $request->reason]
+            ]);
+
+            return $this->successResponse($project, 'Request rejected.');
+        } catch (\Throwable $e) {
+            return $this->handleException($e);
+        }
+    }
+
+    public function requestCancellation($id)
+    {
+        try {
+            $project = Auth::user()->projects()->findOrFail($id);
+
+            if ($project->status === 'inactive' && Auth::user()->role !== 'admin') {
+                return $this->errorResponse('Project is inactive. Actions are restricted.', 403);
+            }
+
+            $project->update([
+                'status' => 'cancelled',
+                'mutual_cancellation_requested' => true,
+                'cancellation_requested_by' => 'client',
+                'last_action_by' => 'client',
+            ]);
+
+            ProjectHistory::create([
+                'project_id' => $project->id,
+                'user_id' => Auth::id(),
+                'action' => 'cancellation_requested',
+                'description' => 'Client requested mutual cancellation. Status reflected as cancelled pending confirmation.',
+            ]);
+
+            return $this->successResponse($project, 'Cancellation requested and reflected.');
         } catch (\Throwable $e) {
             return $this->handleException($e);
         }

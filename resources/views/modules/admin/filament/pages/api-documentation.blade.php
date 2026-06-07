@@ -666,6 +666,178 @@ Accept: application/json</pre>
             </div>
         </div>
 
+        <!-- Project Documents List -->
+        <div class="p-6 bg-white rounded-xl shadow-sm border border-gray-100">
+            <div class="flex flex-wrap items-center gap-3 mb-4">
+                <span class="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs font-bold">GET</span>
+                <code class="text-sm font-bold text-gray-800 bg-gray-50 px-2 py-1 rounded">/projects/{id}/documents</code>
+                <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-[10px] uppercase font-bold">Auth Required</span>
+                <h2 class="text-lg font-bold text-gray-700 ml-auto">List Project Documents</h2>
+            </div>
+            <p class="text-gray-600 mb-4">Get a list of all documents uploaded in the project vault.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="font-bold mb-2 text-sm text-gray-500 uppercase">Response (200)</h3>
+                    <pre class="p-4 bg-gray-900 text-blue-400 rounded-lg text-xs overflow-x-auto">
+{
+  "status": "success",
+  "data": [
+    { "id": 1, "name": "Contract.pdf", "file_path": "...", "user": { ... } }
+  ]
+}</pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Project Document Upload -->
+        <div class="p-6 bg-white rounded-xl shadow-sm border border-gray-100">
+            <div class="flex flex-wrap items-center gap-3 mb-4">
+                <span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-bold">POST</span>
+                <code class="text-sm font-bold text-gray-800 bg-gray-50 px-2 py-1 rounded">/projects/{id}/documents</code>
+                <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-[10px] uppercase font-bold">Auth Required</span>
+                <h2 class="text-lg font-bold text-gray-700 ml-auto">Upload Project Document</h2>
+            </div>
+            <p class="text-gray-600 mb-4">Upload a new document to the project vault.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="font-bold mb-2 text-sm text-gray-500 uppercase">Payload (multipart/form-data)</h3>
+                    <pre class="p-4 bg-gray-900 text-green-400 rounded-lg text-xs overflow-x-auto">
+{
+  "name": "Signed Contract",
+  "file": (Binary File)
+}</pre>
+                </div>
+                <div>
+                    <h3 class="font-bold mb-2 text-sm text-gray-500 uppercase">Response (201)</h3>
+                    <pre class="p-4 bg-gray-900 text-blue-400 rounded-lg text-xs overflow-x-auto">
+{
+  "status": "success",
+  "message": "Document uploaded successfully",
+  "data": { ... }
+}</pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Update Task Status -->
+        <div class="p-6 bg-white rounded-xl shadow-sm border border-gray-100">
+            <div class="flex flex-wrap items-center gap-3 mb-4">
+                <span class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded text-xs font-bold">PATCH</span>
+                <code class="text-sm font-bold text-gray-800 bg-gray-50 px-2 py-1 rounded">/projects/{id}/tasks/{taskId}/status</code>
+                <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-[10px] uppercase font-bold">Auth Required</span>
+                <h2 class="text-lg font-bold text-gray-700 ml-auto">Update Task Status</h2>
+            </div>
+            <p class="text-gray-600 mb-4">Change the status of a specific project sub-task.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="font-bold mb-2 text-sm text-gray-500 uppercase">Payload</h3>
+                    <pre class="p-4 bg-gray-900 text-green-400 rounded-lg text-xs overflow-x-auto">
+{
+  "status": "in_progress" // todo, in_progress, review, done
+}</pre>
+                </div>
+                <div>
+                    <h3 class="font-bold mb-2 text-sm text-gray-500 uppercase">Response (200)</h3>
+                    <pre class="p-4 bg-gray-900 text-blue-400 rounded-lg text-xs overflow-x-auto">
+{
+  "status": "success",
+  "message": "Task status updated."
+}</pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Verify Task -->
+        <div class="p-6 bg-white rounded-xl shadow-sm border border-gray-100">
+            <div class="flex flex-wrap items-center gap-3 mb-4">
+                <span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-bold">POST</span>
+                <code class="text-sm font-bold text-gray-800 bg-gray-50 px-2 py-1 rounded">/projects/{id}/tasks/{taskId}/verify</code>
+                <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-[10px] uppercase font-bold">Auth Required</span>
+                <h2 class="text-lg font-bold text-gray-700 ml-auto">Verify Task</h2>
+            </div>
+            <p class="text-gray-600 mb-4">Client verifies a completed task.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="font-bold mb-2 text-sm text-gray-500 uppercase">Response (200)</h3>
+                    <pre class="p-4 bg-gray-900 text-blue-400 rounded-lg text-xs overflow-x-auto">
+{
+  "status": "success",
+  "message": "Task verified successfully."
+}</pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Approve Project -->
+        <div class="p-6 bg-white rounded-xl shadow-sm border border-gray-100">
+            <div class="flex flex-wrap items-center gap-3 mb-4">
+                <span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-bold">POST</span>
+                <code class="text-sm font-bold text-gray-800 bg-gray-50 px-2 py-1 rounded">/projects/{id}/approve</code>
+                <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-[10px] uppercase font-bold">Auth Required</span>
+                <h2 class="text-lg font-bold text-gray-700 ml-auto">Approve Project</h2>
+            </div>
+            <p class="text-gray-600 mb-4">Approve project completion to release escrow funds.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="font-bold mb-2 text-sm text-gray-500 uppercase">Response (200)</h3>
+                    <pre class="p-4 bg-gray-900 text-blue-400 rounded-lg text-xs overflow-x-auto">
+{
+  "status": "success",
+  "message": "Request approved."
+}</pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reject Project -->
+        <div class="p-6 bg-white rounded-xl shadow-sm border border-gray-100">
+            <div class="flex flex-wrap items-center gap-3 mb-4">
+                <span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-bold">POST</span>
+                <code class="text-sm font-bold text-gray-800 bg-gray-50 px-2 py-1 rounded">/projects/{id}/reject</code>
+                <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-[10px] uppercase font-bold">Auth Required</span>
+                <h2 class="text-lg font-bold text-gray-700 ml-auto">Reject Project</h2>
+            </div>
+            <p class="text-gray-600 mb-4">Reject provider action (e.g. completion) with a specific reason.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="font-bold mb-2 text-sm text-gray-500 uppercase">Payload</h3>
+                    <pre class="p-4 bg-gray-900 text-green-400 rounded-lg text-xs overflow-x-auto">
+{
+  "reason": "Work does not meet requirements."
+}</pre>
+                </div>
+                <div>
+                    <h3 class="font-bold mb-2 text-sm text-gray-500 uppercase">Response (200)</h3>
+                    <pre class="p-4 bg-gray-900 text-blue-400 rounded-lg text-xs overflow-x-auto">
+{
+  "status": "success",
+  "message": "Request rejected."
+}</pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Request Cancellation -->
+        <div class="p-6 bg-white rounded-xl shadow-sm border border-gray-100">
+            <div class="flex flex-wrap items-center gap-3 mb-4">
+                <span class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-bold">POST</span>
+                <code class="text-sm font-bold text-gray-800 bg-gray-50 px-2 py-1 rounded">/projects/{id}/cancel-request</code>
+                <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-[10px] uppercase font-bold">Auth Required</span>
+                <h2 class="text-lg font-bold text-gray-700 ml-auto">Request Cancellation</h2>
+            </div>
+            <p class="text-gray-600 mb-4">Client requests mutual project cancellation.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="font-bold mb-2 text-sm text-gray-500 uppercase">Response (200)</h3>
+                    <pre class="p-4 bg-gray-900 text-blue-400 rounded-lg text-xs overflow-x-auto">
+{
+  "status": "success",
+  "message": "Cancellation requested and reflected."
+}</pre>
+                </div>
+            </div>
+        </div>
+
         <div class="border-t border-gray-200 my-8"></div>
         <h1 class="text-2xl font-bold text-gray-800 mb-6">Service Requests & Payments</h1>
 
