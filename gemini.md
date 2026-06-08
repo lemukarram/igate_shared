@@ -6,7 +6,7 @@ You are an expert Full-Stack Developer and Software Architect. Your task is to b
 ## 2. Technology Stack
 * **Backend:** PHP (Laravel framework highly recommended for ORM, routing, and auth handling).
 * **Database:** MySQL.
-* **Frontend UI:** Tailwind CSS (via CDN to avoid `node_modules`), Vanilla JavaScript for interactions, HTML5.
+* **Frontend UI:** Tailwind CSS (via Vite/NPM for performance and optimization), Vanilla JavaScript for interactions, HTML5.
 * **Environment:** Docker (containerized setup).
 * **Integrations:** SMTP (Email), Stripe/Moyasar (Payments).
 

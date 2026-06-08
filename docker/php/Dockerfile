@@ -8,8 +8,12 @@ ENV GID=33
 RUN apt-get update && apt-get install -y \
     git curl libpng-dev libonig-dev libxml2-dev \
     zip unzip libzip-dev libicu-dev libpq-dev \
-    libfcgi-bin netcat-openbsd \
+    libfcgi-bin netcat-openbsd gnupg \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Install Node.js
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs
 
 # Install PHP extensions
 RUN docker-php-ext-configure intl \
@@ -25,6 +29,9 @@ COPY . /var/www
 
 # ✅ Run composer install at BUILD TIME as root (before chown)
 RUN composer install --no-interaction --optimize-autoloader --no-dev
+
+# ✅ Run npm install and build at BUILD TIME
+RUN npm install && npm run build
 
 # Fix permissions
 RUN chown -R www-data:www-data /var/www

@@ -79,8 +79,8 @@
                 
                 <!-- Mobile Menu Toggle -->
                 <button @click="mobileMenuOpen = !mobileMenuOpen" class="lg:hidden p-2 text-gray-600 hover:theme-text transition-colors">
-                    <i data-lucide="menu" x-show="!mobileMenuOpen" class="w-6 h-6"></i>
-                    <i data-lucide="x" x-show="mobileMenuOpen" class="w-6 h-6" x-cloak></i>
+                    <span x-show="!mobileMenuOpen"><i data-lucide="menu" class="w-6 h-6"></i></span>
+                    <span x-show="mobileMenuOpen" x-cloak><i data-lucide="x" class="w-6 h-6"></i></span>
                 </button>
             </div>
         </div>

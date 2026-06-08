@@ -1,12 +1,14 @@
 <!DOCTYPE html>
-<html :lang="lang" :dir="lang === 'ar' ? 'rtl' : 'ltr'" x-data="i18nManager()">
+<html :lang="lang" :dir="lang === 'ar' ? 'rtl' : 'ltr'">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ config('app.name', 'iGate Shared Services') }}</title>
-    <!-- Use Tailwind via CDN but with production-ready base setup -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Alpine Plugins -->
+    <script defer src="https://unpkg.com/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
+    <!-- Alpine Core -->
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
@@ -91,14 +93,16 @@
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body class="bg-white text-gray-900 overflow-hidden" x-init="init()">
+<body class="bg-white text-gray-900 overflow-hidden" x-init="init()" x-data="i18nManager()">
     <div class="flex h-screen relative">
         <!-- Sidebar -->
         <div :class="sidebarCollapsed ? 'w-20' : 'w-64'" class="border-e border-gray-100 flex flex-col h-full bg-white transition-all duration-300 relative group">
             <!-- Collapse Toggle Button - Always Visible -->
             <button @click="sidebarCollapsed = !sidebarCollapsed" 
                     class="absolute -end-3 top-10 w-6 h-6 bg-white border border-gray-100 rounded-full flex items-center justify-center shadow-sm z-50 hover:bg-gray-50 transition-all">
-                <i data-lucide="chevron-left" class="w-3.5 h-3.5 text-gray-400 transition-transform" :class="sidebarCollapsed ? 'rotate-180' : ''"></i>
+                <span class="inline-flex transition-transform" :class="sidebarCollapsed ? 'rotate-180' : ''">
+                    <i data-lucide="chevron-left" class="w-3.5 h-3.5 text-gray-400"></i>
+                </span>
             </button>
 
             <div class="p-6 flex flex-col" :class="sidebarCollapsed ? 'items-center' : 'items-start'">
