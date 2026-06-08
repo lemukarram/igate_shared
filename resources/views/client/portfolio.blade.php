@@ -68,7 +68,7 @@
 </div>
 
 <!-- Modal Localization -->
-<div id="add-company-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+<div id="add-company-modal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
     <div class="bg-white rounded-[2.5rem] p-10 max-w-md w-full mx-4 shadow-2xl animate-in zoom-in duration-300">
         <div class="flex items-center justify-between mb-8">
             <h3 class="text-2xl font-normal text-gray-900" x-text="t('common.add_new_company')"></h3>

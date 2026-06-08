@@ -246,7 +246,7 @@
 
     <!-- MODALS SECTION -->
     <div x-show="settingsOpen" class="fixed inset-0 z-[100] flex items-center justify-center" style="display: none;">
-        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="settingsOpen = false"></div>
+        <div class="absolute inset-0 bg-black/40" @click="settingsOpen = false"></div>
         <div class="bg-white w-full max-w-4xl rounded-lg shadow-2xl relative z-10 overflow-hidden border border-gray-100 animate-in zoom-in duration-300">
             <div class="flex h-[550px]">
                 <div class="w-56 bg-gray-50 border-r border-gray-100 p-8 flex flex-col">
@@ -884,7 +884,7 @@
     <!-- ADD SERVICE MODAL -->
     @if(Auth::user()->isProviderMode())
     <div x-show="addServiceOpen" class="fixed inset-0 z-[100] flex items-center justify-center" style="display: none;">
-        <div class="absolute inset-0 bg-black/40 backdrop-blur-md" @click="addServiceOpen = false"></div>
+        <div class="absolute inset-0 bg-black/40" @click="addServiceOpen = false"></div>
         <div class="bg-white w-full max-w-lg rounded-lg shadow-2xl relative z-10 p-10 border border-gray-100 animate-in zoom-in duration-300">
             <div class="flex items-center justify-between mb-8">
                 <h2 class="text-2xl font-normal" x-text="t('explore.add_service')"></h2>

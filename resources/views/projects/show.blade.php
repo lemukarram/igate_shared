@@ -403,7 +403,7 @@
 
     <!-- Status Change Modal -->
     <div x-show="statusModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center" style="display: none;">
-        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="statusModalOpen = false"></div>
+        <div class="absolute inset-0 bg-black/40" @click="statusModalOpen = false"></div>
         <div class="bg-white w-full max-sm rounded-xl shadow-2xl relative z-10 p-6 border border-gray-100">
             <h2 class="text-xl font-normal mb-4" x-text="t('project.change_status')"></h2>
             <form action="{{ route('projects.update-status', $project->id) }}" method="POST" class="space-y-4">
@@ -491,7 +491,7 @@
 
     <!-- File Upload Modal -->
     <div x-show="fileUploadModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center" style="display: none;">
-        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="fileUploadModalOpen = false"></div>
+        <div class="absolute inset-0 bg-black/40" @click="fileUploadModalOpen = false"></div>
         <div class="bg-white w-full max-w-md rounded-xl shadow-2xl relative z-10 p-8 border border-gray-100">
             <h2 class="text-2xl font-normal mb-6" x-text="t('project.upload_file')"></h2>
             <form action="{{ route('documents.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
@@ -511,7 +511,7 @@
 
     <!-- Dispute Modal -->
     <div x-show="disputeModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center" style="display: none;">
-        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="disputeModalOpen = false"></div>
+        <div class="absolute inset-0 bg-black/40" @click="disputeModalOpen = false"></div>
         <div class="bg-white w-full max-w-md rounded-xl shadow-2xl relative z-10 p-8 border border-gray-100">
             <h2 class="text-2xl font-normal mb-4 text-red-600" x-text="t('project.actions.dispute')"></h2>
             <p class="text-sm text-gray-500 mb-6" x-text="t('project.dispute_notice')"></p>
@@ -531,7 +531,7 @@
 
     <!-- Termination Modal -->
     <div x-show="terminateModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center" style="display: none;">
-        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="terminateModalOpen = false"></div>
+        <div class="absolute inset-0 bg-black/40" @click="terminateModalOpen = false"></div>
         <div class="bg-white w-full max-w-md rounded-xl shadow-2xl relative z-10 p-8 border border-gray-100">
             <h2 class="text-2xl font-normal mb-4 text-red-600" x-text="t('project.actions.terminate')"></h2>
             <p class="text-sm text-gray-500 mb-6" x-text="t('project.termination_notice')"></p>
@@ -551,7 +551,7 @@
 
     <!-- Reject Modal -->
     <div x-show="rejectModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center" style="display: none;">
-        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="rejectModalOpen = false"></div>
+        <div class="absolute inset-0 bg-black/40" @click="rejectModalOpen = false"></div>
         <div class="bg-white w-full max-w-md rounded-xl shadow-2xl relative z-10 p-8 border border-gray-100">
             <h2 class="text-2xl font-normal mb-4 text-red-600" x-text="t('common.reject')"></h2>
             <p class="text-sm text-gray-500 mb-6" x-text="t('common.reject_reason_placeholder')"></p>
@@ -571,7 +571,7 @@
 
     <!-- History Modal -->
     <div x-show="historyModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center" style="display: none;">
-        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="historyModalOpen = false"></div>
+        <div class="absolute inset-0 bg-black/40" @click="historyModalOpen = false"></div>
         <div class="bg-white w-full max-w-2xl rounded-xl shadow-2xl relative z-10 p-8 border border-gray-100 max-h-[80vh] flex flex-col">
             <div class="flex items-center justify-between mb-6">
                 <h2 class="text-2xl font-normal" x-text="t('project.history')"></h2>
@@ -608,7 +608,7 @@
 
     <!-- Review Modal -->
     <div x-show="reviewModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center" style="display: none;">
-        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="reviewModalOpen = false"></div>
+        <div class="absolute inset-0 bg-black/40" @click="reviewModalOpen = false"></div>
         <div class="bg-white w-full max-w-md rounded-xl shadow-2xl relative z-10 p-8 border border-gray-100">
             <h2 class="text-2xl font-normal mb-2 text-gray-900" x-text="t('project.add_review')"></h2>
             <p class="text-sm text-gray-500 mb-6" x-text="t('project.how_was_your_experience')"></p>

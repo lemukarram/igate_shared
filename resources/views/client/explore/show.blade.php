@@ -226,10 +226,10 @@
     <!-- MODALS -->
     <!-- Provider Info Modal -->
     <div x-show="providerInfoModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center" style="display: none;">
-        <div class="absolute inset-0 bg-black/60 backdrop-blur-md" @click="providerInfoModalOpen = false"></div>
+        <div class="absolute inset-0 bg-black/60" @click="providerInfoModalOpen = false"></div>
         <div class="bg-white w-full max-w-2xl rounded-[2.5rem] shadow-2xl relative z-10 p-0 border border-gray-100 animate-in zoom-in duration-300 max-h-[90vh] overflow-y-auto custom-scrollbar">
             <div class="relative h-32 bg-primary/10">
-                <button @click="providerInfoModalOpen = false" class="absolute top-6 right-6 p-2 bg-white/20 hover:bg-white/40 rounded-full text-gray-900 backdrop-blur-md transition-all">
+                <button @click="providerInfoModalOpen = false" class="absolute top-6 right-6 p-2 bg-white/20 hover:bg-white/40 rounded-full text-gray-900 transition-all">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
@@ -325,7 +325,7 @@
     @if(auth()->user()->isProviderMode())
     <!-- Add Service Modal -->
     <div x-show="addServiceModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center" style="display: none;">
-        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="addServiceModalOpen = false"></div>
+        <div class="absolute inset-0 bg-black/40" @click="addServiceModalOpen = false"></div>
         <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl relative z-10 p-10 border border-gray-100 animate-in zoom-in duration-300">
             <div class="flex items-center justify-between mb-8"><h2 class="text-2xl font-normal" x-text="t('explore.add_service')"></h2><button @click="addServiceModalOpen = false" class="text-gray-400 hover:text-gray-600"><i data-lucide="x" class="w-6 h-6"></i></button></div>
             <form action="{{ route('provider.services.store') }}" method="POST" class="space-y-6">
@@ -344,7 +344,7 @@
     <!-- Edit Service Modal -->
     @if($providerService)
     <div x-show="editServiceModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center" style="display: none;">
-        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="editServiceModalOpen = false"></div>
+        <div class="absolute inset-0 bg-black/40" @click="editServiceModalOpen = false"></div>
         <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl relative z-10 p-10 border border-gray-100 animate-in zoom-in duration-300">
             <div class="flex items-center justify-between mb-8"><h2 class="text-2xl font-normal" x-text="t('common.edit_service')"></h2><button @click="editServiceModalOpen = false" class="text-gray-400 hover:text-gray-600"><i data-lucide="x" class="w-6 h-6"></i></button></div>
             <form action="{{ route('provider.services.update', $providerService->id) }}" method="POST" class="space-y-6">

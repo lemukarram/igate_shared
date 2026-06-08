@@ -20,7 +20,7 @@
 
         <!-- Status Toggle Modal -->
         <div x-show="statusModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center" style="display: none;">
-            <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="statusModalOpen = false"></div>
+            <div class="absolute inset-0 bg-black/40" @click="statusModalOpen = false"></div>
             <div class="bg-white w-full max-w-sm rounded-xl shadow-2xl relative z-10 p-6 border border-gray-100">
                 <h2 class="text-xl font-normal mb-4" x-text="t('common.change_live_status')"></h2>
                 <div class="space-y-2">

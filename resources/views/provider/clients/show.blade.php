@@ -101,7 +101,7 @@
         <!-- Release Request Modal -->
         <div x-show="releaseModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center" style="display: none;" 
              @set-project.window="selectedProject = $event.detail">
-            <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="releaseModalOpen = false"></div>
+            <div class="absolute inset-0 bg-black/40" @click="releaseModalOpen = false"></div>
             <div class="bg-white w-full max-w-md rounded-xl shadow-2xl relative z-10 p-8 border border-gray-100">
                 <h2 class="text-2xl font-normal mb-2" x-text="t('common.release_request')"></h2>
                 <p class="text-gray-500 text-sm mb-6" x-text="'Project: ' + selectedProject.name"></p>

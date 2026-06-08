@@ -133,7 +133,7 @@
     </div>
 
     <!-- Task Modal (Create/Edit) -->
-    <div x-show="showModal" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+    <div x-show="showModal" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
         <div @click.away="showModal = false" class="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden border border-gray-100 flex flex-col md:flex-row">
             <!-- Left Side: Form -->
             <div class="flex-1 overflow-y-auto custom-scrollbar border-e border-gray-100">
