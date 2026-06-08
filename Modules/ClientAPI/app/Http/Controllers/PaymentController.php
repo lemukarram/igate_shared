@@ -98,7 +98,7 @@ class PaymentController extends Controller
         $validated = $request->validate([
             'provider_service_id' => 'required|exists:provider_services,id',
             'company_id' => 'required|exists:companies,id',
-            'billing_cycle' => 'required|in:monthly,annually',
+            'billing_cycle' => 'required|in:monthly,annual,annually',
         ]);
 
         try {
@@ -109,7 +109,7 @@ class PaymentController extends Controller
                 return $this->errorResponse('You cannot subscribe to your own services.', 403);
             }
 
-            $billingCycle = $request->billing_cycle;
+            $billingCycle = $request->billing_cycle === 'annual' ? 'annually' : $request->billing_cycle;
 
             $existingProject = Project::where('client_id', $user->id)
                 ->where('company_id', $request->company_id)

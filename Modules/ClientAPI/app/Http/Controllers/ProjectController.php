@@ -58,8 +58,10 @@ class ProjectController extends Controller
             $validated = $request->validate([
                 'provider_service_id' => 'required|exists:provider_services,id',
                 'company_id' => 'required|exists:companies,id',
-                'billing_cycle' => 'required|in:monthly,annually',
+                'billing_cycle' => 'required|in:monthly,annual,annually',
             ]);
+
+            $billingCycle = $request->billing_cycle === 'annual' ? 'annually' : $request->billing_cycle;
 
             $user = Auth::user();
             $ps = ProviderService::findOrFail($request->provider_service_id);
@@ -75,7 +77,7 @@ class ProjectController extends Controller
                 return $this->errorResponse('Active project already exists for this company', 422);
             }
 
-            $amount = ($request->billing_cycle === 'annually') ? $ps->annual_price : $ps->monthly_price;
+            $amount = ($billingCycle === 'annually') ? $ps->annual_price : $ps->monthly_price;
 
             $project = DB::transaction(function () use ($user, $ps, $request, $amount) {
                 $project = Project::create([

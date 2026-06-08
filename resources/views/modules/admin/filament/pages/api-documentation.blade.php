@@ -903,7 +903,7 @@ Accept: application/json</pre>
 {
   "provider_service_id": 1,
   "company_id": 5,
-  "billing_cycle": "monthly"
+  "billing_cycle": "monthly" // monthly, annual, or annually
 }</pre>
                 </div>
                 <div>
