@@ -31,6 +31,21 @@ class ProjectController extends Controller
     {
         try {
             $project = Auth::user()->projects()->with(['service', 'company', 'tasks', 'documents', 'messages.user'])->findOrFail($id);
+
+            // Auto-populate tasks from service subtasks if none exist (Replicating main website logic)
+            if ($project->tasks->isEmpty() && $project->service && $project->service->subtasks) {
+                foreach ($project->service->subtasks as $subtask) {
+                    Task::create([
+                        'project_id' => $project->id,
+                        'provider_id' => $project->provider_id,
+                        'title' => $subtask,
+                        'status' => 'todo',
+                    ]);
+                }
+                // Refresh tasks relation
+                $project->load('tasks');
+            }
+
             return $this->successResponse($project);
         } catch (\Throwable $e) {
             return $this->handleException($e);
