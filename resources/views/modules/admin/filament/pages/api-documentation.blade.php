@@ -573,14 +573,28 @@ Accept: application/json</pre>
                 <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-[10px] uppercase font-bold">Auth Required</span>
                 <h2 class="text-lg font-bold text-gray-700 ml-auto">Company Detail</h2>
             </div>
-            <p class="text-gray-600 mb-4">Get detailed information about a specific company.</p>
+            <p class="text-gray-600 mb-4">Get detailed information about a specific company, including active projects.</p>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <h3 class="font-bold mb-2 text-sm text-gray-500 uppercase">Response (200)</h3>
                     <pre class="p-4 bg-gray-900 text-blue-400 rounded-lg text-xs overflow-x-auto">
 {
   "status": "success",
-  "data": { "id": 5, "name": "Acme Corp", ... }
+  "data": {
+    "id": 5,
+    "name": "Acme Corp",
+    "industry": "Technology",
+    "active_projects": [
+      {
+        "id": 10,
+        "status": "active",
+        "service_name": "VAT Filing",
+        "provider_name": "Expert Tax Co",
+        "start_date": "2026-05-01",
+        "total_amount": "500.00"
+      }
+    ]
+  }
 }</pre>
                 </div>
             </div>

@@ -41,8 +41,29 @@ class CompanyController extends Controller
     public function show($id)
     {
         try {
-            $company = Auth::user()->companies()->findOrFail($id);
-            return $this->successResponse($company);
+            $company = Auth::user()->companies()->with(['projects' => function($q) {
+                $q->whereIn('status', ['active', 'pending_payment'])
+                  ->with(['service', 'provider.providerProfile']);
+            }])->findOrFail($id);
+
+            $data = $company->toArray();
+            
+            // Format projects for cleaner mobile response
+            $data['active_projects'] = $company->projects->map(function($project) {
+                return [
+                    'id' => $project->id,
+                    'status' => $project->status,
+                    'service_name' => $project->service->getTranslatedName(),
+                    'provider_name' => $project->provider->providerProfile->company_name ?? $project->provider->name,
+                    'start_date' => $project->start_date,
+                    'total_amount' => $project->total_amount,
+                ];
+            });
+
+            // Remove the raw projects relationship if we are providing a formatted one
+            unset($data['projects']);
+
+            return $this->successResponse($data);
         } catch (\Throwable $e) {
             return $this->handleException($e);
         }
