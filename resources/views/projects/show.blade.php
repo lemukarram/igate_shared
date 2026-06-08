@@ -247,7 +247,7 @@
                         <p class="text-[10px] text-gray-400 italic text-center py-4 uppercase tracking-widest" x-text="t('project.no_files')"></p>
                         @endforelse
                     </div>
-                    @if(Auth::user()->isProviderMode())
+                    @if(Auth::user()->isProviderMode() || Auth::user()->isClientMode())
                     <button @click="fileUploadModalOpen = true" class="w-full mt-2 py-1.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 border-dashed rounded text-[10px] font-normal text-gray-600 transition-all flex items-center justify-center gap-2 uppercase tracking-widest">
                         <i data-lucide="upload" class="w-3 h-3"></i>
                         <span x-text="t('project.upload_file')"></span>
@@ -267,7 +267,7 @@
                 </button>
                 <div x-show="sectionsOpen.management" x-collapse class="px-4 pb-4 pt-0">
                     <div class="flex items-center justify-between mb-3">
-                        <p class="text-[10px] font-normal text-gray-400 uppercase tracking-widest" x-text="t('project.actions')"></p>
+                        <p class="text-[10px] font-normal text-gray-400 uppercase tracking-widest" x-text="t('common.actions')"></p>
                         <button @click="openHistory()" class="text-[10px] font-normal text-primary hover:underline uppercase tracking-widest" x-text="t('project.history')"></button>
                     </div>
                     

@@ -16,6 +16,9 @@ class PreSaleMessage extends Model
         'company_id',
         'sender_id',
         'message',
+        'attachment_path',
+        'attachment_name',
+        'attachment_type',
     ];
 
     public function client()

@@ -9,6 +9,7 @@ return [
     'settings' => 'Settings',
     'logout' => 'Logout',
     'save' => 'Save Changes',
+    'save_changes' => 'Save Changes',
     'cancel' => 'Cancel',
     'search' => 'Search...',
     'back' => 'Back',

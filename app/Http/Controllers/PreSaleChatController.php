@@ -50,11 +50,23 @@ class PreSaleChatController extends Controller
     public function sendMessage(Request $request, $serviceId, $providerId)
     {
         $request->validate([
-            'message' => 'required|string',
+            'message' => 'nullable|string|required_without:attachment',
             'company_id' => 'nullable|exists:companies,id',
+            'attachment' => 'nullable|file|mimes:jpeg,png,jpg,gif,svg,webp,pdf,doc,docx|max:20480',
         ]);
 
         $clientId = Auth::user()->isClientMode() ? Auth::id() : $request->client_id;
+
+        $attachmentPath = null;
+        $attachmentName = null;
+        $attachmentType = null;
+
+        if ($request->hasFile('attachment')) {
+            $file = $request->file('attachment');
+            $attachmentName = $file->getClientOriginalName();
+            $attachmentType = strtolower($file->getClientOriginalExtension());
+            $attachmentPath = $file->store('pre_sale_attachments', 'public');
+        }
 
         PreSaleMessage::create([
             'client_id' => $clientId,
@@ -62,7 +74,10 @@ class PreSaleChatController extends Controller
             'service_id' => $serviceId,
             'company_id' => $request->company_id,
             'sender_id' => Auth::id(),
-            'message' => $request->message,
+            'message' => $request->message ?? '',
+            'attachment_path' => $attachmentPath,
+            'attachment_name' => $attachmentName,
+            'attachment_type' => $attachmentType,
         ]);
 
         return redirect()->back()->with('success', 'Message sent.');

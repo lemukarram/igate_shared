@@ -39,5 +39,8 @@ RUN echo '[global]\ndaemonize = no\n\n[www]\nlisten = 0.0.0.0:9000' > /usr/local
 COPY docker/php/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
+# Increase upload sizes
+RUN echo "upload_max_filesize = 50M\npost_max_size = 50M\nmemory_limit = 256M" > /usr/local/etc/php/conf.d/uploads.ini
+
 ENTRYPOINT ["entrypoint.sh"]
 CMD ["php-fpm"]

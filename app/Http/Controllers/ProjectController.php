@@ -388,13 +388,58 @@ class ProjectController extends Controller
 
     public function history($id)
     {
-        $project = Project::with(['histories.user'])->findOrFail($id);
-        
-        if (Auth::user()->role !== 'admin' && Auth::id() !== $project->client_id && Auth::id() !== $project->provider_id) {
-            abort(403);
+        $query = Project::with(['histories.user', 'tasks.histories.user']);
+
+        if (Auth::user()->role !== 'admin') {
+            // Include logic to handle team members if they access via provider/client IDs,
+            // this matches the show() method's basic checks or allows access if the user can view the project.
+            $query->where(function($q) {
+                $q->where('client_id', Auth::id())
+                  ->orWhere('provider_id', Auth::id());
+            });
         }
 
-        return response()->json($project->histories);
+        $project = $query->findOrFail($id);
+
+        $projectHistories = $project->histories->map(function ($h) {
+            return [
+                'id' => 'p_' . $h->id,
+                'description' => $h->description,
+                'action' => $h->action,
+                'created_at' => $h->created_at,
+                'user' => $h->user
+            ];
+        });
+
+        $taskHistories = $project->tasks->flatMap(function ($task) {
+            return $task->histories->map(function ($h) use ($task) {
+                $desc = '';
+                if ($h->action === 'status_changed') {
+                    $desc = "Status changed from {$h->old_value} to {$h->new_value}";
+                } elseif ($h->action === 'created') {
+                    $desc = "Task created";
+                } elseif ($h->action === 'verified') {
+                    $desc = "Task verified";
+                } else {
+                    $desc = "Action: {$h->action}";
+                }
+
+                return [
+                    'id' => 't_' . $h->id,
+                    'description' => 'Task [' . $task->title . ']: ' . $desc,
+                    'action' => $h->action,
+                    'created_at' => $h->created_at,
+                    'user' => $h->user
+                ];
+            });
+        });
+
+        $allHistories = collect($projectHistories)
+            ->concat($taskHistories)
+            ->sortByDesc('created_at')
+            ->values();
+
+        return response()->json($allHistories);
     }
 
     public function sendMessage(Request $request, $id)

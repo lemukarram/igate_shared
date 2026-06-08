@@ -120,13 +120,40 @@
 
                 @forelse($messages as $msg)
                 <div class="flex items-start {{ $msg->sender_id === Auth::id() ? 'flex-row-reverse space-x-reverse' : 'space-x-3' }} max-w-[80%] {{ $msg->sender_id === Auth::id() ? 'ml-auto' : '' }}">
-                    <div class="w-8 h-8 {{ $msg->sender_id === Auth::id() ? 'bg-gray-900 text-white' : 'bg-primary-light text-primary' }} rounded-lg flex items-center justify-center font-normal text-xs uppercase">
+                    <div class="w-8 h-8 {{ $msg->sender_id === Auth::id() ? 'bg-gray-900 text-white' : 'bg-primary-light text-primary' }} rounded-lg flex items-center justify-center font-normal text-xs uppercase flex-shrink-0">
                         {{ substr($msg->sender->name, 0, 2) }}
                     </div>
                     <div class="{{ $msg->sender_id === Auth::id() ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-gray-50 border border-gray-100 text-gray-700' }} p-4 rounded-lg {{ $msg->sender_id === Auth::id() ? 'rounded-tr-none' : 'rounded-tl-none' }}">
-                        <p class="text-sm font-normal leading-relaxed">
-                            {{ $msg->message }}
-                        </p>
+                        @if($msg->message)
+                            <p class="text-sm font-normal leading-relaxed">
+                                {{ $msg->message }}
+                            </p>
+                        @endif
+
+                        @if($msg->attachment_path)
+                            @if(in_array(strtolower($msg->attachment_type), ['jpeg', 'png', 'jpg', 'gif', 'svg', 'webp']))
+                                <div class="mt-3">
+                                    <a href="{{ asset('storage/' . $msg->attachment_path) }}" target="_blank" class="block rounded border border-white/20 overflow-hidden bg-black/5 hover:opacity-90 transition">
+                                        <img src="{{ asset('storage/' . $msg->attachment_path) }}" alt="{{ $msg->attachment_name }}" class="max-w-[250px] max-h-[250px] object-contain">
+                                    </a>
+                                </div>
+                            @else
+                                <div class="mt-3 {{ $msg->sender_id === Auth::id() ? 'bg-black/10 border-white/20' : 'bg-white border-gray-200' }} border rounded p-3 flex items-center space-x-3">
+                                    <div class="flex-shrink-0">
+                                        <i data-lucide="file-text" class="w-6 h-6 {{ $msg->sender_id === Auth::id() ? 'text-white' : 'text-primary' }}"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-medium truncate {{ $msg->sender_id === Auth::id() ? 'text-white' : 'text-gray-900' }}" title="{{ $msg->attachment_name }}">
+                                            {{ $msg->attachment_name }}
+                                        </p>
+                                    </div>
+                                    <a href="{{ asset('storage/' . $msg->attachment_path) }}" target="_blank" class="flex-shrink-0 {{ $msg->sender_id === Auth::id() ? 'text-white hover:text-gray-200' : 'text-primary hover:text-primary-dark' }}">
+                                        <i data-lucide="download" class="w-4 h-4"></i>
+                                    </a>
+                                </div>
+                            @endif
+                        @endif
+
                         <span class="text-[8px] font-normal {{ $msg->sender_id === Auth::id() ? 'text-white/60' : 'text-gray-300' }} uppercase mt-2 block">{{ $msg->created_at->format('g:i A') }}</span>
                     </div>
                 </div>
@@ -147,7 +174,7 @@
 
             <!-- Chat Input -->
             <div class="p-6 bg-gray-50 border-t border-gray-100">
-                <form action="{{ route('explore.chat.send', [$service->id, $provider->id]) }}" method="POST" class="flex flex-col space-y-4">
+                <form action="{{ route('explore.chat.send', [$service->id, $provider->id]) }}" method="POST" enctype="multipart/form-data" class="flex flex-col space-y-4" x-data="{ fileName: null }">
                     @csrf
                     @if(Auth::user()->isProviderMode())
                         <input type="hidden" name="client_id" value="{{ request('client_id') }}">
@@ -165,17 +192,35 @@
                     </div>
                     @endif
 
-                    <div class="flex items-center space-x-4">
+                    <div class="flex items-end space-x-4">
                         <div class="flex-1 relative">
-                            <textarea name="message" required :placeholder="t('project.type_message')" rows="1" class="w-full pl-4 pr-12 py-4 bg-white border border-gray-200 rounded-lg focus:ring-4 focus:ring-primary/10 focus:border-primary/20 outline-none transition-all font-normal text-sm resize-none"></textarea>
-                            <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-300 hover:text-primary transition-colors">
+                            <textarea name="message" :placeholder="t('project.type_message')" rows="1" class="w-full pl-4 pr-12 py-4 bg-white border border-gray-200 rounded-lg focus:ring-4 focus:ring-primary/10 focus:border-primary/20 outline-none transition-all font-normal text-sm resize-none"></textarea>
+                            
+                            <input type="file" name="attachment" id="chat-attachment" class="hidden" accept=".jpeg,.png,.jpg,.gif,.svg,.webp,.pdf,.doc,.docx" @change="fileName = $event.target.files[0] ? $event.target.files[0].name : null">
+                            
+                            <button type="button" @click="document.getElementById('chat-attachment').click()" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary transition-colors">
                                 <i data-lucide="paperclip" class="w-5 h-5"></i>
                             </button>
+                            
+                            <div x-show="fileName" style="display: none;" class="absolute left-0 -top-8 text-xs text-primary bg-primary/10 px-3 py-1.5 rounded-full flex items-center space-x-2">
+                                <i data-lucide="paperclip" class="w-3 h-3"></i>
+                                <span x-text="fileName" class="max-w-[200px] truncate"></span>
+                                <button type="button" @click="fileName = null; document.getElementById('chat-attachment').value = null" class="text-red-500 hover:text-red-700 ml-2">
+                                    <i data-lucide="x" class="w-3 h-3"></i>
+                                </button>
+                            </div>
                         </div>
-                        <button type="submit" class="w-12 h-12 bg-primary text-white rounded-lg flex items-center justify-center hover:bg-primary-dark transition-all shadow-lg shadow-primary/20">
+                        <button type="submit" class="w-12 h-12 flex-shrink-0 bg-primary text-white rounded-lg flex items-center justify-center hover:bg-primary-dark transition-all shadow-lg shadow-primary/20">
                             <i data-lucide="send" class="w-5 h-5"></i>
                         </button>
                     </div>
+                    
+                    @error('attachment')
+                        <span class="text-xs text-red-500 mt-1 block">{{ $message }}</span>
+                    @enderror
+                    @error('message')
+                        <span class="text-xs text-red-500 mt-1 block">{{ $message }}</span>
+                    @enderror
                 </form>
             </div>
         </div>
